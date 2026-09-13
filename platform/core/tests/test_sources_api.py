@@ -132,7 +132,7 @@ def test_cover_is_a_small_lossy_jpeg(client: TestClient) -> None:
     assert len(response.content) < 200_000
 
 
-def test_list_never_carries_extracted_text(client: TestClient) -> None:
+def test_dat03_list_never_carries_extracted_text(client: TestClient) -> None:
     _upload_and_settle(client)
     body = client.get("/sources").text
 
@@ -293,7 +293,7 @@ def test_readable_pages_are_not_flagged(client: TestClient) -> None:
     assert source["pagesNeedingOcr"] == 0
 
 
-def test_no_extracted_text_or_filename_reaches_the_logs(
+def test_dat03_no_extracted_text_or_filename_reaches_the_logs(
     client: TestClient, caplog
 ) -> None:
     """The daily consequence of invariant 3, checked rather than trusted.

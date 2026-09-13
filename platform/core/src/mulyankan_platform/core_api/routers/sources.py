@@ -30,7 +30,10 @@ from mulyankan_platform.ingestion.pipeline import run_extraction
 from mulyankan_platform.registry import RegistryError
 from mulyankan_platform.sources.models import Source
 from mulyankan_platform.sources.store import SourceStore
-from mulyankan_spi.extraction import ExtractionProvider
+from mulyankan_spi.extraction import (
+    ExtractionProvider,
+    media_type_for_extension,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -88,6 +91,9 @@ class SourceView(_Camel):
 
 class PageImageView(_Camel):
     index: int
+    #: Origin-relative path — the client prefixes its configured API base
+    #: (see `coverUrl` in `apps/web/src/lib/sources-api.ts`). Never a URL a
+    #: browser can resolve against the web app's own origin.
     url: str
 
 
@@ -194,7 +200,11 @@ async def upload_source(
         raise HTTPException(status_code=422, detail="Only PDF files are accepted")
 
     store = _store(request)
-    source = store.create(
+    # `create` mkdirs and writes up to the upload ceiling synchronously;
+    # off the event loop, or one 64 MB upload stalls every concurrent
+    # request for the duration of the write.
+    source = await asyncio.to_thread(
+        store.create,
         kind=kind,
         name=name.strip(),
         subject=subject.strip(),
@@ -291,9 +301,14 @@ def get_page(request: Request, source_id: str, page: int) -> PageView:
 def get_page_image(
     request: Request, source_id: str, page: int, index: int
 ) -> FileResponse:
-    """One image embedded in a page, in the encoding the document used."""
+    """One image embedded in a page, in the encoding the document used.
+
+    The media type comes from the artefact's own extension — the SPI's
+    extension map, not a guess — so a JBIG2 image is served as `image/x-jb2`,
+    never a bare `application/octet-stream`.
+    """
     _require(request, source_id)
     for path in _store(request).image_paths(source_id, page):
         if path.stem.endswith(f"-{index:03d}"):
-            return FileResponse(path)
+            return FileResponse(path, media_type=media_type_for_extension(path.suffix))
     raise HTTPException(status_code=404, detail="No such image")

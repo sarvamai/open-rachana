@@ -16,9 +16,15 @@ from mulyankan_platform.ingestion.pipeline import text_is_usable
 # glyph extracts; none of it means anything.
 GARBLED = "❈\x00✁✂✄\n☎✆✝\n✞\n✁✆\n☎✟✄\n✠✡☛\n✆\n✡☞\n✌\n✍✎✆\n✟✄\n✠✡☛\n11\n❲✏\n✑\n✒\n✓\n✔✕"
 
+# Synthetic prose shaped like textbook text — a heading, a page number,
+# ordinary sentences. The readable control must not be verbatim third-party
+# textbook prose: this repository is public, and the material it handles is
+# Restricted (DAT-01). The garbled sample cannot be synthesised (see the
+# module docstring), so it stays a real-world sample of glyph soup.
 READABLE = (
-    "Control and Coordination\n101\nobject is an urgent and dangerous\n"
-    "situation for us. We need to detect it,\nand respond to it."
+    "Life Processes\n57\nWater rises through the stem because the cells\n"
+    "work together as one system. Each part has a role,\nand the whole "
+    "depends on every part doing its job."
 )
 
 

@@ -628,28 +628,51 @@ export function KnowledgeBaseManager({
           </CardShelf>
         )}
         {!awaitingSources && !sourcesUnavailable && tab !== 'group' && view === 'table' && (
-          <Table
-            data={pageRows}
-            columns={columnsFor(tab, composing)}
-            variant="compact"
-            getRowId={(row) => row.id}
-            actions={(row) => [
-              {
-                label: 'Rename',
-                icon: 'pencil-edit',
-                onClick: () => openRename(itemTarget(row)),
-              },
-              { label: 'Delete', icon: 'delete', onClick: () => setDeleteTarget(itemTarget(row)) },
-            ]}
-            currentPage={page}
-            pageSize={pageSize}
-            totalRows={totalRows}
-            onPageChange={handlePageChange}
-            pageSizeOptions={PAGE_SIZES}
-            onPageSizeChange={handlePageSizeChange}
-            emptyTitle="No items found"
-            emptyDescription="Try a different search or filters."
-          />
+          pageRows.length > 0 ? (
+            <Table
+              data={pageRows}
+              columns={columnsFor(tab, composing)}
+              variant="compact"
+              getRowId={(row) => row.id}
+              actions={(row) => [
+                {
+                  label: 'Rename',
+                  icon: 'pencil-edit',
+                  onClick: () => openRename(itemTarget(row)),
+                },
+                { label: 'Delete', icon: 'delete', onClick: () => setDeleteTarget(itemTarget(row)) },
+              ]}
+              currentPage={page}
+              pageSize={pageSize}
+              totalRows={totalRows}
+              onPageChange={handlePageChange}
+              pageSizeOptions={PAGE_SIZES}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          ) : (
+            /* The loaded-but-empty state: the same empty card the shelf
+             * shows. The tatva Table's own empty state fetches
+             * /images/empty-table.png, which this app does not serve. */
+            <Box
+              display="flex"
+              direction="column"
+              align="center"
+              justify="center"
+              gap={10}
+              py={40}
+              bg="surface-primary"
+              borderColor="primary"
+              rounded="md"
+            >
+              <Icon name={SHELF_COPY[tab].icon} size="lg" tone="tertiary" />
+              <Box display="flex" direction="column" align="center" gap={2}>
+                <Text variant="label-md">No items found</Text>
+                <Text variant="body-xs" tone="tertiary">
+                  Try a different search or filters.
+                </Text>
+              </Box>
+            </Box>
+          )
         )}
         {tab === 'group' && (
           <GroupShelf

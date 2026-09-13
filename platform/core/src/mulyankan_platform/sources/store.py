@@ -32,6 +32,7 @@ the discipline the database store inherits.
 
 from __future__ import annotations
 
+import logging
 import shutil
 import threading
 import uuid
@@ -57,6 +58,28 @@ class SourceStore:
         self._root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
         self._sources: dict[str, Source] = {}
+        self._sweep_orphans()
+
+    def _sweep_orphans(self) -> None:
+        """Delete workspace directories no record points at.
+
+        A restart forgets the index but not the bytes: the uploaded PDFs and
+        extracted text under `var/workspace/<id>/` are Restricted (DAT-01)
+        and would otherwise sit there forever, unrecorded and undeletable
+        through the API. At construction the index is empty by definition,
+        so every existing directory is an orphan. Runs synchronously before
+        the app serves; a directory that cannot be removed is logged and
+        left, never raised.
+        """
+        for directory in self._root.iterdir():
+            if not directory.is_dir():
+                continue
+            shutil.rmtree(directory, ignore_errors=True)
+            if directory.exists():
+                logging.getLogger(__name__).warning(
+                    "orphaned workspace directory could not be removed: %s",
+                    directory.name,  # the opaque id, never a filename
+                )
 
     # ── layout ────────────────────────────────────────────────────────────
 

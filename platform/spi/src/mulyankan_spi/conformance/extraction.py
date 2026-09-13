@@ -15,6 +15,7 @@ from mulyankan_spi.extraction import (
     ExtractionProvider,
     PageExtraction,
     Thumbnail,
+    UnreadableDocument,
 )
 
 
@@ -157,8 +158,13 @@ def run_extraction_conformance(
 
     try:
         provider.open(b"not-a-document-at-all")
-    except Exception:  # noqa: BLE001, S110 - refusing is the pass case
+    except UnreadableDocument:
         pass
+    except Exception as exc:  # noqa: BLE001 - suite reports, never raises
+        failures.append(
+            "open() must raise UnreadableDocument on unreadable bytes, "
+            f"not {type(exc).__name__}"
+        )
     else:
         failures.append("open() must raise UnreadableDocument on unreadable bytes")
 

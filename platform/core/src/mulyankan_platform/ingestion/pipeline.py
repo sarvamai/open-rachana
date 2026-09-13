@@ -25,13 +25,16 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import mimetypes
 from datetime import UTC, datetime
 from pathlib import Path
 
 from mulyankan_platform.sources.models import ExtractionSummary, Source, StageRun
 from mulyankan_platform.sources.store import SourceStore
-from mulyankan_spi.extraction import ExtractionProvider, UnreadableDocument
+from mulyankan_spi.extraction import (
+    ExtractionProvider,
+    UnreadableDocument,
+    extension_for_media_type,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +88,7 @@ def _finish(run: StageRun, state: str) -> None:
 
 
 def _extension_for(media_type: str) -> str:
-    return mimetypes.guess_extension(media_type) or ".bin"
+    return extension_for_media_type(media_type)
 
 
 def _write_pages(

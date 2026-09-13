@@ -85,6 +85,40 @@ class Thumbnail:
     data: bytes
 
 
+#: The encodings an embedded image may arrive in, mapped to the media type
+#: the artefact is stored and served as. Lives in the SPI because the set is
+#: part of the contract between provider and platform: the provider reports
+#: `media_type`, the platform stores bytes under an extension derived from
+#: it, and `mimetypes.guess_extension` cannot be trusted for the rarer ones
+#: (`image/x-jb2` has no entry on Python 3.12 and would become `.bin`).
+MEDIA_TYPE_EXTENSIONS: dict[str, str] = {
+    "image/png": ".png",
+    "image/jpeg": ".jpg",
+    "image/jp2": ".jp2",
+    "image/x-jb2": ".jb2",
+    "image/bmp": ".bmp",
+    "image/gif": ".gif",
+    "image/tiff": ".tiff",
+    "image/webp": ".webp",
+}
+
+_EXTENSION_MEDIA_TYPES = {ext: mt for mt, ext in MEDIA_TYPE_EXTENSIONS.items()}
+
+
+def extension_for_media_type(media_type: str) -> str:
+    """The file extension for a reported image media type.
+
+    Unknown types map to `.bin` — an honest name for bytes the platform
+    cannot classify, rather than a guess.
+    """
+    return MEDIA_TYPE_EXTENSIONS.get(media_type.lower(), ".bin")
+
+
+def media_type_for_extension(extension: str) -> str:
+    """The media type for a stored artefact's extension; `.bin` stays opaque."""
+    return _EXTENSION_MEDIA_TYPES.get(extension.lower(), "application/octet-stream")
+
+
 @runtime_checkable
 class ExtractionSession(Protocol):
     """An open document. Close it, or use it as a context manager."""
