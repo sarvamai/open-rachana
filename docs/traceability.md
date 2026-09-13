@@ -39,6 +39,19 @@ write, so signals and closures can be forged onto an append-only chain. The row
 closes when the identity SPI (ADR-0004) validates tokens server-side. Until
 then the surface is development-only — see "Known limitations" in `SECURITY.md`.
 
+## Week 1 product decisions (SEC / DAT)
+
+Export blocking (D-39), soft-delete semantics (D-41), and Admin
+visibility/separation-of-duties constraints (D-42, D-46) are recorded as
+product decisions so implementers do not re-open them while coding:
+
+- [ADR-0011](adr/0011-no-export-from-question-bank.md) — no export from the question bank
+- [ADR-0012](adr/0012-soft-delete-withdraw-retire.md) — soft delete: withdraw or retire
+- [ADR-0013](adr/0013-admin-visibility-and-separation-of-duties.md) — Admin visibility and separation of duties
+
+The capability matrix (issue #42) and the lifecycle state machine (issue #45)
+implement these decisions; tests carry SEC and DAT requirement IDs.
+
 ## Standing DoD checks (v4 §11)
 
 Implemented as conformance tests under `tests/conformance/` and kept green
