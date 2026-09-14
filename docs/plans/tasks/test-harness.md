@@ -2,7 +2,7 @@
 
 Primary package: [Testing framework and acceptance evidence](../testing.md). Proposed owner: **Rohit**.
 Technical reviewers: KKT; feature owners.
-Issue: planned slice `test-harness`. Companion reference: PR #100; contributor workflow: PR #99.
+Issue: #115. Companion reference: PR #100; contributor workflow: PR #99.
 
 Draft plan: owner review and implementation go-ahead are pending. Follow the
 [review and readability workflow](../README.md) before implementation.

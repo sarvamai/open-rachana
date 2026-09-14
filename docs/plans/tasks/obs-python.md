@@ -2,7 +2,7 @@
 
 Primary package: [Operational observability](../observability.md). Proposed owner: **Irfan**.
 Technical reviewers: KKT; Rohit for leak and failure checks.
-Issue: planned slice `obs-python`. Companion reference: PR #100; contributor workflow: PR #99.
+Issue: #110. Companion reference: PR #100; contributor workflow: PR #99.
 
 Draft plan: owner review and implementation go-ahead are pending. Follow the
 [review and readability workflow](../README.md) before implementation.

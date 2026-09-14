@@ -26,7 +26,7 @@ PR descriptions before review, then read the result yourself. Preserve exact
 requirements, IDs, interfaces, numbers and approval status. A planning skill can
 turn an approved plan into tickets; it cannot approve scope or implementation.
 
-The plan index links eight proposed epics and the existing delivery stories,
+The [plan index](plans/README.md) links eight proposed epics and the existing delivery stories,
 plus missing diagnostic, contract, recovery and onboarding work. The starter
 plans need their owners' review before implementation begins.
 

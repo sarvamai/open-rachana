@@ -1,7 +1,7 @@
 # Epic plan: Platform, identity and integration
 
 Proposed owner: **KKT**. Technical reviewers: Gandharva; Rohit for recovery evidence.
-Epic: to be created.
+Epic: #106.
 
 ## Review before implementation
 
@@ -34,8 +34,8 @@ not new services. Changes to shared contracts need the consuming owner’s revie
 | #85 | [As the authority, I want production identity, keys, and managed-device checks](tasks/issue-85.md) |
 | #88 | [As Ops, I want load, backup/restore, and chain verification passed in production](tasks/issue-88.md) |
 | #94 | [Phase 1 leftovers: Makefile, canonicalization spec, as-built page](tasks/issue-94.md) |
-| planned slice `release-recovery` | [Prove failed-release recovery without losing audit or sealed content](tasks/release-recovery.md) |
-| planned slice `task-contract` | [Publish versioned task and identity contracts for parallel implementation](tasks/task-contract.md) |
+| #116 | [Prove failed-release recovery without losing audit or sealed content](tasks/release-recovery.md) |
+| #117 | [Publish versioned task and identity contracts for parallel implementation](tasks/task-contract.md) |
 
 ## Owner’s first PR
 

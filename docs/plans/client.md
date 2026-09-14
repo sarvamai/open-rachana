@@ -1,7 +1,7 @@
 # Epic plan: Workspaces and signed client
 
 Proposed owner: **Divyansh**. Technical reviewers: Kaustav; Accessibility lead for relevant checks.
-Epic: to be created.
+Epic: #102.
 
 ## Review before implementation
 
@@ -39,7 +39,7 @@ not new services. Changes to shared contracts need the consuming owner’s revie
 | #75 | [As a Translation Reviewer, I want original and translation side by side so I can approve or reject](tasks/issue-75.md) |
 | #76 | [As an Accessibility Specialist, I want the same accessibility gate on every language version](tasks/issue-76.md) |
 | #87 | [As the Accessibility lead, I want a WCAG 2.1 AA audit of authoring and review surfaces closed](tasks/issue-87.md) |
-| planned slice `client-contract` | [Connect and release the signed desktop task client](tasks/client-contract.md) |
+| #118 | [Connect and release the signed desktop task client](tasks/client-contract.md) |
 
 ## Owner’s first PR
 

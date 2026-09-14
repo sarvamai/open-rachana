@@ -1,7 +1,7 @@
 # Epic plan: Workflow and business rules
 
 Proposed owner: **Kaustav**. Technical reviewers: KKT; Gandharva for transaction/evidence boundaries.
-Epic: to be created.
+Epic: #103.
 
 ## Review before implementation
 

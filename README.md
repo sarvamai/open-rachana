@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/assets/open-mulyankan-logo.png" alt="open-mulyankan logo" width="180">
+  <img src="docs/assets/open-mulyankan-logo.png" alt="Project Rachana logo" width="180">
 </p>
 
-<h1 align="center">open-mulyankan</h1>
+<h1 align="center">Project Rachana</h1>
 
 <p align="center">
   An open-source <strong>question paper authoring system</strong> built for
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/sarvamai/open-mulyankan/actions/workflows/ci.yml"><img src="https://github.com/sarvamai/open-mulyankan/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="https://github.com/sarvamai/open-rachana/actions/workflows/ci.yml"><img src="https://github.com/sarvamai/open-rachana/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache-2.0"></a>
   <img src="https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white" alt="Python 3.12+">
   <img src="https://img.shields.io/badge/Node-20-339933?logo=nodedotjs&logoColor=white" alt="Node 20">
@@ -19,7 +19,7 @@
 
 ---
 
-**Open Mulyankan** turns a blank page into a sealed, exam-ready question — through four
+**Project Rachana** turns a blank page into a sealed, exam-ready question — through four
 human jobs, under rules the examining authority owns.
 
 Subject experts author. Independent reviewers check. Accessibility specialists verify that

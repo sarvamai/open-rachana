@@ -1,7 +1,7 @@
 # Epic plan: Product acceptance and contributor onboarding
 
 Proposed owner: **Nikhil**. Technical reviewers: KKT for technical steps; Rohit for testability.
-Epic: to be created.
+Epic: #108.
 
 ## Review before implementation
 
@@ -31,7 +31,7 @@ not new services. Changes to shared contracts need the consuming owner’s revie
 | #39 | [As Content Operations, I want pilot languages and named people recorded](tasks/issue-39.md) |
 | #40 | [As Product Owner, I want Week-1 product decisions recorded as ADRs](tasks/issue-40.md) |
 | #89 | [As Product Owner, I want every acceptance criterion signed in one evidence pack and go-live recorded](tasks/issue-89.md) |
-| planned slice `onboarding` | [Verify the contributor first-run guide and first-PR path](tasks/onboarding.md) |
+| #119 | [Verify the contributor first-run guide and first-PR path](tasks/onboarding.md) |
 
 ## Owner’s first PR
 

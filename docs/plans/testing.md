@@ -1,7 +1,7 @@
 # Epic plan: Testing framework and acceptance evidence
 
 Proposed owner: **Rohit**. Technical reviewers: KKT; feature owners.
-Epic: to be created.
+Epic: #107.
 
 ## Review before implementation
 
@@ -31,7 +31,7 @@ not new services. Changes to shared contracts need the consuming owner’s revie
 | #49 | [As the System, I want CI to fail if logs, errors, or audit fixtures contain question content](tasks/issue-49.md) |
 | #52 | [As an engineer, I want CI to run platform pytest so a green PR is evidence](tasks/issue-52.md) |
 | #86 | [As Security, I want a penetration test against isolation, seal, SoD, and export closed](tasks/issue-86.md) |
-| planned slice `test-harness` | [Build shared contract fixtures and the first end-to-end acceptance harness](tasks/test-harness.md) |
+| #115 | [Build shared contract fixtures and the first end-to-end acceptance harness](tasks/test-harness.md) |
 
 ## Owner’s first PR
 

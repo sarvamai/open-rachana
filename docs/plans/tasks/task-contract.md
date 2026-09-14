@@ -2,7 +2,7 @@
 
 Primary package: [Platform, identity and integration](../platform.md). Proposed owner: **KKT**.
 Technical reviewers: Gandharva; Rohit for recovery evidence.
-Issue: planned slice `task-contract`. Companion reference: PR #100; contributor workflow: PR #99.
+Issue: #117. Companion reference: PR #100; contributor workflow: PR #99.
 
 Draft plan: owner review and implementation go-ahead are pending. Follow the
 [review and readability workflow](../README.md) before implementation.

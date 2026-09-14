@@ -35,14 +35,14 @@ not support it. There is no AI-detection score or automatic approval gate.
 
 | Epic | Proposed owner | Plan |
 |---|---|---|
-| Pending — Workspaces and signed client | Divyansh | [client.md](client.md) |
-| Pending — Workflow and business rules | Kaustav | [workflow.md](workflow.md) |
-| Pending — Audit, sealing and vault | Gandharva | [evidence.md](evidence.md) |
-| Pending — Operational observability | Irfan | [observability.md](observability.md) |
-| Pending — Platform, identity and integration | KKT | [platform.md](platform.md) |
-| Pending — Testing framework and acceptance evidence | Rohit | [testing.md](testing.md) |
-| Pending — Product acceptance and contributor onboarding | Nikhil | [product.md](product.md) |
-| Pending — Layer 2 intelligence and adapters | Sarvam team — individual lead to be confirmed | [intelligence.md](intelligence.md) |
+| #102 — Workspaces and signed client | Divyansh | [client.md](client.md) |
+| #103 — Workflow and business rules | Kaustav | [workflow.md](workflow.md) |
+| #104 — Audit, sealing and vault | Gandharva | [evidence.md](evidence.md) |
+| #105 — Operational observability | Irfan | [observability.md](observability.md) |
+| #106 — Platform, identity and integration | KKT | [platform.md](platform.md) |
+| #107 — Testing framework and acceptance evidence | Rohit | [testing.md](testing.md) |
+| #108 — Product acceptance and contributor onboarding | Nikhil | [product.md](product.md) |
+| #109 — Layer 2 intelligence and adapters | Sarvam team — individual lead to be confirmed | [intelligence.md](intelligence.md) |
 
 ## Integration order
 

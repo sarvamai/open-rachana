@@ -2,7 +2,7 @@
 
 Primary package: [Operational observability](../observability.md). Proposed owner: **Irfan**.
 Technical reviewers: KKT; Rohit for leak and failure checks.
-Issue: planned slice `obs-domain`. Companion reference: PR #100; contributor workflow: PR #99.
+Issue: #114. Companion reference: PR #100; contributor workflow: PR #99.
 
 Draft plan: owner review and implementation go-ahead are pending. Follow the
 [review and readability workflow](../README.md) before implementation.
@@ -17,7 +17,7 @@ Expected locations: `runtime instrumentation and deploy/dev observability config
 
 ## Dependencies
 
-planned slice `obs-python`, #63, #77
+#110, #63, #77
 
 Dependencies order implementation, not permission to draft a plan. Use agreed
 fixtures while a producer is under construction; real integration is still required.

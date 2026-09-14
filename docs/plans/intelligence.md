@@ -1,7 +1,7 @@
 # Epic plan: Layer 2 intelligence and adapters
 
 Proposed owner: **Sarvam team — individual lead to be confirmed**. Technical reviewers: Kaustav; Security for translation hosting.
-Epic: to be created.
+Epic: #109.
 
 ## Review before implementation
 

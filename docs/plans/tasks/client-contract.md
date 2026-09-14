@@ -2,7 +2,7 @@
 
 Primary package: [Workspaces and signed client](../client.md). Proposed owner: **Divyansh**.
 Technical reviewers: Kaustav; Accessibility lead for relevant checks.
-Issue: planned slice `client-contract`. Companion reference: PR #100; contributor workflow: PR #99.
+Issue: #118. Companion reference: PR #100; contributor workflow: PR #99.
 
 Draft plan: owner review and implementation go-ahead are pending. Follow the
 [review and readability workflow](../README.md) before implementation.
@@ -17,7 +17,7 @@ Expected locations: `apps/client and the content-free configuration/oversight pa
 
 ## Dependencies
 
-planned slice `task-contract`, #41, #53
+#117, #41, #53
 
 Dependencies order implementation, not permission to draft a plan. Use agreed
 fixtures while a producer is under construction; real integration is still required.

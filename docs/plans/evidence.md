@@ -1,7 +1,7 @@
 # Epic plan: Audit, sealing and vault
 
 Proposed owner: **Gandharva**. Technical reviewers: Kaustav; Security for key/retention controls.
-Epic: to be created.
+Epic: #104.
 
 ## Review before implementation
 

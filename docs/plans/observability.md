@@ -1,7 +1,7 @@
 # Epic plan: Operational observability
 
 Proposed owner: **Irfan**. Technical reviewers: KKT; Rohit for leak and failure checks.
-Epic: to be created.
+Epic: #105.
 
 ## Review before implementation
 
@@ -28,11 +28,11 @@ not new services. Changes to shared contracts need the consuming owner’s revie
 
 | Issue | Plan |
 |---|---|
-| planned slice `obs-python` | [Instrument Python API logs, metrics and traces](tasks/obs-python.md) |
-| planned slice `obs-local` | [Provide the local Collector and Grafana observability stack](tasks/obs-local.md) |
-| planned slice `obs-next` | [Connect Next.js server instrumentation to API traces](tasks/obs-next.md) |
-| planned slice `obs-client` | [Add bounded browser and signed-client diagnostic telemetry](tasks/obs-client.md) |
-| planned slice `obs-domain` | [Add workflow dashboards and tested operational alerts](tasks/obs-domain.md) |
+| #110 | [Instrument Python API logs, metrics and traces](tasks/obs-python.md) |
+| #111 | [Provide the local Collector and Grafana observability stack](tasks/obs-local.md) |
+| #112 | [Connect Next.js server instrumentation to API traces](tasks/obs-next.md) |
+| #113 | [Add bounded browser and signed-client diagnostic telemetry](tasks/obs-client.md) |
+| #114 | [Add workflow dashboards and tested operational alerts](tasks/obs-domain.md) |
 
 ## Owner’s first PR
 

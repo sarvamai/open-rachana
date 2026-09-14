@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping build Open Mulyankan. A few rules keep the project trustworthy.
+Thanks for helping build Project Rachana. A few rules keep the project trustworthy.
 
 Start with [AGENTS.md](AGENTS.md) — it records what actually exists in the tree
 today, the invariants a change must not break, and how to run each stack. The
