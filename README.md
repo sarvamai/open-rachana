@@ -72,6 +72,7 @@ closure is evidence, not demonstration.
 
 | Document | Purpose |
 |---|---|
+| [`docs/contributor-work-packages.md`](docs/contributor-work-packages.md) | Proposed engineering packages, contribution briefs and testing responsibilities |
 | [`docs/architecture.md`](docs/architecture.md) | Layers, state machine, invariants, trust boundaries |
 | [`docs/adr/`](docs/adr/) | Architecture decision records |
 | [`docs/provider-contracts.md`](docs/provider-contracts.md) | How providers plug in and certify |

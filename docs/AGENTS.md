@@ -10,6 +10,7 @@ Read the root `AGENTS.md` first.
 
 | File | Contract |
 |---|---|
+| `contributor-work-packages.md` | Proposed contributor allocation, module boundaries, starter contributions and acceptance responsibilities; not confirmed assignments. |
 | `architecture.md` | Layers, the state machine, the ten numbered invariants, trust boundaries, non-functional targets. The invariants are the normative part. |
 | `adr/NNNN-<slug>.md` | One accepted decision each, numbered sequentially. |
 | `provider-contracts.md` | The working contract for provider authors: lifecycle, rules, SPI catalogue. |
