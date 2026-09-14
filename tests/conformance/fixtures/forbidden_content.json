@@ -1,0 +1,17 @@
+{
+  "stems": [
+    "What is the capital of India?",
+    "Calculate the area of a triangle with base 5cm and height 10cm",
+    "Which of the following is a fundamental right?"
+  ],
+  "options": [
+    "New Delhi",
+    "25 sq cm",
+    "Right to Equality"
+  ],
+  "explanations": [
+    "The capital of India is New Delhi, which was designated in 1911",
+    "Area of triangle equals half times base times height",
+    "Article 14 guarantees equality before law"
+  ]
+}

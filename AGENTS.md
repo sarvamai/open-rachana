@@ -12,7 +12,7 @@ create. **The tree is the fact; the doc is the intent.** Before importing a
 path you read in a doc, check it exists:
 
 ```bash
-ls providers db contracts tests/conformance platform.yaml docs/canonicalization.md 2>&1
+ls providers db contracts platform.yaml docs/canonicalization.md 2>&1
 ```
 
 Every one of those is absent today. If a task needs one, create it explicitly
