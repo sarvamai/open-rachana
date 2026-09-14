@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/open-mulyankan-logo.png" alt="Project Rachana logo" width="180">
+  <img src="docs/assets/project-rachana-logo.png" alt="Project Rachana logo" width="180">
 </p>
 
 <h1 align="center">Project Rachana</h1>

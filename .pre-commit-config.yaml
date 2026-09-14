@@ -1,4 +1,4 @@
-# Repo-local pre-commit checks for Open Mulyankan.
+# Repo-local pre-commit checks for Project Rachana.
 #
 # Required tooling (install once):
 #   brew install pre-commit gitleaks trivy
