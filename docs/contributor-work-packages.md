@@ -13,6 +13,23 @@ The accompanying product-reference PR supplies the expanded requirement
 register and reconciliation items mentioned below. These work packages propose
 ownership without independently ratifying those product or security decisions.
 
+## Docs first, then implementation
+
+Each epic owner checks in a plan under [docs/plans](plans/README.md) before
+implementation. Nikhil reviews product scope and acceptance; KKT coordinates
+technical review; Rohit reviews the test approach. Record the accepted plan
+revision and go-ahead in the issue. Extended tasks get their own plan; small
+tasks use a short task plan. Existing approvals and in-flight work remain valid.
+
+Use [Humanizer](https://github.com/blader/humanizer) on plans, documentation and
+PR descriptions before review, then read the result yourself. Preserve exact
+requirements, IDs, interfaces, numbers and approval status. A planning skill can
+turn an approved plan into tickets; it cannot approve scope or implementation.
+
+The plan index links eight proposed epics and the existing delivery stories,
+plus missing diagnostic, contract, recovery and onboarding work. The starter
+plans need their owners' review before implementation begins.
+
 ## Recommended team shape
 
 Keep one repository and the existing core/client/web architecture. These are
@@ -39,7 +56,7 @@ KKT's primary responsibility is integration: keep his platform work to a
 bounded reference deployment and service bindings, with operational support.
 Do not give him a full independent feature backlog as well as all integration.
 Do not build identity, databases or key-management products from scratch.
-The planned managed-service host supplies the environment; the team integrates
+The adopting organisation contracts its managed-service providers; the team integrates
 and verifies it.
 
 ## 1. Divyansh — workspaces and client
@@ -177,10 +194,10 @@ supply domain measures, content filtering or leak tests automatically.
 queue; reference deployment/configuration; identity-provider integration,
 token/MFA/device/workload verification; secrets/service bindings; release pipeline,
 application rollback procedures and operational backup/restore runbooks.
-Coordinate with the planned managed-service host for real test dependencies.
+Coordinate with the adopting organisation’s contracted providers for real test dependencies.
 
 **Boundary:** the IdP proves identity; package 2 decides what that identity may do
-in the current task and lineage. The host supplies services; packages 2/3 own
+in the current task and lineage. Contracted providers supply services; packages 2/3 own
 application data semantics. Rohit owns test-gate design; KKT owns deployment/release
 mechanics. Application rollback must preserve sealed records and audit history;
 never implement rollback as deletion or rewriting of accepted evidence.
