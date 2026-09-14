@@ -144,8 +144,10 @@ def build_app(registry: ProviderRegistry) -> FastAPI:
 
     @app.get("/v1/audit/verify")
     def audit_verify() -> dict:
-        """On-demand chain verification (ASR01-EVD-02/03); Admin/Auditor only.
+        """On-demand chain verification (ASR01-EVD-02/03).
 
+        Intended for Admin/Auditor once the identity SPI (ADR-0004) lands;
+        currently unauthenticated like all Layer 1 routes (see SECURITY.md).
         Response is intentionally content-free: structural fields only.
         ``first_bad_seq`` and ``reason`` are omitted when the chain is intact
         so callers can key on the presence of those fields, not their value.

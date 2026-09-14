@@ -74,12 +74,19 @@ def main() -> None:  # pragma: no cover — entry point wired in __main__
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
     )
-    # M1 uses the in-memory log; replace this import with the persisted store
-    # once M2 lands.  The signature of run_verification does not change.
-    from mulyankan_platform.audit import AuditLog  # noqa: PLC0415
-
-    log = AuditLog()
-    sys.exit(run_verification(log.events))
+    # The real audit chain lives in the API server's process (in-memory until
+    # M2).  A fresh AuditLog() constructed here is always empty and always
+    # verifies clean — wiring this entry point to it would give a permanent
+    # false green and is worse than no hook at all.
+    #
+    # Until the persisted store (M2) lands and can be read out-of-process,
+    # exit _EXIT_ERROR so any scheduler wired to this entry point fails loudly
+    # instead of silently reporting health it cannot actually measure.
+    logger.error(
+        "audit verify hook: no persisted store wired; "
+        "cannot verify the live chain out-of-process until M2 lands"
+    )
+    sys.exit(_EXIT_ERROR)
 
 
 if __name__ == "__main__":
