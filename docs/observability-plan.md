@@ -304,7 +304,7 @@ git commit -s -m "Add the observability package skeleton and OTel dependencies"
 - Test: `platform/core/tests/test_observability_guard.py`
 
 **Interfaces:**
-- Produces: `ALLOWED_SPAN_ATTRIBUTES: frozenset[str]`, `ALLOWED_LOG_ATTRIBUTES: frozenset[str]`, `SpanAttributeGuard(dropped: Counter | None = None)` (a `SpanProcessor`), `LogAttributeGuard(dropped: Counter | None = None)` (a `LogRecordProcessor`). `dropped` is an OTel `Counter`; each removed key is counted with attributes `{"signal": "span" | "log", "attribute": key}`.
+- Produces: `ALLOWED_SPAN_ATTRIBUTES: frozenset[str]`, `ALLOWED_LOG_ATTRIBUTES: frozenset[str]`, `ALLOWED_METRIC_ATTRIBUTES: frozenset[str]`, `frames_only(stacktrace: str) -> str`, `metric_views() -> list[View]`, `SpanAttributeGuard(dropped: Counter | None = None)` (a `SpanProcessor`), `LogAttributeGuard(dropped: Counter | None = None)` (a `LogRecordProcessor`). `dropped` is an OTel `Counter`; each removed key is counted with attributes `{"signal": "span" | "log", "attribute": key}`. Keys are filtered by name; `exception.stacktrace` is the one value that is also rewritten, because the SDK renders the exception message into it. Metric attributes are filtered by the SDK `View` from `metric_views()`, which drops silently (no counter).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -324,9 +324,12 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
 from mulyankan_platform.observability.guard import (
+    ALLOWED_METRIC_ATTRIBUTES,
     ALLOWED_SPAN_ATTRIBUTES,
     LogAttributeGuard,
     SpanAttributeGuard,
+    frames_only,
+    metric_views,
 )
 
 SENTINEL = "SENTINEL-4f1c"
@@ -369,8 +372,33 @@ def test_asr02obs_unknown_span_attributes_are_dropped_and_counted() -> None:
     assert dict(exported.attributes) == {"http.route": "/items/{item_id}"}
     (event,) = exported.events
     assert set(event.attributes) == {"exception.type", "exception.stacktrace"}
+    # record_exception renders `ValueError: <message>` into the stacktrace;
+    # the guard keeps the frames and removes that line.
+    assert "test_observability_guard.py" in event.attributes["exception.stacktrace"]
     assert SENTINEL not in str(dict(event.attributes))
     assert {"url.query", "exception.message", "exception.escaped"} <= _dropped_keys(reader)
+
+
+def test_asr02obs_stacktrace_keeps_frames_and_drops_the_message() -> None:
+    rendered = (
+        "Traceback (most recent call last):\n"
+        '  File "/app/x.py", line 10, in outer\n'
+        "    inner()\n"
+        '  File "/app/x.py", line 4, in inner\n'
+        "    raise ValueError(msg)\n"
+        f"ValueError: {SENTINEL}\n"
+        f"  second line of the message {SENTINEL}\n"
+        f"Note: {SENTINEL}\n"
+    )
+    kept = frames_only(rendered)
+    assert SENTINEL not in kept
+    assert kept.splitlines() == [
+        '  File "/app/x.py", line 10, in outer',
+        "    inner()",
+        '  File "/app/x.py", line 4, in inner',
+        "    raise ValueError(msg)",
+    ]
+    assert frames_only("") == ""
 
 
 def test_asr02obs_unknown_log_attributes_are_dropped_and_counted() -> None:
@@ -393,10 +421,23 @@ def test_asr02obs_unknown_log_attributes_are_dropped_and_counted() -> None:
     assert "stem" in _dropped_keys(reader)
 
 
+def test_asr02obs_unknown_metric_attributes_are_dropped() -> None:
+    reader = InMemoryMetricReader()
+    provider = MeterProvider(metric_readers=[reader], views=metric_views())
+    counter = provider.get_meter("test").create_counter("mulyankan.audit.events")
+
+    counter.add(1, {"action": "probe", "stem": SENTINEL})
+
+    (rm,) = reader.get_metrics_data().resource_metrics
+    (point,) = [p for sm in rm.scope_metrics for m in sm.metrics for p in m.data.data_points]
+    assert dict(point.attributes) == {"action": "probe"}
+
+
 def test_allowlist_never_admits_the_known_leaky_keys() -> None:
     for key in ("url.full", "url.path", "url.query", "user_agent.original",
                 "exception.message", "enduser.id", "db.query.text"):
         assert key not in ALLOWED_SPAN_ATTRIBUTES
+        assert key not in ALLOWED_METRIC_ATTRIBUTES
 ```
 
 - [ ] **Step 2: Run to see them fail**
@@ -418,16 +459,25 @@ traces or metrics, so every attribute is removed unless it is listed here.
 Removed keys are counted so a new attribute from an upgraded instrumentation
 shows up in a metric rather than leaking silently.
 
+Filtering is by key, with one exception: `exception.stacktrace`. The SDK's
+`record_exception` renders the trace with `traceback.format_exception`, whose
+last line is `ExceptionType: message`, so the value is rewritten to its frame
+lines before export (`frames_only`). Metric attributes go through an SDK
+`View` (`metric_views`) rather than a processor; a View drops silently, so
+metric drops are not counted and the §7 sentinel test is the check.
+
 This list is what an auditor reads: one entry per line, with the reason.
 Keep it identical to `apps/web/src/observability/allowlist.ts`.
 """
 
 from __future__ import annotations
 
-from typing import Any, Mapping
+import re
+from typing import Any, Callable, Mapping
 
 from opentelemetry.metrics import Counter
 from opentelemetry.sdk._logs import LogRecordProcessor
+from opentelemetry.sdk.metrics.view import View
 from opentelemetry.sdk.trace import Event, ReadableSpan, SpanProcessor
 
 ALLOWED_SPAN_ATTRIBUTES: frozenset[str] = frozenset(
@@ -444,7 +494,7 @@ ALLOWED_SPAN_ATTRIBUTES: frozenset[str] = frozenset(
         "client.address",  # D10: operational security signal, not content
         "error.type",  # status class or exception class name
         "exception.type",
-        "exception.stacktrace",  # code locations; the message is dropped
+        "exception.stacktrace",  # frame lines only: frames_only() removes the message
         "enduser.pseudo.id",  # DAT-02 pseudonymous workforce id, never enduser.id
         "mulyankan.spi",
         "mulyankan.provider.name",
@@ -468,6 +518,55 @@ ALLOWED_LOG_ATTRIBUTES: frozenset[str] = ALLOWED_SPAN_ATTRIBUTES | frozenset(
     }
 )
 
+# Metric data-point attributes (spec §3.2). The HTTP duration histogram uses
+# the span keys; the rest are the domain instruments' own keys and the fixed
+# enumerations of the process metrics (`_PROCESS_METRICS` in setup.py).
+ALLOWED_METRIC_ATTRIBUTES: frozenset[str] = ALLOWED_SPAN_ATTRIBUTES | frozenset(
+    {
+        "signal",  # mulyankan.observability.attributes_dropped
+        "attribute",  # mulyankan.observability.attributes_dropped: a key name, never a value
+        "action",  # mulyankan.audit.events
+        "spi",  # mulyankan.registry.bindings
+        "provider.name",  # mulyankan.registry.bindings
+        "provider.version",  # mulyankan.registry.bindings
+        "from_state",  # mulyankan.workflow.transitions (M1)
+        "to_state",  # mulyankan.workflow.transitions (M1)
+        "type",  # process.cpu.time: user | system
+        "generation",  # cpython.gc.collections: 0 | 1 | 2
+    }
+)
+
+# A frame is `  File "<path>", line <n>, in <name>` followed by indented
+# source (and, on 3.11+, caret) lines. Everything else in a rendered
+# traceback is a header, a chaining note, the `Type: message` line, message
+# continuation lines or exception notes, and all of those are dropped.
+_FRAME_LINE = re.compile(r'^\s+File ".*", line \d+, in .*$')
+
+
+def frames_only(stacktrace: str) -> str:
+    """Reduce a `traceback.format_exception` rendering to its frame lines."""
+    kept: list[str] = []
+    in_frame = False
+    for line in stacktrace.splitlines():
+        if _FRAME_LINE.match(line):
+            in_frame = True
+        elif not (in_frame and line.startswith("    ")):
+            in_frame = False
+            continue
+        kept.append(line)
+    return "\n".join(kept)
+
+
+_SANITISERS: dict[str, Callable[[Any], Any]] = {
+    "exception.stacktrace": lambda v: frames_only(v) if isinstance(v, str) else "",
+}
+
+
+def metric_views() -> list[View]:
+    """One View matching every instrument: the SDK drops unlisted keys at
+    aggregation time, before any reader sees them."""
+    return [View(instrument_name="*", attribute_keys=set(ALLOWED_METRIC_ATTRIBUTES))]
+
 
 def filter_attributes(
     attributes: Mapping[str, Any] | None,
@@ -478,7 +577,8 @@ def filter_attributes(
     kept: dict[str, Any] = {}
     for key, value in (attributes or {}).items():
         if key in allowed:
-            kept[key] = value
+            sanitise = _SANITISERS.get(key)
+            kept[key] = sanitise(value) if sanitise else value
         elif dropped is not None:
             dropped.add(1, {"signal": signal, "attribute": key})
     return kept
@@ -542,7 +642,7 @@ class LogAttributeGuard(LogRecordProcessor):
 - [ ] **Step 4: Run to see them pass**
 
 Run: `python -m pytest platform/core/tests/test_observability_guard.py -q`
-Expected: 3 passed.
+Expected: 5 passed.
 
 - [ ] **Step 5: Commit**
 
@@ -1271,7 +1371,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, SimpleSpanProcessor
 
-from mulyankan_platform.observability.guard import LogAttributeGuard, SpanAttributeGuard
+from mulyankan_platform.observability.guard import LogAttributeGuard, SpanAttributeGuard, metric_views
 from mulyankan_platform.observability.http import RequestLogMiddleware
 from mulyankan_platform.observability.logs import configure_logging
 from mulyankan_platform.observability.metrics import attributes_dropped, observe_registry_bindings
@@ -1327,6 +1427,7 @@ def register_providers(*, span_exporter=None, metric_reader=None, log_exporter=N
     meter_provider = MeterProvider(
         resource=resource,
         metric_readers=[metric_reader or PeriodicExportingMetricReader(OTLPMetricExporter())],
+        views=metric_views(),  # the metric-side guard (§4.2)
     )
     metrics.set_meter_provider(meter_provider)
 
@@ -1706,7 +1807,9 @@ processors:
   batch: {}
   redaction:
     allow_all_keys: false
-    # Keep identical to platform/core/.../guard.py and apps/web/.../allowlist.ts.
+    # One processor for all three pipelines: the union of the span, log and
+    # metric allowlists in platform/core/.../guard.py and
+    # apps/web/.../allowlist.ts. Keep it identical to them.
     allowed_keys:
       - http.request.method
       - http.route
@@ -1756,6 +1859,21 @@ processors:
       - target_element
       - target_xpath
       - mulyankan.web.vital.rating
+      # Metric data-point keys (ALLOWED_METRIC_ATTRIBUTES on each tier)
+      - signal
+      - attribute
+      - action
+      - spi
+      - provider.name
+      - provider.version
+      - from_state
+      - to_state
+      - type
+      - generation
+      - nodejs.eventloop.state
+      - v8js.gc.type
+      - v8js.heap.space.name
+      - v8js.resource.type
     summary: debug
 
 exporters:
@@ -1780,7 +1898,7 @@ service:
       exporters: [otlphttp]
     metrics:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, redaction, batch]
       exporters: [otlphttp]
     logs:
       receivers: [otlp]
@@ -1888,9 +2006,15 @@ pnpm add @opentelemetry/api@1.9.1 @opentelemetry/api-logs@0.222.0 \
   @opentelemetry/exporter-trace-otlp-http@0.222.0 \
   @opentelemetry/exporter-metrics-otlp-http@0.222.0 \
   @opentelemetry/exporter-logs-otlp-http@0.222.0 \
-  @opentelemetry/instrumentation-pino@0.68.0 pino@10.3.1
+  @opentelemetry/sdk-metrics@2.11.0 \
+  @opentelemetry/auto-instrumentations-node@0.80.0 pino@10.3.1
 pnpm add -D vitest@5.0.0
 ```
+
+`auto-instrumentations-node` is the official bundle (D19, spec §4.7); it
+carries `instrumentation-http`, `instrumentation-pino` and
+`instrumentation-runtime-node`, which are the three in use here. `sdk-metrics`
+is listed explicitly because the guard imports `View` from it.
 
 If `.npmrc`'s `minimum-release-age` rejects a version, use the newest one it accepts and note it in the commit message.
 
@@ -1902,10 +2026,10 @@ Add to `nextConfig`:
 
 ```ts
   // OTel instrumentations patch modules at require time; bundling them would
-  // bypass the patch. Keep the SDK, the pino instrumentation and pino external.
+  // bypass the patch. Keep the SDK, the instrumentation bundle and pino external.
   serverExternalPackages: [
     '@opentelemetry/sdk-node',
-    '@opentelemetry/instrumentation-pino',
+    '@opentelemetry/auto-instrumentations-node',
     '@opentelemetry/instrumentation',
     'pino',
   ],
@@ -1950,7 +2074,7 @@ export const ALLOWED_ATTRIBUTES: ReadonlySet<string> = new Set([
   'client.address',
   'error.type',
   'exception.type',
-  'exception.stacktrace', // first line (the message) is removed before emit
+  'exception.stacktrace', // frame lines only: framesOnly() removes the message
   'enduser.pseudo.id', // DAT-02 pseudonymous workforce id
   'session.id', // D17: random per-tab id
   // Next.js built-in spans (older HTTP conventions)
@@ -1977,6 +2101,20 @@ export const ALLOWED_ATTRIBUTES: ReadonlySet<string> = new Set([
 /** Attributes whose value is a URL: the query string is removed, the rest kept. */
 export const URL_ATTRIBUTES: ReadonlySet<string> = new Set(['url.full', 'http.url']);
 
+/**
+ * Metric data-point attributes (spec §3.2): the span keys, the browser
+ * instruments' own keys, and the fixed enumerations of the Node runtime
+ * instrumentation. Applied by an SDK View on both the Node and browser
+ * meter providers; a View drops silently, so the sentinel test is the check.
+ */
+export const ALLOWED_METRIC_ATTRIBUTES: ReadonlySet<string> = new Set([
+  ...ALLOWED_ATTRIBUTES,
+  'nodejs.eventloop.state', // active | idle
+  'v8js.gc.type', // major | minor | incremental | weakcb
+  'v8js.heap.space.name',
+  'v8js.resource.type',
+]);
+
 /** Spans about the telemetry pipeline itself are never exported (feedback loop). */
 export const RELAY_ROUTE_PREFIX = '/api/otlp';
 export const OTLP_PATH = /\/v1\/(traces|metrics|logs)$/;
@@ -1999,7 +2137,7 @@ git commit -s -m "Add OTel Node dependencies, vitest, and the web allowlist"
 - Test: `apps/web/src/observability/guard.test.ts`
 
 **Interfaces:**
-- Produces: `stripQuery(url: string): string`, `filterAttributes(attrs, onDrop?)`, `GuardedSpanExporter(inner: SpanExporter, onDrop?)`, `GuardedLogExporter(inner: LogRecordExporter, onDrop?)`. Both wrap an exporter, filter attributes in place, and drop relay spans before delegating. Used by Task 14 (Node) and Task 16 (browser).
+- Produces: `stripQuery(url: string): string`, `framesOnly(stack: string | undefined): string`, `filterAttributes(attrs, onDrop?)`, `metricViews(): View[]`, `GuardedSpanExporter(inner: SpanExporter, onDrop?)`, `GuardedLogExporter(inner: LogRecordExporter, onDrop?)`. The exporters wrap an exporter, filter attributes in place, and drop relay spans before delegating. `filterAttributes` filters by key and rewrites two kinds of value: URL attributes lose their query string and `exception.stacktrace` is reduced to its `at ...` frame lines, because V8 renders `Name: message` as the first line(s) of `err.stack` and `recordException` copies it verbatim. `metricViews()` is the metric-side guard. Used by Task 14 (Node) and Task 16 (browser).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2007,8 +2145,9 @@ git commit -s -m "Add OTel Node dependencies, vitest, and the web allowlist"
 
 ```ts
 import { describe, expect, it, vi } from 'vitest';
+import { AggregationTemporality, InMemoryMetricExporter, MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import type { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
-import { GuardedSpanExporter, stripQuery } from './guard';
+import { GuardedSpanExporter, framesOnly, metricViews, stripQuery } from './guard';
 
 const SENTINEL = 'SENTINEL-1d9f';
 
@@ -2022,18 +2161,35 @@ describe('asr02obs guard', () => {
     expect(stripQuery('not a url')).toBe('');
   });
 
+  it('reduces a stack to its frame lines', () => {
+    const stack = `Error: ${SENTINEL}\n  second line ${SENTINEL}\n    at inner (x.ts:4:9)\n    at outer (x.ts:10:3)`;
+    expect(framesOnly(stack)).toBe('    at inner (x.ts:4:9)\n    at outer (x.ts:10:3)');
+    expect(framesOnly(undefined)).toBe('');
+  });
+
   it('removes unlisted attributes, keeps listed ones, counts drops', () => {
     const inner: SpanExporter = { export: vi.fn((_s, cb) => cb({ code: 0 })), shutdown: vi.fn(async () => {}) };
     const dropped: string[] = [];
     const exporter = new GuardedSpanExporter(inner, (k) => dropped.push(k));
     const s = span('GET', { 'http.request.method': 'GET', 'url.full': `http://x/y?q=${SENTINEL}`, 'user_agent.original': SENTINEL },
-      [{ name: 'exception', attributes: { 'exception.type': 'Error', 'exception.message': SENTINEL } }]);
+      [{ name: 'exception', attributes: { 'exception.type': 'Error', 'exception.message': SENTINEL, 'exception.stacktrace': `Error: ${SENTINEL}\n    at f (x.ts:1:1)` } }]);
     exporter.export([s], () => {});
     const exported = (inner.export as ReturnType<typeof vi.fn>).mock.calls[0][0] as ReadableSpan[];
     expect(exported[0].attributes).toEqual({ 'http.request.method': 'GET', 'url.full': 'http://x/y' });
-    expect(exported[0].events[0].attributes).toEqual({ 'exception.type': 'Error' });
+    expect(exported[0].events[0].attributes).toEqual({ 'exception.type': 'Error', 'exception.stacktrace': '    at f (x.ts:1:1)' });
     expect(dropped).toEqual(['user_agent.original', 'exception.message']);
     expect(JSON.stringify(exported)).not.toContain(SENTINEL);
+  });
+
+  it('drops unlisted metric attributes through the view', async () => {
+    const exporter = new InMemoryMetricExporter(AggregationTemporality.CUMULATIVE);
+    const reader = new PeriodicExportingMetricReader({ exporter, exportIntervalMillis: 60_000 });
+    const provider = new MeterProvider({ readers: [reader], views: metricViews() });
+    provider.getMeter('test').createCounter('mulyankan.web.errors').add(1, { 'exception.type': 'Error', stem: SENTINEL });
+    await reader.forceFlush();
+    const points = exporter.getMetrics().flatMap((rm) => rm.scopeMetrics.flatMap((sm) => sm.metrics.flatMap((m) => m.dataPoints)));
+    expect(points.map((p) => p.attributes)).toEqual([{ 'exception.type': 'Error' }]);
+    await provider.shutdown();
   });
 
   it('drops spans about the relay and the exporter itself', () => {
@@ -2069,10 +2225,28 @@ Expected: FAIL, cannot resolve `./guard`.
  */
 import type { ExportResult } from '@opentelemetry/core';
 import type { ReadableLogRecord, LogRecordExporter } from '@opentelemetry/sdk-logs';
+import { View } from '@opentelemetry/sdk-metrics';
 import type { ReadableSpan, SpanExporter } from '@opentelemetry/sdk-trace-base';
-import { ALLOWED_ATTRIBUTES, OTLP_PATH, RELAY_ROUTE_PREFIX, URL_ATTRIBUTES } from './allowlist';
+import { ALLOWED_ATTRIBUTES, ALLOWED_METRIC_ATTRIBUTES, OTLP_PATH, RELAY_ROUTE_PREFIX, URL_ATTRIBUTES } from './allowlist';
 
 export type OnDrop = (key: string) => void;
+
+/**
+ * V8 renders `err.stack` as `Name: message` (the message may span lines)
+ * followed by `    at ...` frames, and `span.recordException` copies it into
+ * `exception.stacktrace` verbatim. Keep only the frame lines.
+ */
+export function framesOnly(stack: string | undefined): string {
+  return (stack ?? '')
+    .split('\n')
+    .filter((line) => /^\s+at /.test(line))
+    .join('\n');
+}
+
+/** The metric-side guard: one View over every instrument (spec §4.2). */
+export function metricViews(): View[] {
+  return [new View({ instrumentName: '*', attributeKeys: [...ALLOWED_METRIC_ATTRIBUTES] })];
+}
 
 export function stripQuery(url: string): string {
   try {
@@ -2090,6 +2264,8 @@ export function filterAttributes(attrs: Record<string, unknown>, onDrop?: OnDrop
       onDrop?.(key);
     } else if (URL_ATTRIBUTES.has(key) && typeof attrs[key] === 'string') {
       attrs[key] = stripQuery(attrs[key] as string);
+    } else if (key === 'exception.stacktrace') {
+      attrs[key] = framesOnly(typeof attrs[key] === 'string' ? (attrs[key] as string) : undefined);
     }
   }
 }
@@ -2147,7 +2323,7 @@ export class GuardedLogExporter implements LogRecordExporter {
 - [ ] **Step 4: Run to see it pass, then commit**
 
 Run: `pnpm test && pnpm check-types`
-Expected: 3 passed, types clean.
+Expected: 5 passed, types clean.
 
 ```bash
 git add src/observability/guard.ts src/observability/guard.test.ts
@@ -2161,7 +2337,7 @@ git commit -s -m "Add guarded OTLP exporters for the web app"
 - Test: `apps/web/src/app/api/otlp/v1/[signal]/route.test.ts`
 
 **Interfaces:**
-- Produces: `POST /api/otlp/v1/{traces|metrics|logs}` forwarding the body and `Content-Type` to `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/<signal>`; `204` on success, `502` on upstream failure, `413` over 1 MiB, `404` for other signals, `204` with no forwarding when the endpoint is unset.
+- Produces: `POST /api/otlp/v1/{traces|metrics|logs}` forwarding the body and `Content-Type` to `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/<signal>`; `204` on success, `502` on upstream failure or a 5 s upstream timeout, `413` over 1 MiB, `429` over `RATE_LIMIT` requests per client address per minute, `404` for other signals, `204` with no forwarding when the endpoint is unset. The relay is the web app's first route handler, so it sets the limits itself (D16); the reverse proxy's limits stack on top.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -2169,7 +2345,7 @@ git commit -s -m "Add guarded OTLP exporters for the web app"
 
 ```ts
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { POST } from './route';
+import { POST, RATE_LIMIT } from './route';
 
 const params = (signal: string) => ({ params: Promise.resolve({ signal }) });
 
@@ -2207,8 +2383,29 @@ describe('asr02obs otlp relay', () => {
     vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', '');
     expect((await POST(new Request('http://web/x', { method: 'POST', body: '{}' }), params('metrics'))).status).toBe(204);
   });
+
+  it('bounds the upstream call with a timeout', async () => {
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://collector:4318');
+    const upstream = vi.fn(async () => new Response(null, { status: 200 }));
+    vi.stubGlobal('fetch', upstream);
+    await POST(new Request('http://web/x', { method: 'POST', body: '{}' }), params('traces'));
+    const [, init] = upstream.mock.calls[0] as [string, RequestInit];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it('rate limits per client address', async () => {
+    vi.stubEnv('OTEL_EXPORTER_OTLP_ENDPOINT', 'http://collector:4318');
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(null, { status: 200 })));
+    const from = (ip: string) => new Request('http://web/x', { method: 'POST', body: '{}', headers: { 'x-forwarded-for': ip } });
+    let last = 0;
+    for (let i = 0; i < RATE_LIMIT + 1; i += 1) last = (await POST(from('10.0.0.1'), params('logs'))).status;
+    expect(last).toBe(429);
+    expect((await POST(from('10.0.0.2'), params('logs'))).status).toBe(204);
+  });
 });
 ```
+
+(`RATE_LIMIT` is imported from `./route` alongside `POST`.)
 
 - [ ] **Step 2: Run to see it fail**
 
@@ -2224,15 +2421,45 @@ Expected: FAIL, cannot resolve `./route`.
  * OTLP relay (spec §4.9, D16). The browser posts OTLP here and never learns
  * the Collector's address; the Collector needs no CORS policy. The body is
  * forwarded as received: never parsed, never logged.
+ *
+ * This is an unauthenticated write path into the telemetry pipeline, so it
+ * carries its own limits (D16): a body cap, a per-client-address rate limit
+ * and an upstream timeout. A browser can send any `enduser.pseudo.id` here,
+ * so check a browser-reported identity against the audit chain before
+ * acting on it (D17).
  */
 export const dynamic = 'force-dynamic';
 
 const SIGNALS = new Set(['traces', 'metrics', 'logs']);
 const MAX_BYTES = 1_048_576;
+const UPSTREAM_TIMEOUT_MS = 5_000;
+/** Requests per client address per minute. A tab sends at most three batches
+ * every two seconds (§4.8), so this is an order of magnitude of headroom. */
+export const RATE_LIMIT = 300;
+const WINDOW_MS = 60_000;
+const MAX_TRACKED_CLIENTS = 10_000;
+
+const windows = new Map<string, { until: number; count: number }>();
+
+function overLimit(client: string, now = Date.now()): boolean {
+  const current = windows.get(client);
+  if (current && current.until > now) {
+    current.count += 1;
+    return current.count > RATE_LIMIT;
+  }
+  if (windows.size >= MAX_TRACKED_CLIENTS) windows.clear(); // bounded memory; a reset is harmless
+  windows.set(client, { until: now + WINDOW_MS, count: 1 });
+  return false;
+}
+
+function clientAddress(request: Request): string {
+  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+}
 
 export async function POST(request: Request, context: { params: Promise<{ signal: string }> }): Promise<Response> {
   const { signal } = await context.params;
   if (!SIGNALS.has(signal)) return new Response(null, { status: 404 });
+  if (overLimit(clientAddress(request))) return new Response(null, { status: 429 });
 
   const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT?.replace(/\/+$/, '');
   const body = await request.arrayBuffer();
@@ -2244,13 +2471,18 @@ export async function POST(request: Request, context: { params: Promise<{ signal
       method: 'POST',
       headers: { 'content-type': request.headers.get('content-type') ?? 'application/json' },
       body,
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
     });
     return new Response(null, { status: upstream.ok ? 204 : 502 });
   } catch {
-    return new Response(null, { status: 502 });
+    return new Response(null, { status: 502 }); // includes the timeout
   }
 }
 ```
+
+The limiter is per process, which matches the single-host deployment shape in
+spec §6.3; a multi-replica deployment moves the limit to the ingress and the
+in-process one becomes the backstop.
 
 - [ ] **Step 4: Run, then commit**
 
@@ -2292,9 +2524,9 @@ import { W3CTraceContextPropagator } from '@opentelemetry/core';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { NodeSDK, logs, metrics, tracing } from '@opentelemetry/sdk-node';
-import { GuardedLogExporter, GuardedSpanExporter } from './observability/guard';
+import { GuardedLogExporter, GuardedSpanExporter, metricViews } from './observability/guard';
 
 // Service name, resource attributes and the endpoint come from the standard
 // OTEL_* variables (ADR-0011); nothing here names a backend.
@@ -2303,8 +2535,14 @@ if (process.env.OTEL_SDK_DISABLED?.toLowerCase() !== 'true') {
     spanProcessors: [new tracing.BatchSpanProcessor(new GuardedSpanExporter(new OTLPTraceExporter()))],
     logRecordProcessors: [new logs.BatchLogRecordProcessor(new GuardedLogExporter(new OTLPLogExporter()))],
     metricReader: new metrics.PeriodicExportingMetricReader({ exporter: new OTLPMetricExporter() }),
+    views: metricViews(), // the metric-side guard (§4.2)
     textMapPropagator: new W3CTraceContextPropagator(), // tracecontext only (D8)
-    instrumentations: [new PinoInstrumentation()],
+    // The official bundle (D19). In use: http (the server span Next.js's own
+    // spans nest under), pino (trace ids injected, records forwarded to the
+    // logs SDK; on by default) and runtime-node (event loop, GC, heap). fs is
+    // off by default and stays off. Whatever else the bundle emits passes the
+    // same guard; OTEL_NODE_DISABLED_INSTRUMENTATIONS trims it without code.
+    instrumentations: [getNodeAutoInstrumentations()],
   });
   sdk.start();
 }
@@ -2320,8 +2558,9 @@ import pino from 'pino';
 /**
  * Server-side logger (D19). Same convention as core-api: the message is a
  * static dotted event name, fields go in the first argument under allowlisted
- * keys. The pino instrumentation adds trace ids and forwards each record to
- * the OTel logs SDK. Never log request bodies, query strings or user input.
+ * keys. The pino instrumentation (from the auto-instrumentations bundle in
+ * instrumentation.node.ts) adds trace ids and forwards each record to the
+ * OTel logs SDK. Never log request bodies, query strings or user input.
  *
  *   logger.info({ 'mulyankan.object_ref': ref }, 'task.fetched');
  */
@@ -2360,7 +2599,7 @@ With `deploy/dev` running and the env sourced:
 OTEL_SERVICE_NAME=web pnpm dev &
 sleep 8; curl -s localhost:3000/ | grep -o '<meta name="traceparent"[^>]*>'
 ```
-Expected: one meta tag with a 32-hex trace id. In Grafana Explore, Tempo shows a trace under `service.name=web` with the `GET /` root span and `render route (app) /` child; Loki shows pino lines for `web` with `trace_id`. If the pino lines do not reach Loki, the instrumentation did not patch pino: confirm `serverExternalPackages` from Task 11 is in effect (`pnpm build` output lists the externals).
+Expected: one meta tag with a 32-hex trace id. In Grafana Explore, Tempo shows a trace under `service.name=web` with the http instrumentation's `POST` or `GET` server span as root, Next.js's `GET /` under it and `render route (app) /` below that; Loki shows pino lines for `web` with `trace_id`; Prometheus has `nodejs_eventloop_utilization`. If the pino lines do not reach Loki, the instrumentation did not patch pino: confirm `serverExternalPackages` from Task 11 is in effect (`pnpm build` output lists the externals) and that the logger in `logger.ts` is created after `sdk.start()` runs, which the `instrumentation.ts` ordering guarantees.
 
 - [ ] **Step 5: Check, then commit**
 
@@ -2376,7 +2615,7 @@ git commit -s -m "Start the OTel Node SDK in Next.js and link renders to the bro
 
 - [ ] **Step 1: `apps/web/AGENTS.md`**
 
-"What exists" gains: `src/instrumentation.ts` + `.node.ts` (OTel Node SDK; do not import them elsewhere), `src/observability/` (allowlist, guarded exporters, pino logger), `src/app/api/otlp/v1/[signal]/route.ts` (the OTLP relay; never parse or log its body), and the `traceparent` meta tag in `layout.tsx`. Add a "Load-bearing wires" row: `next.config.ts` `serverExternalPackages` keeps pino and the OTel instrumentation unbundled; removing it silently stops log forwarding. Add to the untrusted-client paragraph: "No question content in span or log attributes either; `src/observability/allowlist.ts` is the list, and adding to it needs a reason."
+"What exists" gains: `src/instrumentation.ts` + `.node.ts` (OTel Node SDK; do not import them elsewhere), `src/observability/` (allowlist, guarded exporters, pino logger), `src/app/api/otlp/v1/[signal]/route.ts` (the OTLP relay; never parse or log its body), and the `traceparent` meta tag in `layout.tsx`. Add a "Load-bearing wires" row: `next.config.ts` `serverExternalPackages` keeps pino and the OTel instrumentation bundle unbundled; removing it silently stops log forwarding. Add to the untrusted-client paragraph: "No question content in span or log attributes either; `src/observability/allowlist.ts` is the list, and adding to it needs a reason."
 
 - [ ] **Step 2: CI `web` job**
 
@@ -2410,7 +2649,7 @@ git commit -s -m "Document the web observability wiring and run its tests in CI"
 - [ ] **Step 1: Add packages**
 
 ```bash
-pnpm add @opentelemetry/sdk-trace-web@2.11.0 @opentelemetry/sdk-metrics@2.11.0 \
+pnpm add @opentelemetry/sdk-trace-web@2.11.0 \
   @opentelemetry/context-zone@2.11.0 @opentelemetry/instrumentation@0.222.0 \
   @opentelemetry/instrumentation-fetch@0.222.0 \
   @opentelemetry/instrumentation-document-load@0.67.0 \
@@ -2481,18 +2720,14 @@ export function reportVitals(meter: Meter): void {
 ```ts
 import type { Counter } from '@opentelemetry/api';
 import { SeverityNumber, type Logger } from '@opentelemetry/api-logs';
-
-/** A stack without its first line, which is where the message lives. */
-export function stackWithoutMessage(stack: string | undefined): string {
-  return (stack ?? '').split('\n').slice(1).join('\n');
-}
+import { framesOnly } from './guard';
 
 export function reportErrors(logger: Logger, counter: Counter): void {
   const emit = (error: unknown) => {
     const err = error instanceof Error ? error : undefined;
     const attributes = {
       'exception.type': err?.name ?? 'Error',
-      'exception.stacktrace': stackWithoutMessage(err?.stack),
+      'exception.stacktrace': framesOnly(err?.stack), // the guard does this again at export
       'url.path': window.location.pathname,
     };
     logger.emit({ severityNumber: SeverityNumber.ERROR, body: 'web.error', attributes });
@@ -2532,7 +2767,7 @@ import { BatchSpanProcessor, WebTracerProvider } from '@opentelemetry/sdk-trace-
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
 import { ActorSpanProcessor } from './observability/actor';
 import { reportErrors } from './observability/errors';
-import { GuardedLogExporter, GuardedSpanExporter } from './observability/guard';
+import { GuardedLogExporter, GuardedSpanExporter, metricViews } from './observability/guard';
 import { reportVitals } from './observability/vitals';
 
 const RELAY = '/api/otlp/v1';
@@ -2574,6 +2809,7 @@ try {
   const meterProvider = new MeterProvider({
     resource,
     readers: [new PeriodicExportingMetricReader({ exporter: new OTLPMetricExporter({ url: `${RELAY}/metrics` }), exportIntervalMillis: 10000 })],
+    views: metricViews(), // the metric-side guard (§4.2)
   });
   metrics.setGlobalMeterProvider(meterProvider);
 

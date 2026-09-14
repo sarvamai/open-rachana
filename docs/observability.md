@@ -74,10 +74,10 @@ them, not the whole spec.
 | D13 | Browser-side instrumentation | Now / after the role-surface question is settled | Now. Traces must start in the browser to be followed end to end, and oversight roles use this web app in a browser whichever way the role-surface question lands, so the work is not wasted. Content roles' thin client (ADR-0008; a Tauri scaffold under `apps/client/` per ADR-0010) gets its own instrumentation once it speaks to the server through `contracts/` | Settled 2026-09-09 |
 | D14 | CI Python job | Prerequisite PR / part of the first slice | Separate prerequisite PR. The sentinel test in §7 is worthless if it cannot fail a PR, and `build-and-test` is still an `echo` | Recommended |
 | D15 | Where the local stack lives | New `deploy/dev/` / `platform/core/dev/` / repo root `compose.yaml` | `deploy/dev/`. It will hold the production Collector config later; the root `AGENTS.md` gains the path in the same PR | Open |
-| D16 | How browser spans reach the Collector | Browser posts OTLP to a Next.js route handler that forwards to the Collector / browser posts to the Collector directly with CORS | Route handler. The browser then talks only to the web app's origin, which matches the egress posture (ARC-07) and keeps the Collector off the public surface. The handler forwards bytes unchanged and applies the same size and rate limits as any other route | Recommended |
+| D16 | How browser spans reach the Collector | Browser posts OTLP to a Next.js route handler that forwards to the Collector / browser posts to the Collector directly with CORS | Route handler. The browser then talks only to the web app's origin, which matches the egress posture (ARC-07) and keeps the Collector off the public surface. The handler forwards bytes unchanged. It is the web app's first route handler, so it sets its own limits: a 1 MiB body cap, a per-client-address rate limit and a 5 s upstream timeout, with the reverse proxy's limits (§6.3) stacked on top. It is unauthenticated, so a browser can send any `enduser.pseudo.id` it likes (D17); check a browser-reported identity against the audit chain before acting on it | Recommended |
 | D17 | Identity on browser telemetry | Anonymous per-tab `session.id` only / `session.id` plus the DAT-02 pseudonymous workforce id / raw identity | `session.id` plus `enduser.pseudo.id`, the same pseudonymous workforce identifier the audit chain carries, set after sign-in; plus the ADR-0008 machine id when the thin client exists. Never a name, email or subject claim: the regulated entity holds the mapping. This makes every browser signal joinable to the audit chain and to the server span for the same actor | Settled 2026-09-09: traceability is paramount; the data is handled by a regulated entity |
 | D18 | RUM capture boundaries | Spans, vitals, errors only / add session replay or input capture | Spans, vitals and errors only. No session replay, no DOM snapshots, no input values, no element text: each would capture question content. Interaction spans record the element's id or xpath; element text is excluded | Recommended |
-| D19 | Logging framework | Python: stdlib `logging` / structlog / loguru. Node: pino / winston. Browser: none / a logger | Python: stdlib `logging`, with the message as a static event name and every value in `extra`; the OTel handler maps `extra` to attributes with no code, and uvicorn and FastAPI already log through it. structlog is nicer to write with, but its rendered event reaches the OTel handler as one string, so fields land in the body where the guard cannot filter them; revisit if `extra` proves clumsy. Node: pino with `@opentelemetry/instrumentation-pino`, which injects trace ids and forwards records to the OTel logs SDK. Browser: none; errors use the OTel logs SDK directly (§4.8). Not previously selected by the team | Recommended |
+| D19 | Logging framework | Python: stdlib `logging` / structlog / loguru. Node: pino / winston. Browser: none / a logger | Python: stdlib `logging`, with the message as a static event name and every value in `extra`; the OTel handler maps `extra` to attributes with no code, and uvicorn and FastAPI already log through it. structlog is nicer to write with, but its rendered event reaches the OTel handler as one string, so fields land in the body where the guard cannot filter them; revisit if `extra` proves clumsy. Node: pino, instrumented through `@opentelemetry/auto-instrumentations-node`, whose bundled pino instrumentation injects trace ids and forwards each record to the OTel logs SDK (log sending is on by default and needs pino 7 or later). Browser: none; errors use the OTel logs SDK directly (§4.8). Not previously selected by the team | Recommended |
 
 ## 3. What gets instrumented
 
@@ -94,7 +94,7 @@ ADR-0001 and arrives with the milestone that introduces the dependency.
 | Python | `httpx` | `opentelemetry-instrumentation-httpx` | Client spans + context propagation | When the core first calls out |
 | Python | SQLAlchemy 2.0 | `opentelemetry-instrumentation-sqlalchemy` | DB client spans (see D11) | M1 |
 | Python | PostgreSQL driver | `-psycopg` or `-asyncpg`, whichever M1 picks | Driver-level spans | M1 |
-| Node | Next.js 16 server | Built-in framework spans once `instrumentation.ts` registers a provider; `@opentelemetry/sdk-node`, OTLP HTTP exporters | Route render, server actions, middleware, outgoing `fetch` with `traceparent` | Now |
+| Node | Next.js 16 server | Built-in framework spans once `instrumentation.ts` registers a provider; `@opentelemetry/sdk-node` with `@opentelemetry/auto-instrumentations-node` (http, pino and runtime-node in use; fs off), OTLP HTTP exporters | Server spans, route render, server actions, middleware, outgoing `fetch` with `traceparent`; pino records as log records; event loop, GC and heap metrics | Now |
 | Browser | The web app in the browser (RUM), started from Next.js's `instrumentation-client.ts` | `@opentelemetry/sdk-trace-web` with `instrumentation-fetch`, `instrumentation-document-load` and `instrumentation-user-interaction`; `sdk-metrics` and `sdk-logs` with their OTLP HTTP exporters; `context-zone`; the `web-vitals` library (Apache-2.0) as the vitals source | Page-load and navigation spans linked to the server render via `Server-Timing`; a span per `fetch` to core-api with `traceparent` injected; click spans; web vitals as metrics; JavaScript errors as log records | Now (D13) |
 
 Uvicorn's access log is disabled (`--no-access-log`): it prints the raw path
@@ -111,7 +111,7 @@ content-free.
 | `mulyankan.audit.events` | counter | `action` | Now |
 | `mulyankan.audit.append.duration` | histogram (s) | — | Now |
 | `mulyankan.registry.bindings` | observable gauge | `spi`, `provider.name`, `provider.version` | Now |
-| `mulyankan.observability.attributes_dropped` | counter | `signal` (`span`/`log`), `attribute` | Now |
+| `mulyankan.observability.attributes_dropped` | counter | `signal` (`span`/`log`), `attribute`. Metric drops are not counted: the metric guard is an SDK View (§4.2) | Now |
 | `mulyankan.workflow.transitions` | counter | `from_state`, `to_state` | M1 |
 | `mulyankan.audit.durable.latency` | histogram (s), target ≤ 5 s | — | M1 |
 | `mulyankan.outbox.lag` | observable gauge (s) | — | M1 |
@@ -156,6 +156,16 @@ the list is removed and counted in
 `mulyankan.observability.attributes_dropped`, so an instrumentation upgrade
 that starts emitting a new attribute shows up in a metric.
 
+Metrics get the same treatment by a different mechanism: an SDK `View`
+matching every instrument, with `attribute_keys` (Python) or
+`attributeKeys` (Node and browser) set to the metric allowlist, which is
+the span list plus the instrument-specific keys in §3.2 and the fixed
+enumerations of the runtime instrumentations. The SDK drops unlisted keys at
+aggregation time, before any reader sees them. A View drops silently, so
+metric drops are not counted; the §7 sentinel test, which inspects metric
+data-point attributes, is the check. The Collector's `redaction` processor
+runs on all three pipelines as the second layer.
+
 Allowed on spans:
 
 - HTTP server/client: `http.request.method`, `http.route`,
@@ -164,7 +174,10 @@ Allowed on spans:
   `network.protocol.version`, `client.address` (D10).
 - Exceptions: `exception.type`, `exception.stacktrace`. `exception.message`
   is dropped: the repo rule says exception strings are content-free, and the
-  guard does not rely on that.
+  guard does not rely on that. The guard also rewrites the stacktrace value,
+  because both SDKs render the message into it (Python's `format_exception`
+  ends with `Type: message`, V8's `err.stack` starts with it); only the frame
+  lines are kept.
 - Identity: `enduser.pseudo.id` (the DAT-02 pseudonymous workforce id),
   never `enduser.id`.
 - Domain: `mulyankan.spi`, `mulyankan.provider.name`,
@@ -175,10 +188,16 @@ Allowed on spans:
 - Database (M1): `db.system.name`, `db.operation.name`,
   `db.collection.name`; `db.query.text` per D11.
 
-Always dropped, by name and as a matter of record: `url.full`, `url.path`,
+Always dropped on every tier, by name and as a matter of record:
 `url.query`, `user_agent.original`, `http.request.header.*`,
-`http.response.header.*`, and any `*.body`. Span names and log bodies are
-not inspected; they are trusted to be static templates (§4.4).
+`http.response.header.*`, and any `*.body`. `platform/core` also drops
+`url.full` and `url.path`: the route template is the only path it records.
+The `apps/web` allowlist, shared by the Next.js server and the browser
+(§4.7, §4.8), keeps `url.path` and a `url.full` reduced to scheme, host and
+path: the pathname is content-free by DAT-03, the browser signals in §3.2
+key on it, and neither the browser nor Next.js's built-in spans know the
+route template. Span names and log bodies are not inspected; they are
+trusted to be static templates (§4.4).
 
 Allowed on log records: the same set plus `code.function.name`,
 `code.file.path`, `code.line.number`, and the trace/span ids the handler
@@ -221,8 +240,9 @@ cannot inspect the message itself, so a value interpolated into the message
 is a review finding, and the sentinel test in §7 is the backstop.
 
 On the Node side (§4.7), pino is the logger and the pino instrumentation
-adds trace and span ids and forwards records to the OTel logs SDK; the same
-event-name-plus-fields convention applies.
+from the auto-instrumentations bundle adds trace and span ids and forwards
+records to the OTel logs SDK; the same event-name-plus-fields convention
+applies.
 
 ### 4.5 `providers.py` — provider-call spans at the registry
 
@@ -253,9 +273,13 @@ exporters, the resource from environment, and `tracecontext` as the only
 propagator. Next.js's built-in spans then cover route rendering, server
 actions and outgoing `fetch`, and the `traceparent` header reaches
 `platform/core`, so one page render and its API calls are one trace.
-Per the `apps/web` rule, no question content in `console.log` or any
-attribute. The Node side gets the same allowlist guard as Python, applied
-by wrappers around the OTLP exporters, in the same slice. The guard also drops every span whose
+Instrumentation comes from `@opentelemetry/auto-instrumentations-node`, the
+official bundle: its http, pino and runtime-node instrumentations are the
+ones in use, `fs` stays disabled (the bundle's default), and whatever else
+the bundle emits passes the same guard. Per the `apps/web` rule, no question
+content in `console.log` or any attribute. The Node side gets the same
+allowlist guard as Python, applied by wrappers around the OTLP exporters
+and a metric View, in the same slice. The guard also drops every span whose
 route is the OTLP relay (§4.9): without that, each relayed batch would
 produce a span, which would be relayed, which would produce a span.
 
@@ -300,9 +324,10 @@ Real-user monitoring is four signal sources on top of the tracer:
   FCP; each is recorded on the histograms in §3.2 with the pathname as the
   only attribute.
 - **Errors.** `window.onerror` and `unhandledrejection` handlers emit a log
-  record with `exception.type` and `exception.stacktrace` and increment
-  `mulyankan.web.errors`. `exception.message` is dropped, as in §4.2, because
-  JavaScript error messages routinely interpolate values.
+  record with `exception.type` and `exception.stacktrace` (frame lines only,
+  as in §4.2) and increment `mulyankan.web.errors`. `exception.message` is
+  dropped, as in §4.2, because JavaScript error messages routinely
+  interpolate values.
 
 Every RUM span and record carries the current trace context, so a slow
 interaction, the fetch it triggered and the FastAPI span that served it
@@ -315,9 +340,12 @@ A Next.js route handler for `traces`, `metrics` and `logs` that accepts
 `POST` bodies and forwards them, with their `Content-Type`, unchanged to
 the matching path under `OTEL_EXPORTER_OTLP_ENDPOINT` on the server side
 (D16). The browser exporters send OTLP as JSON and the Python exporter sends
-protobuf; the Collector's OTLP receiver accepts both. It does not parse or log the payload, enforces a body-size limit,
-and returns the Collector's status. The browser therefore never learns the
-Collector's address, and the Collector needs no CORS policy.
+protobuf; the Collector's OTLP receiver accepts both. It does not parse or
+log the payload, and returns the Collector's status. It carries its own
+limits (D16): a 1 MiB body cap, a per-client-address rate limit and a 5 s
+upstream timeout, so a stalled Collector cannot hold the handler and an
+abusive client cannot flood the pipeline. The browser therefore never
+learns the Collector's address, and the Collector needs no CORS policy.
 
 On the FastAPI side, the CORS configuration that will arrive with the first
 real API must list `traceparent` and `tracestate` in the allowed request
@@ -403,8 +431,9 @@ is used only as an OTLP receiver.
   Collector's OTLP ports and Grafana are published to the host.
 - `otel-collector.yaml`: `otlp` receiver (HTTP and gRPC); processors
   `memory_limiter`, `batch`, `resourcedetection` (env, system),
-  `redaction` as defence in depth with the same allowlist as §4.2 and
-  `summary: debug` so a Collector-side drop is itself observable, and
+  `redaction` on the traces, metrics and logs pipelines as defence in depth
+  with the union of the §4.2 allowlists and `summary: debug` so a
+  Collector-side drop is itself observable, and
   `filter` to drop the health-check route if D9 changes; exporters `otlphttp`
   to `lgtm:4318`; `health_check` and the Collector's own telemetry enabled.
 - `.env.example`: the §5 variables. The Collector's OTLP receiver has no
@@ -456,8 +485,10 @@ a Collector. Requirement-facing names carry the ID.
   `testkit_fake_provider` double.
 - `test_asr02obs_audit_append_records_metrics_and_span_link`.
 - Existing `test_healthz_*` unchanged: `/healthz` output does not grow.
-- `apps/web`: a unit test that the relay forwards a body unchanged and
-  rejects an oversized one, and a browser test (Playwright, when the app
+- `apps/web`: unit tests that the relay forwards a body unchanged, rejects
+  an oversized one, bounds the upstream call and rate limits per client
+  address, plus a unit test that the metric View drops unlisted keys; and a
+  browser test (Playwright, when the app
   gains tests) that a page load followed by a fetch to a stub core-api
   yields one trace id across all three tiers.
 - `apps/web`: a browser test that types a sentinel into a form field, clicks,
