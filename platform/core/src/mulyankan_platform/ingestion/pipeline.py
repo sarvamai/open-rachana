@@ -218,5 +218,11 @@ async def run_extraction(
         source.error = f"unexpected {type(exc).__name__}"
         logger.exception("extraction crashed source=%s", source.id)
     finally:
+        # This coroutine runs as a fire-and-forget task; an error escaping
+        # here would surface only as an "unhandled task exception". Close is
+        # best-effort cleanup, so a failure is logged, never raised.
         if session is not None:
-            await asyncio.to_thread(session.close)
+            try:
+                await asyncio.to_thread(session.close)
+            except Exception:
+                logger.warning("session close failed source=%s", source.id)

@@ -44,6 +44,13 @@ def test_unloadable_target_rejected() -> None:
         )
 
 
+def test_non_mapping_config_rejected() -> None:
+    with pytest.raises(RegistryError, match="config for spi 'kms' must be a mapping"):
+        ProviderRegistry.from_mapping(
+            {"providers": {"kms": {"provider": FAKE_TARGET, "config": "not-a-mapping"}}}
+        )
+
+
 def test_describe_reports_bindings() -> None:
     registry = ProviderRegistry.from_mapping(_mapping())
     report = registry.describe()

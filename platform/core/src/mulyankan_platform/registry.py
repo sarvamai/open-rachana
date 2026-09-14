@@ -69,6 +69,11 @@ class ProviderRegistry:
                     f"cannot load provider '{target}' for spi '{spi}': {exc}"
                 ) from exc
             provider_config = entry.get("config") or {}
+            if not isinstance(provider_config, dict):
+                raise RegistryError(
+                    f"config for spi '{spi}' must be a mapping, got "
+                    f"{type(provider_config).__name__}"
+                )
             try:
                 instance = factory(provider_config)
             except Exception as exc:

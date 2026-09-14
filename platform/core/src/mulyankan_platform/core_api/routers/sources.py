@@ -218,6 +218,9 @@ async def upload_source(
     )
 
     # Held on the app so the task is not garbage-collected mid-run.
+    # TODO(ocr): cap concurrent extractions (e.g. an asyncio.Semaphore) once
+    # jobs run for minutes — unbounded tasks share the anyio threadpool with
+    # the upload path and can starve it.
     task = asyncio.create_task(run_extraction(source, store, provider))
     request.app.state.jobs.add(task)
     task.add_done_callback(request.app.state.jobs.discard)
