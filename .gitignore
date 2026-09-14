@@ -30,3 +30,6 @@ apps/web/dist/
 runs/
 *.log
 .DS_Store
+
+# trilochana is a vendored local tool; not part of this repo's tracked tree
+trilochana/
