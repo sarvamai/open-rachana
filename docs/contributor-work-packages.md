@@ -13,6 +13,23 @@ The accompanying product-reference PR supplies the expanded requirement
 register and reconciliation items mentioned below. These work packages propose
 ownership without independently ratifying those product or security decisions.
 
+## Docs first, then implementation
+
+Each epic owner checks in a plan under [docs/plans](plans/README.md) before
+implementation. Nikhil reviews product scope and acceptance; KKT coordinates
+technical review; Rohit reviews the test approach. Record the accepted plan
+revision and go-ahead in the issue. Extended tasks get their own plan; small
+tasks use a short task plan. Existing approvals and in-flight work remain valid.
+
+Use [Humanizer](https://github.com/blader/humanizer) on plans, documentation and
+PR descriptions before review, then read the result yourself. Preserve exact
+requirements, IDs, interfaces, numbers and approval status. A planning skill can
+turn an approved plan into tickets; it cannot approve scope or implementation.
+
+The [plan index](plans/README.md) links eight proposed epics and the existing delivery stories,
+plus missing diagnostic, contract, recovery and onboarding work. The starter
+plans need their owners' review before implementation begins.
+
 ## Recommended team shape
 
 Keep one repository and the existing core/client/web architecture. These are

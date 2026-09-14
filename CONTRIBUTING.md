@@ -14,6 +14,20 @@ Use [traceability](docs/traceability.md) to find the individual requirement,
 its historical ID and planned verification. Do not treat a source default,
 mock UI or planned test label as an approved or delivered capability.
 
+## Plan and review the work
+
+Pick an existing issue from the [contributor plan](docs/contributor-work-packages.md).
+Its epic owner maintains the [checked-in plan](docs/plans/README.md). Review
+product scope with Nikhil, technical interfaces through KKT and verification
+with Rohit. Record the approved plan revision and implementation go-ahead in
+the issue. Existing valid approvals and in-flight contributions are preserved.
+
+Before asking people to review a plan, document or PR description, use
+[Humanizer](https://github.com/blader/humanizer) and read the result yourself.
+Keep the requirements, numbers, API names and acceptance rules intact. If the
+agent cannot load the skill, apply its documented guidance manually. The
+purpose is clear writing; it is not an automatic approval or AI-detection test.
+
 ## Ground rules
 
 - **Small, meaningful PRs.** One concern per PR; the diff should be reviewable in one

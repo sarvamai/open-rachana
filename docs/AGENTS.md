@@ -19,6 +19,7 @@ Read the root `AGENTS.md` first.
 | `delivery-plan.md` | Sprint baseline, seven completion outcomes, build gates, managed services, handover and roadmap. |
 | `contributor-work-packages.md` | Proposed contributor allocation, module boundaries, first contributions, shared contracts and acceptance responsibilities; not confirmed assignments. |
 | `canonicalization.md` | Existing draft-v0.1 audit bytes; proposed v1 kept separate until ratified. |
+| `plans/README.md` | Epic ownership, checked-in task plans, review/go-ahead workflow and Humanizer readability guidance. |
 | `architecture.md` | Layers, the state machine, the ten numbered invariants, trust boundaries, non-functional targets. The invariants are the normative part. |
 | `adr/NNNN-<slug>.md` | One decision each, numbered sequentially; preserve its actual accepted/proposed status. |
 | `provider-contracts.md` | The working contract for provider authors: lifecycle, rules, SPI catalogue. |
@@ -77,3 +78,11 @@ are `Status` / `Deciders` / `Date`, then `## Context`, `## Decision`,
 
 Update it when you add a document here, change the ADR template, or create a
 planned file the root `AGENTS.md` still lists as absent.
+
+## Plans and readability
+
+Before new implementation, check in or update the relevant `docs/plans/` plan.
+Link its approved revision and go-ahead in the issue. Preserve valid prior
+approvals and existing work; new plans do not silently reset them.
+Use the Humanizer skill linked in `plans/README.md`, then check the prose
+personally. Preserve requirements, numbers, interfaces and security rules.
