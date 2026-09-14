@@ -2,7 +2,7 @@
   <img src="docs/assets/open-mulyankan-logo.png" alt="open-mulyankan logo" width="180">
 </p>
 
-<h1 align="center">open-mulyankan</h1>
+<h1 align="center">open-rachana</h1>
 
 <p align="center">
   An open-source <strong>question paper authoring system</strong> built for
