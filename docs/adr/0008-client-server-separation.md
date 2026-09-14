@@ -1,6 +1,8 @@
 # ADR-0008: Zero Trust separation — thin task client and authoritative server
 
-- Status: Accepted
+- Status: Accepted. Role placement amended 2026-09-14 by the Product Owner
+  in the repository-alignment review; see the dated amendment below. Renderer
+  and controlled-reference contracts remain unresolved.
 - Date: 2026-09-07
 
 ## Context
@@ -77,3 +79,32 @@ Content never flows to oversight surfaces.
 - Candidate exam delivery remains out of scope (v4 §14.2): the client is the
   authoring workstation, not an exam-hall terminal.
 - The build track gains a device-enrollment item ahead of client packaging.
+
+## Admin role placement (amended 2026-09-14)
+
+The original role split above predates the supplied PRD's V1 Admin-as-author
+model (main §5; annex §2.7; D-42/D-46). The Admin must be able to author and
+view unsealed questions without gaining review approval or sealed-content
+read rights. The Product Owner confirmed “Yes—use this split” in the
+repository-alignment review: **Admin authoring and unsealed-content work use
+the signed desktop client; configuration and content-free oversight use the
+web app.** This supersedes the original blanket administrator placement above.
+The same identity may use both surfaces with server-checked capabilities;
+oversight responses still contain no question content. Review approval and
+routine sealed-plaintext read rights remain denied. R1 in
+[PRD reconciliation](../prd-reconciliation.md) records the decision.
+
+The trust boundary is unchanged. Session binding, capability selection and
+re-authentication between surfaces must be specified and tested before
+deployment; the product placement decision is not implementation evidence.
+
+PRD-ATH-18's server reference renderer also needs reconciliation with the
+locally bundled renderer (R5). Never solve that conflict by sending executable
+server UI to the client. The source's controlled translation/correction
+references require an explicit contract without a general vault-read route
+(R8). The camera/replay wording above does not authorise capture of question
+content or establish a cycle policy; R9 records that remaining decision.
+
+Consequences: versioned role/task schemas, render equivalence and integrity
+capture policy are separate acceptance prerequisites. The scaffold and this
+ADR alone do not prove them.

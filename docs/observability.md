@@ -4,6 +4,14 @@ Status: draft for decision, 2026-09-09. Once the decisions in §2 are settled
 this document stays as the working contract (the way `provider-contracts.md`
 does for providers) and the decisions themselves move to an ADR.
 
+PRD alignment note, 2026-09-14: this remains a design proposal, not delivered
+functionality. ADR-0011 still says Proposed. D1–D19 below are local
+observability decisions and are distinct from the PRD's D-01–D-48 register.
+Diagnostic telemetry is not the durable session-integrity or audit path;
+ASR02-OBS-05 retry/durability and expected-evidence blocking continue to apply
+to those paths even when diagnostic export is disabled. Camera/replay policy
+in the client is unresolved; see R9/R11 in [reconciliation](prd-reconciliation.md).
+
 Requirement group: ASR02-OBS (`traceability.md`). Related: ADR-0002 (licence
 posture for AGPL services), ADR-0003 (the `telemetry` SPI row), ADR-0008 (the
 other thing called "telemetry").

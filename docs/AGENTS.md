@@ -10,19 +10,28 @@ Read the root `AGENTS.md` first.
 
 | File | Contract |
 |---|---|
-| `contributor-work-packages.md` | Proposed contributor allocation, module boundaries, starter contributions and acceptance responsibilities; not confirmed assignments. |
+| `source-of-truth.md` | Product baseline, source precedence, tab versions and retrieved revision. |
+| `product-workflow.md` | PRD scope, permissions, full per-language workflow and acceptance-relevant controls. |
+| `prd-reconciliation.md` | Source/ADR conflicts, proposed resolutions, owner roles and dependent work. R-numbers are review items, not requirements. |
+| `prd-decisions.md` | All 48 source D-nn decisions, defaults and evidence of approval. |
+| `requirements.md` | All 302 unique numbered PRD requirements, source wording, aliases, planned checks and evidence status. |
+| `delivery-status.md` | Dated implementation snapshot, inspected test definitions and evidence limits. |
+| `delivery-plan.md` | Sprint baseline, seven completion outcomes, build gates, managed services, handover and roadmap. |
+| `contributor-work-packages.md` | Proposed contributor allocation, module boundaries, first contributions, shared contracts and acceptance responsibilities; not confirmed assignments. |
+| `canonicalization.md` | Existing draft-v0.1 audit bytes; proposed v1 kept separate until ratified. |
 | `architecture.md` | Layers, the state machine, the ten numbered invariants, trust boundaries, non-functional targets. The invariants are the normative part. |
-| `adr/NNNN-<slug>.md` | One accepted decision each, numbered sequentially. |
+| `adr/NNNN-<slug>.md` | One decision each, numbered sequentially; preserve its actual accepted/proposed status. |
 | `provider-contracts.md` | The working contract for provider authors: lifecycle, rules, SPI catalogue. |
-| `traceability.md` | Requirement ID → component → milestone, plus the standing definition-of-done checks. |
+| `traceability.md` | Canonical/v4 crosswalk, planned components/milestones, narrative acceptance obligations and closure rules. |
 | `observability.md` | Working contract for observability: decisions table, what is instrumented, the content-free guard, configuration, local stack, infra guidance. ADR-0011 is the decision. |
 | `observability-plan.md` | The execution plan for `observability.md`: five slices, one PR each, with tests and code. Tick tasks as they land; delete or archive it when the last slice merges. |
 
-These documents describe the system through M6 and are written in the present
-tense, so they name paths that do not exist yet (`providers/`, `db/`,
-`contracts/`, `tests/conformance/`, `platform.yaml`). That is deliberate.
-When you change code, do not "fix" a doc into describing only what exists
-today — but do not code to the doc either. The root `AGENTS.md` lists the gap.
+These documents describe the target through M6 and may name paths that do
+not exist yet (`providers/`, `db/`, `contracts/`, `tests/conformance/`,
+`platform.yaml`). Label those as planned. Preserve the target architecture
+while keeping delivery status and acceptance evidence distinct. The root
+`AGENTS.md` and `delivery-status.md` list the gap; a document is not evidence
+that a component exists.
 
 ## Writing an ADR
 
@@ -39,21 +48,30 @@ are `Status` / `Deciders` / `Date`, then `## Context`, `## Decision`,
   in place with a dated note in `Status` and a subsection explaining the
   change and its consequences — ADR-0001's Next.js amendment is the worked
   example. Supersede with a new ADR only when the whole decision is replaced.
-- Requirement IDs (QST/ARC/SEC/DAT/INT/FND/ASR/RES) are cited inline where
-  they apply. Don't invent an ID; if you need one that isn't in
-  `traceability.md`, say so.
+- Cite canonical PRD IDs (ASM/INS/ARC/SEC/DAT/INT/ASR/RES/UI/PRD) inline
+  where applicable. Existing QST/FND IDs remain traceable through the v4
+  crosswalk. Don't invent IDs; `requirements.md` retains the source rows.
 
 ## Discipline that is easy to break
 
 - **Never put question content, real candidate data, or anything Restricted in
   an example.** Examples use placeholders and opaque references — the same rule
   the audit chain enforces in code.
-- Keep `traceability.md` honest: a row's `Closed in` milestone is a claim about
-  evidence, not intent. Requirement-facing tests carry their requirement ID in
-  the test name, and that name is the link between this file and the code.
+- Keep traceability honest: target milestones and planned check labels are
+  intent; acceptance requires a linked commit, actual check, dated result and
+  named sign-off. Update `requirements.md` and `delivery-status.md` as evidence
+  lands. Never infer closure from a test name or a UI mock.
+- Retain GAP and D-nn qualifiers in extracted source wording. Update both
+  source tabs/revision when refreshing; do not silently turn a recommendation
+  into an approved value. Source contradictions belong in `prd-reconciliation.md`.
 - British spelling, as used throughout (`licence`, `artefact`, `behaviour`).
-- Tables and prose over diagrams; there are no image assets except the logo in
-  `assets/`.
+- Use tables and prose to explain controls. The Product Owner explicitly
+  requested the architecture diagram: preserve it in
+  `assets/rachana-three-layer-architecture.png`. These repository documents
+  are the standalone reference; external source links are not required.
+  The review deck's slide 4 and all its information are excluded.
+- M0–M6 are evidence gates; `delivery-plan.md` supplies the current calendar
+  target. Keep planned responsibilities distinct from delivery evidence.
 
 ## Keeping this file true
 

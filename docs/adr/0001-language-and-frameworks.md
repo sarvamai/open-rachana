@@ -7,6 +7,11 @@
 - Deciders: Product owner, technical lead
 - Date: 2026-09-07
 
+Planning note, 14 September 2026: the historical five-week constraint below
+is superseded by the [current delivery plan](../delivery-plan.md), a three-week
+sprint ending 28 September 2026. This changes the planning baseline, not the
+accepted language/framework choices or their acceptance requirements.
+
 ## Context
 
 The v4 specification (§12, Week 1) requires the language and framework

@@ -3,6 +3,12 @@
 How solutions plug in. ADR-0003 is the decision; this document is the working
 contract for provider authors.
 
+Status: design target. [Delivery status](delivery-status.md) records the
+interfaces and test definitions actually present. The catalogue's milestone
+column is a planned introduction, not proof of an installed provider.
+Read the [PRD source map](source-of-truth.md) and [product workflow](product-workflow.md)
+for the behaviour a provider must preserve.
+
 ## Lifecycle of a provider
 
 1. Implement the SPI — a `typing.Protocol` in `mulyankan-spi` — in your own
@@ -49,11 +55,19 @@ providers:
 | notify | `mulyankan_spi.notify` | `conformance.notify` | lifecycle events | M4 |
 | export | `mulyankan_spi.export` | `conformance.export` | readiness handoff | M4+ |
 
-Telemetry is not in the catalogue: the project adopts OpenTelemetry as that
-SPI (ADR-0011), bound by the OTel environment variables rather than
-`platform.yaml`; see `docs/observability.md`.
+Telemetry is not in the catalogue: the proposed OpenTelemetry approach in
+ADR-0011 uses OTel environment variables rather than `platform.yaml`;
+see [observability](observability.md). ADR-0011 still says Proposed; this
+catalogue does not mark it accepted or implemented. Diagnostic telemetry
+must remain separate from the durable integrity/audit requirements.
 
-M0 ships the `kms` SPI complete (interface, conformance suite, reference
-provider) to prove the full pluggability path. The remaining SPIs are added in
-the milestone that first consumes them, so each interface is designed against
-a real caller.
+M0 contains the `kms` interface and conformance suite, exercised with a test
+double. The reference provider and environment binding remain planned;
+`providers/` and `platform.yaml` are absent at the baseline. The remaining
+SPIs are planned for the milestone that first consumes them.
+
+The gateway's M4 target covers the connector slice. D-38's full Layer 2
+curriculum ingestion, generation and metadata delivery needs a named owner
+and schedule (R2); translation drafting additionally depends on D-48.
+The `export` entry refers to controlled machine handoff, never an Admin
+question-bank download or paper-assembly feature.

@@ -3,6 +3,8 @@
 - Status: Accepted. Amended 2026-09-09: the `telemetry` row is satisfied by
   adopting OpenTelemetry rather than by a project SPI — see "Telemetry
   (amended 2026-09-09)" below and ADR-0011.
+  Alignment note 2026-09-14 below qualifies provider delivery and the
+  still-proposed telemetry decision.
 - Date: 2026-09-07
 
 ## Context
@@ -90,10 +92,24 @@ core the authority owns.
 
 - Third parties integrate by implementing an SPI package and passing its
   conformance suite; they never fork the core.
-- The reference provider in this repository (`providers/kms-local/`)
-  demonstrates the full path: SPI implementation, conformance test,
-  configuration binding.
+- The planned reference provider (`providers/kms-local/`) will demonstrate
+  the full path: SPI implementation, conformance test, configuration binding.
+  At the 2026-09-14 baseline only the interface, suite and test double exist.
 - Provider distributions depend only on `mulyankan-spi`, never on the platform
   core, keeping the dependency arrow pointing outward.
 - SPIs are added in the milestone that first consumes them, so interfaces are
   designed against real callers rather than speculation.
+
+## PRD alignment note — 2026-09-14
+
+The provider/core boundary is retained. D-38 adds a product obligation to
+deliver Layer 2 drafting beyond a gateway adapter; see ADR-0007 and R2/R4 in
+[PRD reconciliation](../prd-reconciliation.md). No provider may take a
+workflow decision or bypass human review.
+
+The telemetry amendment above describes the intended OTel approach;
+ADR-0011 still carries Proposed status. This note does not fabricate its
+acceptance (R11). Optional diagnostic export may fail without blocking the
+core; durable integrity/audit evidence still owes retry and completeness
+under ASR02-OBS-05. A missing diagnostic sink must never silently satisfy a
+required evidence record (R9).
