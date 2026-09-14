@@ -142,6 +142,26 @@ def build_app(registry: ProviderRegistry) -> FastAPI:
         page = monitor.integrity_view(status=status, limit=limit)
         return {"sessions": [snapshot.as_dict() for snapshot in page]}
 
+    @app.get("/v1/audit/verify")
+    def audit_verify() -> dict:
+        """On-demand chain verification (ASR01-EVD-02/03).
+
+        Intended for Admin/Auditor once the identity SPI (ADR-0004) lands;
+        currently unauthenticated like all Layer 1 routes (see SECURITY.md).
+        Response is intentionally content-free: structural fields only.
+        ``first_bad_seq`` and ``reason`` are omitted when the chain is intact
+        so callers can key on the presence of those fields, not their value.
+        """
+        result = audit_log.verify()
+        body: dict = {"ok": result.ok, "events": result.events}
+        # Omit failure fields entirely on a clean chain so the response shape
+        # itself signals health — no need to check for None values client-side.
+        if result.first_bad_seq is not None:
+            body["first_bad_seq"] = result.first_bad_seq
+        if result.reason is not None:
+            body["reason"] = result.reason
+        return body
+
     @app.exception_handler(UnknownSessionError)
     def unknown_session(request: Request, exc: UnknownSessionError) -> JSONResponse:
         """Refuse unknown sessions without echoing the identifier."""
