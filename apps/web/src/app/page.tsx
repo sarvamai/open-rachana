@@ -40,7 +40,7 @@ export default function Home() {
       >
         <Box display="flex" direction="column" gap={2}>
           <Text as="h1" variant="heading-lg">
-            Open Mulyankan
+            Project Rachana
           </Text>
           <Text variant="body-sm" tone="secondary">
             Layer 1 content authoring workflow core.

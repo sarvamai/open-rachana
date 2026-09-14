@@ -11,8 +11,8 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'Open Mulyankan',
-    template: '%s | Open Mulyankan',
+    default: 'Project Rachana',
+    template: '%s | Project Rachana',
   },
   description: 'Layer 1 content authoring workflow core.',
 };

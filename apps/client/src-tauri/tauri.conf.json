@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "client",
+  "productName": "Project Rachana",
   "version": "0.1.0",
   "identifier": "ai.sarvam.mulyankan.client",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "client",
+        "title": "Project Rachana",
         "width": 800,
         "height": 600
       }

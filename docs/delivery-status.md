@@ -6,6 +6,17 @@ implement product features. The README's **M0 foundation** status is retained;
 partial M1 session/audit scaffolding exists. No acceptance milestone is closed
 by this inspection.
 
+## In-flight implementation coordination
+
+PR #93 (architecture/extraction recovery) is open against the same baseline.
+It proposes real Python CI, provider/source code, a Makefile, canonicalisation
+and as-built documentation, plus ADR-0012 for deployment/role surfaces.
+This snapshot describes main, not that unmerged implementation. On integration,
+reconcile its canonicalisation/as-built pages and update paths, CI evidence and
+status from the merged code. Do not overwrite its work or close #92/#94 from
+this documentation change. This reference uses ADR-0013 for the separate
+product generation/assembly boundary to avoid the numbering collision.
+
 ## What exists and what it proves
 
 | Area | Inspected artefact | Evidence limit |
@@ -95,8 +106,10 @@ M5 hardening and M6 acceptance/handover. These are dependency/evidence gates,
 not calendar weeks. The [delivery plan](delivery-plan.md) sets 28 September
 2026 as the current target, including full Layer 2 integration; the M4 gateway
 plan is not a substitute. Named delivery owners and interim dates remain to
-be assigned. Sarvam AI pilot and Bodhan AI managed-service hosting are planned
-responsibilities, not evidence of provisioned services or completed handover.
+be assigned. Sarvam AI remains the planned pilot intelligence provider.
+Layer 3 providers are selected and contracted by each adopting organisation;
+Bodhan AI is not a mandatory host. No provisioned services or completed
+handover are established by this planning record.
 
 ## How to update this status
 

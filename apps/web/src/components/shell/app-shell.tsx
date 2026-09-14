@@ -69,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               header={{
                 children: (
                   <span className="block overflow-hidden whitespace-nowrap">
-                    <Text variant="heading-md">Open Mulyankan</Text>
+                    <Text variant="heading-md">Project Rachana</Text>
                   </span>
                 ),
               }}

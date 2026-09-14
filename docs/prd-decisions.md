@@ -8,13 +8,14 @@ security, legal and production prerequisites closed until their owner acts.
 
 Only **D-38** explicitly records a Product Owner decision in the retrieved source.
 Later decisions from this alignment review are distinguished in the evidence
-column: R1 settles Admin application placement and R3/ADR-0012 confirms the
+column: R1 settles Admin application placement and R3/ADR-0013 confirms the
 generation/assembly boundary relevant to D-40. Source default text is retained.
 D-38's connector controls and translation hosting still require Security action.
 D-28 has a partial repository decision: ADR-0001 and ADR-0010 select stacks;
-they do not settle production hosting. Bodhan AI is the planned host and
-continuing maintainer in [delivery-plan.md](delivery-plan.md), with service
-contracts and named contacts pending. Other rows have no approval evidence
+they do not settle production hosting. The adopting organisation selects
+and contracts its Layer 3 provider(s), as recorded in
+[delivery-plan.md](delivery-plan.md). Bodhan AI’s proposed reference-maintenance
+role does not determine those providers; contracts and contacts remain pending. Other rows have no approval evidence
 attached by this review. The preserved Needed-by column records historical
 PRD weeks. Apply its dependency order within the current 28 September target;
 it does not create a second calendar or defer prerequisites beyond the sprint.
@@ -52,7 +53,7 @@ D-nn IDs for the local D1–D19 observability decisions.
 | D-25 | Supersession delivery mechanism and acknowledgement window | Mutual-TLS webhook to registered consumers; 24-hour window. | Assembly team, Technical Lead | Week 2 (agree), Week 4 (live) | No approval attached; source recommendation |
 | D-26 | Selection notification atomicity | All-or-nothing per notification. | Assembly team | Week 4 | No approval attached; source recommendation |
 | D-27 | Evidence view versus scripted procedure (P1) | Build the minimal view; fall back to the script only if Week 3 capacity is strained, with equivalent output. | Product Owner, QA Lead | Week 3 | No approval attached; source recommendation |
-| D-28 | Technology stack and hosting | Technical Lead's proposal evaluated against §10.4. | Technical Lead, DevSecOps | Week 1 | Stack partly recorded in ADR-0001/0010; Bodhan AI hosting planned in delivery-plan.md; deployment/service contracts pending |
+| D-28 | Technology stack and hosting | Technical Lead's proposal evaluated against §10.4. | Technical Lead, DevSecOps | Week 1 | Stack partly recorded in ADR-0001/0010; Adopting organisation contracts Layer 3 provider(s); no mandatory host; deployment/service contracts pending |
 | D-29 | Pilot languages (primary plus two) | To be named. | Content Operations | Week 0 | No approval attached; source recommendation |
 | D-30 | Environments and production topology | §10.7; four environments; repository zone separate. | DevSecOps | Week 1 | No approval attached; source recommendation |
 | D-31 | Classification and location of similarity fingerprints | Restricted derived data in the repository tier; never exposed. | Security | Week 2 | No approval attached; source recommendation |
@@ -64,7 +65,7 @@ D-nn IDs for the local D1–D19 observability decisions.
 | D-37 | Two-tab behaviour for content surfaces | Both tabs function; one session record; concurrent-tab signal recorded (per specification). | Security | Week 2 | No approval attached; source recommendation |
 | D-38 | AI generation and AI translation drafts (Sarvam) versus ARC-12 | Decided 7 September 2026 (Product Owner): in scope for the MVP and the demo as Layer 2. AI may draft, never judge: candidates, translation first drafts and metadata suggestions enter as Drafts with provenance and pass the identical human pipeline; no AI in validation, similarity, review, accessibility, sealing, readiness or monitoring; Layer 2 runs outside the hardened zones behind the single connector (§1.5, PRD-ARC-13). ARC-12 is re-worded to bind Layer 1. | Product Owner (decided); Security ratifies the connector controls | Decided; Security by Week 1 | Decided in PRD; connector controls pending |
 | D-39 | Admin download and export | None from the question bank for any role; paper export belongs to the assembly module under release custody (DAY-01). | Product Owner, Security | Week 1 | No approval attached; source recommendation |
-| D-40 | In-product assembly by the Admin | Build assembly as a separate module consuming the readiness interface; selection by metadata against the blueprint (blind assembly); rendering through release custody, never through authoring surfaces. | Product Owner, Technical Lead | Week 2 | Separate assembly scope confirmed 2026-09-14 in R3/ADR-0012; release-custody contract still required |
+| D-40 | In-product assembly by the Admin | Build assembly as a separate module consuming the readiness interface; selection by metadata against the blueprint (blind assembly); rendering through release custody, never through authoring surfaces. | Product Owner, Technical Lead | Week 2 | Separate assembly scope confirmed 2026-09-14 in R3/ADR-0013; release-custody contract still required |
 | D-41 | Admin "Delete question" | Withdraw for unsubmitted drafts, Retire for approved or sealed questions; nothing physically deleted. | Product Owner | Week 1 | No approval attached; source recommendation |
 | D-42 | Admin "View all questions" | Allowed for unsealed versions because the Admin authors everything in V1; sealed versions expose metadata only. | Security | Week 1 | No approval attached; source recommendation |
 | D-43 | Accessibility check per language version | Keep (specification MUST); the variant remediation is small. Deferral for the pilot is a documented drop. | Accessibility Specialist, Product Owner | Week 3 | No approval attached; source recommendation |

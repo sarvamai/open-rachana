@@ -1,4 +1,4 @@
-# ADR-0012: Generation configuration belongs to Rachana; final paper assembly is separate
+# ADR-0013: Generation configuration belongs to Rachana; final paper assembly is separate
 
 - Status: Accepted
 - Deciders: Product Owner, in the repository-alignment review

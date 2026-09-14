@@ -6,8 +6,9 @@ The documentation in this repository is intended to become the maintained
 product and delivery reference for **Project Rachana** on acceptance. Contributors should use these documents
 for scope, workflow, architecture, requirements, decisions and delivery
 planning. External documents are historical inputs; later changes to them
-do not silently change this baseline. `open-mulyankan` remains the repository
-and existing package name.
+do not silently change this baseline. The project name is **Project Rachana** and the current repository is
+`sarvamai/open-rachana`. Existing import/package identifiers remain technical
+compatibility names pending a separate rename decision.
 
 ## The reference set
 
@@ -34,7 +35,7 @@ remain visible until the required owner acts and evidence is retained.
   amendment to ADR-0008 record the placement.
 - Curriculum, generation constraints and candidate counts belong to Rachana.
   Final paper selection, ordering and export belong to the separate assembly
-  module. R3 and ADR-0012 record the boundary.
+  module. R3 and ADR-0013 record the boundary.
 - The repository incorporates the review plan and its actual architecture
   diagram and becomes the standalone reference. External source links are
   omitted at the owner's request. The review deck's slide 4 and all its
@@ -43,7 +44,10 @@ remain visible until the required owner acts and evidence is retained.
 The current delivery target replaces the older five-build-week/three-day-
 closeout calendar. M0–M6 remain dependency/evidence gates, not additional
 weeks. Interim dates and named-person appointments remain to be assigned.
-Sarvam AI pilot and Bodhan AI hosting/continuation are planned responsibilities.
+Sarvam AI is the planned pilot intelligence provider. The Product Owner
+clarified that Layer 3 is supplied by any provider(s) contracted by the
+organisation adopting the authoring engine. Bodhan AI is not a mandatory host.
+Its proposed reference-maintenance role is separate from deployment services.
 The separate Author-role and proposal-adoption clarification remains open in
 R4; the baseline's Admin-only wording does not settle that pending decision.
 

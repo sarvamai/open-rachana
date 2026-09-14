@@ -39,7 +39,7 @@ KKT's primary responsibility is integration: keep his platform work to a
 bounded reference deployment and service bindings, with operational support.
 Do not give him a full independent feature backlog as well as all integration.
 Do not build identity, databases or key-management products from scratch.
-The planned managed-service host supplies the environment; the team integrates
+The adopting organisation contracts its managed-service providers; the team integrates
 and verifies it.
 
 ## 1. Divyansh — workspaces and client
@@ -177,10 +177,10 @@ supply domain measures, content filtering or leak tests automatically.
 queue; reference deployment/configuration; identity-provider integration,
 token/MFA/device/workload verification; secrets/service bindings; release pipeline,
 application rollback procedures and operational backup/restore runbooks.
-Coordinate with the planned managed-service host for real test dependencies.
+Coordinate with the adopting organisation’s contracted providers for real test dependencies.
 
 **Boundary:** the IdP proves identity; package 2 decides what that identity may do
-in the current task and lineage. The host supplies services; packages 2/3 own
+in the current task and lineage. Contracted providers supply services; packages 2/3 own
 application data semantics. Rohit owns test-gate design; KKT owns deployment/release
 mechanics. Application rollback must preserve sealed records and audit history;
 never implement rollback as deletion or rewriting of accepted evidence.

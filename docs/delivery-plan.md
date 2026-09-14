@@ -17,7 +17,8 @@ because it appears in this plan.
 | Full block scope | Five of the stack's 34 blocks: ASM-03 Authoring and review; ASM-04 Language and variants; ASM-05 Repository; ASR-01 Evidence and audit; ASR-02 Monitoring and referral |
 | Architecture | Layer 2 intelligence, Layer 1 workflow, Layer 3 managed services, connected by adapters and bindings |
 | Pilot intelligence | Sarvam AI; providers replaceable through capability adapters |
-| Hosting and continuation | Bodhan AI is the planned host and continuing maintainer |
+| Layer 3 services and hosting | Supplied by whichever provider(s) the adopting organisation contracts, subject to the agreed interfaces and acceptance requirements |
+| Reference continuation | Bodhan AI is a proposed continuing maintainer of the reference implementation; this does not determine the adopter’s service providers |
 | Handover support | Two-week hyper-care with the sprint team on call |
 
 The date, team size and institutional arrangements below remain planning
@@ -98,10 +99,15 @@ Author-role/adoption clarification is recorded in R4.
 
 ## Layer 3 and handover responsibilities
 
-Bodhan AI is the planned provider of the managed-service environment and the
-organisation continuing the reference. Named contacts, service agreements,
-provisioning and transfer acceptance remain to be established. The embedded
-architecture image uses the spelling “Boden AI” for the same planned host.
+The organisation adopting the authoring engine selects and contracts its
+Layer 3 providers. One provider may supply the whole environment, or different
+providers may supply different services. The architecture requires compatible
+interfaces and verified controls, not a particular company.
+
+Bodhan AI is identified as a proposed continuing maintainer of the reference
+implementation. That is separate from supplying or operating an adopter’s
+managed services. Named maintainers, service providers, agreements and
+acceptance responsibilities must be recorded for the actual deployment.
 
 Layer 3 covers enterprise identity/MFA, HSM-backed key management, object
 storage with retention lock, relational database, monitoring/alerting,
@@ -113,10 +119,10 @@ with the workflow team before the dependent gate closes.
 |---|---|---|
 | Open-source reference release | Identified release/tag and reproducible build, dependency notices and release approval; preserve the existing proprietary dependency exception | Repository steward, Technical Lead |
 | Signed evidence pack | Acceptance signatures, verification reports, restore drill, penetration-test closure and accessibility audit | QA, Security, Accessibility, Operations |
-| Runbooks and named owners | Deployment/restore/incident procedures, service ownership, credential rotation and escalation contacts | Sprint Operations and Bodhan AI operations |
+| Runbooks and named owners | Deployment/restore/incident procedures, service ownership, credential rotation and escalation contacts | Adopting organisation, its contracted service providers and the handing-over team |
 | Decision register and plain-English PRD | Current sources, resolved/open decisions and accepted implementation contracts | Product Owner, Technical Lead, continuing maintainer |
 | Two-week hyper-care | Named on-call rota, escalation route, support start/end tied to actual handover | Sprint team and continuing maintainer |
-| Continued code and roadmap ownership | Accepted repository/release responsibilities, issue triage, decision maintenance and change-control process | Bodhan AI continuing maintainer; named contacts pending |
+| Continued code and roadmap ownership | Accepted repository/release responsibilities, issue triage, decision maintenance and change-control process | Proposed reference maintainer: Bodhan AI; scope and named contacts pending |
 
 The completed reference release and handover must preserve the repository's
 Apache-2.0 licence and the existing proprietary dependency exception. This

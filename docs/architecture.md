@@ -19,7 +19,7 @@ The diagram is embedded in the repository and describes the design target.
 |---|---|---|
 | Layer 2 — Intelligence | Curriculum ingestion/OCR; candidate generation at required count × multiplier; translation drafts; metadata suggestions; grounding pre-check | Sarvam AI in the pilot, replaceable providers. Returns proposals with provenance; never approves content |
 | Layer 1 — Workflow | Authoring, independent question review, accessibility remediation/review, language variants, system sealing, vault and readiness | Owns permissions, state, deterministic rules and evidence. Admin content work uses the signed client; configuration/content-free oversight uses the web app |
-| Layer 3 — Managed services | Identity/MFA; HSM-backed keys; retention-locked object storage; relational database; monitoring/alerting; malware scanning; workload identity/mutual TLS; hosting | Bodhan AI is the planned host and continuing maintainer. Service bindings, identities, deployment and acceptance remain to be established |
+| Layer 3 — Managed services | Identity/MFA; HSM-backed keys; retention-locked object storage; relational database; monitoring/alerting; malware scanning; workload identity/mutual TLS; hosting | Any provider or combination of providers contracted by the adopting organisation. The organisation selects and accepts its service bindings, identities and deployment; no named host is mandatory |
 
 Cross-cutting controls cover identity/capability and separation of duties
 (INS-04), expected evidence and audit (ASR-01), session integrity and referral
@@ -39,6 +39,12 @@ Capability adapters cover `generate`, `draft-translation` and
 `suggest-metadata`: Layer 1 sends governed parameters; Layer 2 returns
 proposals stamped with provenance. A grounding pre-check is advisory and
 does not replace deterministic validation or human review.
+
+Layer 3 is provider-neutral. An organisation adopting the authoring engine
+may contract different providers for identity, keys, storage, database,
+monitoring and hosting. They must meet the same interface, security and
+acceptance requirements. Bodhan AI is not a required hosting dependency;
+reference-code maintenance and deployment services are separate responsibilities.
 
 Managed-service bindings use short-lived workload identities and mutual TLS
 where applicable to service connections. A required dependency failure must
