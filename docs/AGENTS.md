@@ -14,6 +14,9 @@ Read the root `AGENTS.md` first.
 | `adr/NNNN-<slug>.md` | One accepted decision each, numbered sequentially. |
 | `provider-contracts.md` | The working contract for provider authors: lifecycle, rules, SPI catalogue. |
 | `traceability.md` | Requirement ID → component → milestone, plus the standing definition-of-done checks. |
+| `canonicalization.md` | The normative byte format behind every audit hash (draft-v0.1). |
+| `as-built.md` | What exists today: as-is and target diagrams, the gap table, known limitations. |
+| `code-practices.md` | The house style: folder rules, the five patterns, comment discipline, AGENTS.md practice. |
 | `observability.md` | Working contract for observability: decisions table, what is instrumented, the content-free guard, configuration, local stack, infra guidance. ADR-0011 is the decision. |
 | `observability-plan.md` | The execution plan for `observability.md`: five slices, one PR each, with tests and code. Tick tasks as they land; delete or archive it when the last slice merges. |
 
