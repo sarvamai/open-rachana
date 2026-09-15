@@ -205,10 +205,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Run conformance tests
-        run: |
-          pip install pytest
-          python -m pytest tests/conformance/ -q
+      - name: Install platform packages
+        run: pip install -e ./platform/spi -e "./platform/core[dev]"
+
+      - name: Run tests
+        run: python -m pytest platform/spi platform/core tests/conformance -q
 
   web:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
