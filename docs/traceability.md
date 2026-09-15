@@ -45,9 +45,9 @@ Export blocking (D-39), soft-delete semantics (D-41), and Admin
 visibility/separation-of-duties constraints (D-42, D-46) are recorded as
 product decisions so implementers do not re-open them while coding:
 
-- [ADR-0011](adr/0011-no-export-from-question-bank.md) — no export from the question bank
-- [ADR-0012](adr/0012-soft-delete-withdraw-retire.md) — soft delete: withdraw or retire
-- [ADR-0013](adr/0013-admin-visibility-and-separation-of-duties.md) — Admin visibility and separation of duties
+- [ADR-0012](adr/0012-no-export-from-question-bank.md) — no export from the question bank
+- [ADR-0013](adr/0013-soft-delete-withdraw-retire.md) — soft delete: withdraw or retire
+- [ADR-0014](adr/0014-admin-visibility-and-separation-of-duties.md) — Admin visibility and separation of duties
 
 The capability matrix (issue #42) and the lifecycle state machine (issue #45)
 implement these decisions; tests carry SEC and DAT requirement IDs.
