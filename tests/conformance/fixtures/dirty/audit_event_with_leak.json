@@ -1,0 +1,14 @@
+{
+  "event_id": "d1r7y3v3n70001",
+  "seq": 5,
+  "ts": "2026-09-14T00:05:00.000Z",
+  "actor": "author-001",
+  "action": "draft.created",
+  "object_refs": ["artefact-a1"],
+  "payload_hash": "ab12cd34ef56ab12cd34ef56ab12cd34ef56ab12cd34ef56ab12cd34ef56abcd",
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "hash": "f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1",
+  "stem": "What is the capital of India?",
+  "options": ["New Delhi", "Mumbai", "Kolkata", "Chennai"],
+  "explanation": "The capital of India is New Delhi, which was designated in 1911"
+}

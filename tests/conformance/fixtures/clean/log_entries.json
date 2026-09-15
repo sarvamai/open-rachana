@@ -1,0 +1,22 @@
+[
+  {
+    "level": "INFO",
+    "logger": "mulyankan_platform.core_api",
+    "message": "session.registered",
+    "session_id": "abc123def456",
+    "actor": "author-001",
+    "timestamp": "2026-09-14T00:00:00.000Z"
+  },
+  {
+    "level": "WARNING",
+    "logger": "mulyankan_platform.sessions.monitor",
+    "message": "session sweep failed; continuing",
+    "timestamp": "2026-09-14T00:01:00.000Z"
+  },
+  {
+    "level": "ERROR",
+    "logger": "mulyankan_platform.registry",
+    "message": "cannot load provider 'kms-local:create' for spi 'kms': No module named 'kms_local'",
+    "timestamp": "2026-09-14T00:02:00.000Z"
+  }
+]
