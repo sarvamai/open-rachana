@@ -1200,7 +1200,7 @@ GAP D-01 The rule below is proposed for ratification in Week 1 and fixed as `can
 | --- | --- |
 | Container | The canonical content document is a JSON object serialized with the JSON Canonicalization Scheme (RFC 8785): object keys sorted by Unicode code point, no insignificant whitespace, strings escaped per the scheme, UTF-8 encoding. |
 | Text normalization | Every string is Unicode NFC. Leading and trailing whitespace is trimmed; internal runs of whitespace (space, tab, line break) collapse to one space. Zero-width and bidirectional control characters are removed except an explicit dir attribute. |
-| Restricted HTML | Serialized from the sanitized DOM: lowercase element names; attributes sorted by name; attribute values double-quoted with & < > " escaped; text nodes escaped for & < >; no comments; empty text nodes dropped; void elements written as <br> and <img …>; adjacent text nodes merged. |
+| Restricted HTML | Serialized from the sanitized DOM: lowercase element names; attributes sorted by name; attribute values double-quoted with & < > " escaped; text nodes escaped for & < >; no comments; empty text nodes dropped; void elements written as `<br>` and `<img …>`; adjacent text nodes merged. |
 | Equations | Parsed with the permitted-subset grammar and re-serialized from the syntax tree: single spaces between tokens, no comments, braces normalized, command aliases mapped to one spelling. The canonical LaTeX string is stored in eq[data-latex]. |
 | Options | Serialized in display position order as objects with option_id, body and is_correct. Option identifiers are structural and stable across variants. |
 | Numbers | Marks and any numeric metadata are integers or decimal strings without trailing zeros; floating-point values never appear. |
