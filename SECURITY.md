@@ -1,6 +1,6 @@
 # Security Policy
 
-Open Mulyankan exists to keep examination content confidential. Security reports are
+Project Rachana exists to keep examination content confidential. Security reports are
 taken seriously and handled privately.
 
 ## Reporting a vulnerability
