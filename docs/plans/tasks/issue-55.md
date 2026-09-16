@@ -1,54 +1,57 @@
-# Plan: As an Admin, I want to define a blueprint for an assessment
+# #55: As an Admin, I want to define a blueprint for an assessment
 
-Primary package: [Workflow and business rules](../workflow.md). Proposed owner: **Kaustav**.
-Technical reviewers: KKT; Gandharva for transaction/evidence boundaries.
-Issue: #55. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Kaustav**. Technical review: KKT; Gandharva for transaction/evidence boundaries.
+Epic: [#103](https://github.com/Bodhan-AI/open-rachana/issues/103). [Module route](../workflow.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Record generation blueprints and translate their counts and constraints into independent candidate requests.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own legal transitions, capability policy, assignments, validation, review/language gates, readiness and corrections. State changes and required audit events share one transaction.
+First deliverable: Implement a validated blueprint object and the deterministic count calculation, with a request fixture consumed by #56.
 
-Expected locations: `platform/core domain services, validators, API and event schemas`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Cycle and curriculum references, item type, marks, required count, candidate multiplier, weightage, Bloom level, difficulty, objective, competency and language.
+- Output: Versioned generation configuration and requested candidate count; validation errors for invalid/stale parameters. No final paper selection or export.
 
-#44
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [PRD-ATH-25](../../requirements.md#req-prd-ath-25) | GAP D-38 Generated candidates: a generation request by the Admin (curriculum, cycle, question type, marks, required count × candidate multiplier) produces independent artefacts, each with one DRAFT of provenance generated, owned by the requesting Admin. Every generated draft records generation identifier, model identifier, generation configuration, source curriculum, chapter, page range, stored source context, and timestamp. A generated draft that fails the automated validation catalogue (§6.5) is discarded before any human sees it. Generated drafts are never grouped as alternatives of one question. The generation service runs outside the hardened zones and never receives content from the pipeline. | MUST |
+| [PRD-CFG-06](../../requirements.md#req-prd-cfg-06) | GAP The cycle record carries, in addition to CFG-01: author cap per cycle; required review count (1 or 2) D-06; whether reviewers see the correct answer D-06; remediation-repeats-review policy D-07; assignment expiry per task type D-12; similarity threshold D-08; default marks per item from the marking policy; a monotonically increasing policy_version that increments on every change. | MUST |
+| [PRD-ATH-27](../../requirements.md#req-prd-ath-27) | GAP D-44 Question types: single-select multiple choice is fully supported. Other types the blueprint may name (for example short answer) are stored with the same content model minus options, and may enter the pipeline only when the cycle enables them; the validation and structural rule sets for such types are reduced accordingly and named per type. | SHOULD |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [6. Core Concepts](../../prd/main-baseline.md#6-core-concepts)
+- [7. Question Generation (Layer 2)](../../prd/main-baseline.md#7-question-generation-layer-2)
+- [1.5 Two-layer architecture at a glance](../../prd/technical-baseline.md#15-two-layer-architecture-at-a-glance)
+
+## Behaviour to demonstrate
+
+For a synthetic request of 5 items with multiplier 3, request 15 independent candidates. Changing the generation pool never selects or orders a final paper.
+
+Failure checks: Try zero/negative/invalid counts and stale cycle data. Confirm count × multiplier produces independent candidate requests, never a final paper.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] Blueprint captures: question type, marks, number required, candidate multiplier, weightage, Bloom, difficulty, learning objective, competency, language
 - [ ] Candidates generated = required × multiplier, as independent questions (never grouped as alternatives)
 - [ ] Blueprint does not assemble a paper or assign final question numbers
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Try zero/negative/invalid counts and stale cycle data. Confirm count × multiplier produces independent candidate requests, never a final paper.
+Required producer work: [#44](issue-44.md) (Kaustav).
 
-## Requirement trace
+R3 is settled. D-44 governs enabling other item types; non-MCQ generation must not bypass type-specific validation.
 
-QST01-CFG / blueprint fields — assembly remains out
+## Engineering choices and review
 
-## Decisions and amendments to check
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-- The Admin content client/web split is recorded in the reference PR. A separate Author role and automatic draft creation versus explicit adoption remain R4; do not settle them by coding an old issue sentence.
-
-## Evidence required to close
-
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

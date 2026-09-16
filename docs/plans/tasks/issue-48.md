@@ -1,50 +1,58 @@
-# Plan: As an Auditor, I want to search the audit trail and never see question content
+# #48: As an Auditor, I want to search the audit trail and never see question content
 
-Primary package: [Audit, sealing and vault](../evidence.md). Proposed owner: **Gandharva**.
-Technical reviewers: Kaustav; Security for key/retention controls.
-Issue: #48. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Gandharva**. Technical review: Kaustav; Security for key/retention controls.
+Epic: [#104](https://github.com/Bodhan-AI/open-rachana/issues/104). [Module route](../evidence.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Give auditors a restricted evidence search and verification result without a question-content path.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own durable evidence, canonical bytes, encryption/manifests, sealing retries and verification. The workflow owner decides legal state changes; this package returns verified receipts.
+First deliverable: Implement one search query and verify action with fake safe events, then connect #46/#47 and a read-only surface or approved equivalent script.
 
-Expected locations: `platform/core audit/sealing workers and provider contracts`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Auditor capability; actor/action/artefact/time filters; opaque cursor; verification result from #47.
+- Output: Paginated allowlisted event metadata and checkpoint status; on-demand verification for authorised auditors, with no Restricted free text.
 
-#42, #46
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [ASR01-EVD-08](../../requirements.md#req-asr01-evd-08) | An evidence view provides read-only audit search by actor, action, artefact and time range, and displays the verification result. (P1 — may reduce to a scripted operator procedure if Week 3 capacity is strained.) | SHOULD |
+| [PRD-EVD-17](../../requirements.md#req-prd-evd-17) | GAP D-27 Evidence view (EVD-08): read-only search by actor audit identifier, action, artefact or version identifier and time range; event detail with no content; the latest verification result and checkpoint; a "verify now" control for auditors. If reduced to a scripted procedure, the script must produce the same search and verification output to a file readable by the auditor. | SHOULD |
+| [UI-12](../../requirements.md#req-ui-12) | Evidence — read-only audit search and chain-verification result. (P1.) | SHOULD |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [5.8 Other roles](../../prd/main-baseline.md#58-other-roles)
+- [19. Evidence and Audit](../../prd/main-baseline.md#19-evidence-and-audit)
+- [6.13 Expected evidence and audit · ASR01-EVD](../../prd/technical-baseline.md#613-expected-evidence-and-audit--asr01-evd)
+- [9.2 Screen requirements](../../prd/technical-baseline.md#92-screen-requirements)
+
+## Behaviour to demonstrate
+
+An Auditor can find a version’s review event and hash, but cannot obtain the review comments, answer or rendering by expanding the result or changing the endpoint.
+
+Failure checks: Attempt forbidden content fields and another role’s endpoint; filters and result counts must not reveal question text or restricted context.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] Auditor can filter by actor (pseudonymous), action, object ref, time
 - [ ] Response schema has no stem, options, explanation, or translation text fields
 - [ ] Admin may open the same content-free view in the pilot
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Attempt forbidden content fields and another role’s endpoint; filters and result counts must not reveal question text or restricted context.
+Required producer work: [#42](issue-42.md) (Kaustav), [#46](issue-46.md) (Gandharva).
 
-## Requirement trace
+D-27 chooses UI versus equivalent scripted output; security of the evidence API is required in either case.
 
-ASR01-EVD-09 · DAT-03
+## Engineering choices and review
 
-## Evidence required to close
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

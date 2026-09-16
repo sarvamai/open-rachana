@@ -1,54 +1,63 @@
-# Plan: As Security, I want a penetration test against isolation, seal, SoD, and export closed
+# #86: As Security, I want a penetration test against isolation, seal, SoD, and export closed
 
-Primary package: [Testing framework and acceptance evidence](../testing.md). Proposed owner: **Rohit**.
-Technical reviewers: KKT; feature owners.
-Issue: #86. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Rohit**. Technical review: KKT; feature owners.
+Epic: [#107](https://github.com/Bodhan-AI/open-rachana/issues/107). [Module route](../testing.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Run independent security qualification against the implemented interfaces and deployment.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own the shared testing system and independent failure cases. Each feature owner writes tests for their implementation; expert security/accessibility acceptance still needs named people.
+First deliverable: Build the attack matrix for forged roles, direct-API duty conflicts, sealed retrieval, upload abuse and content leakage; exercise it against the integrated environment.
 
-Expected locations: `CI, shared fixtures, contract/integration/end-to-end tests and evidence index`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Versioned release/environment, endpoint inventory, role/workload fixtures, data classification, threat cases and unresolved findings.
+- Output: Reproducible attack results, severity/disposition/owner for each finding and named Security acceptance; untested surfaces stay explicit.
 
-#85, #60, #65, #68, #78, #81
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [SEC-04](../../requirements.md#req-sec-04) | Emergency evidence access sits outside the routine workflow and requires a separately approved, dual-authorized manual procedure. | MUST |
+| [SEC-11](../../requirements.md#req-sec-11) | Transport is TLS 1.2 or above. Content-security policy, cross-site request forgery defence, output encoding, secure headers and no-store caching are all in place. | MUST |
+| [SEC-01](../../requirements.md#req-sec-01) | Sealed plaintext is not retrievable through any human or API interface — author, reviewer, accessibility specialist, translator, coordinator, operator, auditor or administrator. | MUST |
+| [SEC-03](../../requirements.md#req-sec-03) | Automated tests assert that no non-permitted role receives correct-answer or sealed-plaintext fields in any response body. | MUST |
+| [SEC-05](../../requirements.md#req-sec-05) | Authorization is server-side on every operation. Interface restrictions are convenience, never control. | MUST |
+| [SEC-06](../../requirements.md#req-sec-06) | Separation of duties is provable through both the interface and a hand-crafted direct API call. | MUST |
+| [SEC-09](../../requirements.md#req-sec-09) | Uploads are quarantined and only released after format allowlisting, signature inspection, malware scanning, re-encoding, metadata removal and decompression limits. | MUST |
+| [SEC-13](../../requirements.md#req-sec-13) | Backups are encrypted, access-separated, immutable, and restoration is tested. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [10.3 Security requirements](../../prd/technical-baseline.md#103-security-requirements)
+- [10.6 Break-glass procedure requirements](../../prd/technical-baseline.md#106-break-glass-procedure-requirements)
+- [13.2 Mandated automated suites](../../prd/technical-baseline.md#132-mandated-automated-suites)
+- [13.3 Expert and manual verification](../../prd/technical-baseline.md#133-expert-and-manual-verification)
+
+## Behaviour to demonstrate
+
+Try a permitted reviewer token on an unassigned task and a platform-admin credential on sealed retrieval. Retain actual responses and evidence references without publishing Restricted content.
+
+Failure checks: Retain reproducible evidence for each attack surface and disposition each finding with the named Security owner; no assumed emergency-read exception.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] Pentest report filed against: reviewer isolation, sealed plaintext, SoD API, copy/export, vault
 - [ ] Findings tracked to close or accepted risk
 - [ ] Emergency two-person unseal (if any) is in scope
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Retain reproducible evidence for each attack surface and disposition each finding with the named Security owner; no assumed emergency-read exception.
+Required producer work: [#85](issue-85.md) (KKT), [#60](issue-60.md) (Divyansh), [#65](issue-65.md) (Divyansh), [#68](issue-68.md) (Kaustav), [#78](issue-78.md) (Gandharva), [#81](issue-81.md) (Kaustav).
 
-## Requirement trace
+R8 emergency/reference procedure and R10 distribution rights are separate release prerequisites. Rohit’s harness cannot substitute for the Security owner’s sign-off.
 
-SEC-01..14
+## Engineering choices and review
 
-## Decisions and amendments to check
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-- Canonicalisation, retention and scoped sealed-reference/emergency contracts have explicit gates (R6/R8, D-24). No routine human sealed-plaintext read path is authorised by this issue.
-
-## Evidence required to close
-
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

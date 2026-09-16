@@ -1,51 +1,58 @@
-# Plan: Build shared contract fixtures and the first end-to-end acceptance harness
+# #115: Build shared contract fixtures and the first end-to-end acceptance harness
 
-Primary package: [Testing framework and acceptance evidence](../testing.md). Proposed owner: **Rohit**.
-Technical reviewers: KKT; feature owners.
-Issue: #115. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Rohit**. Technical review: KKT; feature owners.
+Epic: [#107](https://github.com/Bodhan-AI/open-rachana/issues/107). [Module route](../testing.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Provide shared fixtures and a contract/integration harness used by all feature owners.
 
-## Outcome and boundary
+## Start here
 
-Create synthetic actors, questions, languages and provider doubles, then execute the same contract against real persistence and the shared environment.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own the shared testing system and independent failure cases. Each feature owner writes tests for their implementation; expert security/accessibility acceptance still needs named people.
+First deliverable: Implement the manual draft-to-independent-review scenario and direct-API self-approval refusal; extend through accessibility/sealing/languages as producers merge.
 
-Expected locations: `CI, shared fixtures, contract/integration/end-to-end tests and evidence index`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Versioned task/API schemas, synthetic roles/languages/questions, provider doubles and real test persistence.
+- Output: Reusable fixtures and tests spanning allowed/refused/retried operations, with results mapped to requirement IDs.
 
-#52
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [ARC-02](../../requirements.md#req-arc-02) | Every state-changing operation and its audit record commit in the same database transaction. | MUST |
+| [INT-03](../../requirements.md#req-int-03) | Retryable mutations accept an idempotency key and are safe to repeat. | MUST |
+| [SEC-06](../../requirements.md#req-sec-06) | Separation of duties is provable through both the interface and a hand-crafted direct API call. | MUST |
+| [SEC-03](../../requirements.md#req-sec-03) | Automated tests assert that no non-permitted role receives correct-answer or sealed-plaintext fields in any response body. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [13.1 Levels](../../prd/technical-baseline.md#131-levels)
+- [13.2 Mandated automated suites](../../prd/technical-baseline.md#132-mandated-automated-suites)
+- [13.4 Synthetic corpus](../../prd/technical-baseline.md#134-synthetic-corpus)
+- [13.5 Evidence pack](../../prd/technical-baseline.md#135-evidence-pack)
+
+## Behaviour to demonstrate
+
+The same actor fixture with two roles still fails own-work approval. Killing a transaction proves both the domain and audit writes roll back.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] Allowed and refused examples exercise the same published API contract.
 - [ ] The first author/reviewer path proves direct-API self-approval refusal.
 - [ ] Failure, retry and transaction tests retain results linked to requirements.
 - [ ] Desktop restrictions receive native validation; browser tests are not substituted.
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Desktop restrictions receive native validation; browser tests are not substituted.
+Required producer work: [#52](issue-52.md) (Rohit).
 
-## Requirement trace
+Rohit owns the harness; each feature owner supplies its tests. Signed-client and expert security/accessibility checks remain separate evidence types.
 
-Standing verification obligations and all requirement-specific tests consumed by the harness.
+## Engineering choices and review
 
-## Evidence required to close
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

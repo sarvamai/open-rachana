@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/sarvamai/open-rachana/actions/workflows/ci.yml"><img src="https://github.com/sarvamai/open-rachana/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+  <a href="https://github.com/Bodhan-AI/open-rachana/actions/workflows/ci.yml"><img src="https://github.com/Bodhan-AI/open-rachana/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache-2.0"></a>
   <img src="https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white" alt="Python 3.12+">
   <img src="https://img.shields.io/badge/Node-20-339933?logo=nodedotjs&logoColor=white" alt="Node 20">
@@ -18,6 +18,8 @@
 </p>
 
 ---
+
+Start contributing: [engineering handoff](docs/plans/README.md). Find your module, first task, exact PRD rules and current implementation work there.
 
 **Project Rachana** turns a blank page into a sealed, exam-ready question — through four
 human jobs, under rules the examining authority owns.

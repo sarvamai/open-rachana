@@ -1,58 +1,34 @@
-# Epic plan: Workspaces and signed client
+# Workspaces and signed client
 
-Proposed owner: **Divyansh**. Technical reviewers: Kaustav; Accessibility lead for relevant checks.
-Epic: #102.
+Proposed owner: **Divyansh**. Technical reviewers: Kaustav; Accessibility lead for relevant checks. Epic: [#102](https://github.com/Bodhan-AI/open-rachana/issues/102).
 
-## Review before implementation
+Start with the #118 client integration boundary and #58 manual draft screen. Use #117’s synthetic contract while server producers are under construction. Ship the first real draft flow before adding every role screen. Each content surface runs in the signed client; only configuration/content-free oversight belongs in the web app.
 
-Status: draft plan; owner review and go-ahead are pending. Nikhil reviews product
-scope and acceptance. KKT coordinates technical/interface review; Rohit reviews
-the test approach. Record the plan PR, approved revision and go-ahead in the issue.
-Security/accessibility decisions still need their named owners. Existing valid
-approvals and in-flight work are preserved; this plan does not revoke them.
+## Work and first deliverables
 
-Run [Humanizer](https://github.com/blader/humanizer) on prose before requesting
-review, then read it yourself. Preserve requirements, IDs, API names, numbers,
-MUST/MUST NOT rules, acceptance criteria and approval status. Clarity is the
-criterion; an AI-detection score is not. If your agent cannot load the skill,
-apply its documented writing guidance manually and say so.
+The order below is the module’s reading/build sequence. The dependencies in each brief determine integration order; independent fixture and design work can proceed while a producer is being built.
 
-## Scope and interfaces
+| Task | Deliverable |
+|---|---|
+| [#118](tasks/client-contract.md) | Connect, enrol and package the signed desktop client for authorised content tasks. |
+| [#58](tasks/issue-58.md) | Build the signed-client manual authoring screen with accessible content fields, autosave and field-level validation. |
+| [#59](tasks/issue-59.md) | Implement safe image and equation handling from upload through rendering and validation. |
+| [#60](tasks/issue-60.md) | Enforce and report supported restricted actions in the signed content client before the editor starts. |
+| [#65](tasks/issue-65.md) | Deliver a read-only review workspace with strict payload isolation and assigned-task access. |
+| [#69](tasks/issue-69.md) | Build field-limited accessibility remediation and immutable completion by the Accessibility Specialist. |
+| [#70](tasks/issue-70.md) | Implement independent accessibility review with structured findings and accommodation outcomes. |
+| [#72](tasks/issue-72.md) | Build the content-free Integrity Operator surface and reconnecting live session feed. |
+| [#73](tasks/issue-73.md) | Build the translation workspace around a scoped read-only primary reference and editable target text. |
+| [#75](tasks/issue-75.md) | Implement independent translation review and explicit equivalent-difficulty judgement. |
+| [#76](tasks/issue-76.md) | Apply the accessibility remediation and independent review pipeline to each language variant. |
+| [#87](tasks/issue-87.md) | Qualify all required role surfaces with keyboard, screen reader and supported-script checks. |
+
+## Ownership boundaries
 
 Own task screens, accessible interaction, content-client restrictions and release packaging. Consume server permissions and task responses; never infer authorization from a hidden button.
 
-Expected locations: `apps/client and the content-free configuration/oversight parts of apps/web`. These are shared-code ownership boundaries,
-not new services. Changes to shared contracts need the consuming owner’s review.
+## How to use this handoff
 
-## Child plans
+Read the first task brief, its exact PRD sections and the effective-rule notes. The brief contains the relevant source clauses, inputs, outputs, examples, dependencies and first deliverable. Propose implementation details in that brief or an attached plan PR; consumers review shared interfaces. Existing PRs and valid approvals stay in force. Only the named unresolved decision blocks its dependent behaviour; it does not require the whole module to wait.
 
-| Issue | Plan |
-|---|---|
-| #58 | [As an Admin, I want to write and edit a single-select MCQ in the tool](tasks/issue-58.md) |
-| #59 | [As an Admin, I want to add images and limited LaTeX to a question](tasks/issue-59.md) |
-| #60 | [As an Admin, I cannot copy, cut, paste, print, download, or export question content](tasks/issue-60.md) |
-| #65 | [As a Question Reviewer, I want to see only my assigned question and the allowed metadata](tasks/issue-65.md) |
-| #69 | [As an Accessibility Specialist, I want to remediate accessibility fields only](tasks/issue-69.md) |
-| #70 | [As an Accessibility Reviewer, I want to test the rendered question and decide](tasks/issue-70.md) |
-| #72 | [As an Integrity Operator, I want a live board of sessions, scores, and events with no content](tasks/issue-72.md) |
-| #73 | [As a Translator, I want to create and edit a translation after the original is sealed](tasks/issue-73.md) |
-| #75 | [As a Translation Reviewer, I want original and translation side by side so I can approve or reject](tasks/issue-75.md) |
-| #76 | [As an Accessibility Specialist, I want the same accessibility gate on every language version](tasks/issue-76.md) |
-| #87 | [As the Accessibility lead, I want a WCAG 2.1 AA audit of authoring and review surfaces closed](tasks/issue-87.md) |
-| #118 | [Connect and release the signed desktop task client](tasks/client-contract.md) |
-
-## Owner’s first PR
-
-Review these starter plans against current code. Settle interfaces and the first
-small slice, record available capacity and return the plan PR for review. Keep
-open policy decisions explicit. Extended work can use a separate plan file;
-small work can remain in its linked task plan. Do not duplicate the existing
-observability spec or implementation plans: reference and amend them.
-
-## Acceptance and handover
-
-The epic closes when its child acceptance criteria have retained evidence,
-its interfaces work in the shared flow, and its runbooks/limitations are
-reviewed by another contributor. The primary owner is responsible for integration
-with consumers; Rohit supplies the shared harness and Nikhil reviews product
-behaviour. Humanizer is a prose review step, not technical approval.
+For each implementation PR, retain the accepted contract/plan revision, requirement IDs, code, actual check result and remaining limits. Use [Humanizer](https://github.com/blader/humanizer) for new prose and read it yourself. Preserve quoted source text, IDs, numbers and security rules.

@@ -1,54 +1,59 @@
-# Plan: As an Accessibility Specialist, I want the same accessibility gate on every language version
+# #76: As an Accessibility Specialist, I want the same accessibility gate on every language version
 
-Primary package: [Workspaces and signed client](../client.md). Proposed owner: **Divyansh**.
-Technical reviewers: Kaustav; Accessibility lead for relevant checks.
-Issue: #76. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Divyansh**. Technical review: Kaustav; Accessibility lead for relevant checks.
+Epic: [#102](https://github.com/Bodhan-AI/open-rachana/issues/102). [Module route](../client.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Apply the accessibility remediation and independent review pipeline to each language variant.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own task screens, accessible interaction, content-client restrictions and release packaging. Consume server permissions and task responses; never infer authorization from a hidden button.
+First deliverable: Reuse #69/#70 contracts with target-language fixtures and prove that the primary’s approval cannot satisfy the variant check.
 
-Expected locations: `apps/client and the content-free configuration/oversight parts of apps/web`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Translation-reviewed variant, target-language alternatives/captions, cycle accommodations and task eligibility.
+- Output: Separate remediation and review evidence tied to the variant hash, followed by its own seal request.
 
-#75, #70
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [PRD-ACC-19](../../requirements.md#req-prd-acc-19) | GAP D-43 Every language version — the primary and each variant — has its own remediation task and review (ASM04-TRN-05). For variants the remediation is normally limited to translated alternative text and captions. | MUST |
+| [ASM04-TRN-05](../../requirements.md#req-asm04-trn-05) | Each language variant receives its own accessibility check and its own sealed artefact. | MUST |
+| [PRD-ACC-16](../../requirements.md#req-prd-acc-16) | GAP Accessibility remediation task (engineering IN_ACCESSIBILITY): on question-review approval the system creates an accessibility draft derived from the approved version and assigns an Accessibility Specialist by policy. The draft exposes only accessibility fields: alternative text and decorative flags, table headers and captions, equation text alternatives, reading-order markup and accessibility metadata. Stem, options, correct flag, explanation, marks, classification, image bytes and mathematical notation are locked and machine-verified unchanged on completion. The specialist completes the evaluation checklist as a self-check, may comment, and completes the task, which creates the immutable version that enters IN_ACCESSIBILITY_REVIEW. | MUST |
+| [PRD-ACC-18](../../requirements.md#req-prd-acc-18) | GAP The Accessibility Reviewer decides on the completed accessibility version: approval requests sealing; rejection creates an accessibility-correction draft for a different Accessibility Specialist (accessibility findings) or an authoring-correction draft for the author (authoring findings), and the next accessibility review is by a different Accessibility Reviewer (PRD-ASG-10). | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [10. Accessibility](../../prd/main-baseline.md#10-accessibility)
+- [11. Translation](../../prd/main-baseline.md#11-translation)
+- [6.7 Accessibility remediation and review · ASM04-ACC](../../prd/technical-baseline.md#67-accessibility-remediation-and-review--asm04-acc)
+- [6.8 Translation and variant equivalence · ASM04-TRN](../../prd/technical-baseline.md#68-translation-and-variant-equivalence--asm04-trn)
+
+## Behaviour to demonstrate
+
+Primary and two translations have review approvals but one variant lacks accessibility review: that variant cannot seal and the artefact cannot become ready.
+
+Failure checks: Attempt readiness with a language accessibility approval missing; refuse. Any proposed exception requires explicit owner review, not an implicit bypass.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] After translation review approve, the language version enters Accessibility Specialist → Accessibility Reviewer
 - [ ] Same field restrictions and SoD as the original-language gate
 - [ ] A cycle that skips this gate must persist a recorded decision (default is keep the gate)
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Attempt readiness with a language accessibility approval missing; refuse. Any proposed exception requires explicit owner review, not an implicit bypass.
+Required producer work: [#75](issue-75.md) (Divyansh), [#70](issue-70.md) (Divyansh).
 
-## Requirement trace
+D-43 is the source per-language requirement; a pilot deferral must be an explicit scope decision. R5 rendering qualification applies to each supported script.
 
-QST04-ACC · D-43
+## Engineering choices and review
 
-## Decisions and amendments to check
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-- The reference requires accessibility for each language. The older bypass sentence is not approval to skip that gate; any scope change needs an explicit product/security decision.
-
-## Evidence required to close
-
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

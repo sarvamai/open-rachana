@@ -1,50 +1,55 @@
-# Plan: As Security, I want the translation-draft model channel off until the model runs inside our boundary
+# #57: As Security, I want the translation-draft model channel off until the model runs inside our boundary
 
-Primary package: [Layer 2 intelligence and adapters](../intelligence.md). Proposed owner: **Sarvam team — individual lead to be confirmed**.
-Technical reviewers: Kaustav; Security for translation hosting.
-Issue: #57. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Sarvam team — individual lead to be confirmed**. Technical review: Kaustav; Security for translation hosting.
+Epic: [#109](https://github.com/Bodhan-AI/open-rachana/issues/109). [Module route](../intelligence.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Keep the translation-draft AI channel disabled until its data-handling and hosting approval is recorded.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Produce grounded proposals with provenance through governed adapters. No sealed content, workflow-store credentials or AI approval/validation paths. Layer 1 owns validation and human gates.
+First deliverable: Implement the off-by-default control and an integration test showing no primary text is sent while approval is absent.
 
-Expected locations: `curriculum ingestion and replaceable generation/translation/metadata adapters`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Channel configuration, Security approval record, private service binding and task-scoped primary-reference release contract.
+- Output: A disabled-channel refusal by default, or a governed proposal returned into the ordinary translation workflow; manual translation remains available.
 
-#40
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [PRD-ARC-14](../../requirements.md#req-prd-arc-14) | GAP D-48 Translation drafts require the primary reference text to reach Layer 2. This is permitted only when Layer 2 runs inside the trust boundary (a private deployment with no data retention and no training on inputs) or when Security accepts a documented exception with the same guarantees contractually. Until then the translation-draft channel of the connector stays disabled and translators start from an empty variant. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [11. Translation](../../prd/main-baseline.md#11-translation)
+- [1.5 Two-layer architecture at a glance](../../prd/technical-baseline.md#15-two-layer-architecture-at-a-glance)
+- [10.2 Architecture requirements](../../prd/technical-baseline.md#102-architecture-requirements)
+
+## Behaviour to demonstrate
+
+Setting a boolean in a request cannot activate translation AI. An empty manual language draft still opens while the AI service is disabled.
+
+Failure checks: Prove the channel stays off without the recorded approval; manual translation still works and toggling configuration cannot bypass the approval gate.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] Translation-draft generation path is disabled by default
 - [ ] Enabling it requires a recorded Security + Technical Lead decision that the model is inside the boundary, no retention, no training
 - [ ] Until then, translators write by hand (translation stories still apply)
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Prove the channel stays off without the recorded approval; manual translation still works and toggling configuration cannot bypass the approval gate.
+Required producer work: [#40](issue-40.md) (Nikhil).
 
-## Requirement trace
+D-48 and R8 block actual primary-text release. Private hosting/no-retention/no-training guarantees require named approval; no general vault credential goes to Layer 2.
 
-ADR-0007 · D-48
+## Engineering choices and review
 
-## Evidence required to close
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

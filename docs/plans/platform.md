@@ -1,54 +1,30 @@
-# Epic plan: Platform, identity and integration
+# Platform, identity and integration
 
-Proposed owner: **KKT**. Technical reviewers: Gandharva; Rohit for recovery evidence.
-Epic: #106.
+Proposed owner: **KKT**. Technical reviewers: Gandharva; Rohit for recovery evidence. Epic: [#106](https://github.com/Bodhan-AI/open-rachana/issues/106).
 
-## Review before implementation
+Start with #117’s shared identity/task contract and #51’s development environment. Coordinate existing #93/#96 work. Build identity and device proof next; qualify production bindings and recovery only against the adopter’s selected services.
 
-Status: draft plan; owner review and go-ahead are pending. Nikhil reviews product
-scope and acceptance. KKT coordinates technical/interface review; Rohit reviews
-the test approach. Record the plan PR, approved revision and go-ahead in the issue.
-Security/accessibility decisions still need their named owners. Existing valid
-approvals and in-flight work are preserved; this plan does not revoke them.
+## Work and first deliverables
 
-Run [Humanizer](https://github.com/blader/humanizer) on prose before requesting
-review, then read it yourself. Preserve requirements, IDs, API names, numbers,
-MUST/MUST NOT rules, acceptance criteria and approval status. Clarity is the
-criterion; an AI-detection score is not. If your agent cannot load the skill,
-apply its documented writing guidance manually and say so.
+The order below is the module’s reading/build sequence. The dependencies in each brief determine integration order; independent fixture and design work can proceed while a producer is being built.
 
-## Scope and interfaces
+| Task | Deliverable |
+|---|---|
+| [#117](tasks/task-contract.md) | Publish the versioned identity, task, decision and error contracts consumed across modules. |
+| [#51](tasks/issue-51.md) | Provide a reproducible development environment for the API, persistence and service bindings. |
+| [#41](tasks/issue-41.md) | Authenticate interactive users with the organisation IdP and produce the trusted identity context consumed by authorisation. |
+| [#43](tasks/issue-43.md) | Enforce managed-device and approved-zone access at sign-in and refresh. |
+| [#85](tasks/issue-85.md) | Bind and qualify production identities, keys, zones and privileged-operation controls. |
+| [#116](tasks/release-recovery.md) | Define and demonstrate safe recovery from a failed application/schema release. |
+| [#88](tasks/issue-88.md) | Measure performance and prove encrypted backup/restore against the PRD’s non-functional targets. |
+| [#94](tasks/issue-94.md) | Keep commands, paths, byte-format descriptions and implementation status consistent with the merged repository. |
+
+## Ownership boundaries
 
 Own verified identities, reproducible environments, organisation-contracted managed-service bindings, release recovery and integration. The adopting organisation may contract any provider(s) meeting the interfaces and controls; no named host is mandatory. The IdP identifies the actor; workflow determines their task permissions.
 
-Expected locations: `deployment/configuration, identity adapters, contracts and integration pipeline`. These are shared-code ownership boundaries,
-not new services. Changes to shared contracts need the consuming owner’s review.
+## How to use this handoff
 
-## Child plans
+Read the first task brief, its exact PRD sections and the effective-rule notes. The brief contains the relevant source clauses, inputs, outputs, examples, dependencies and first deliverable. Propose implementation details in that brief or an attached plan PR; consumers review shared interfaces. Existing PRs and valid approvals stay in force. Only the named unresolved decision blocks its dependent behaviour; it does not require the whole module to wait.
 
-| Issue | Plan |
-|---|---|
-| #41 | [As a staff member, I want to sign in through the organisation IdP with MFA](tasks/issue-41.md) |
-| #43 | [As a staff member, I am refused unless device posture and network zone claims are present](tasks/issue-43.md) |
-| #51 | [As an engineer, I want compose, a real Dockerfile, and platform.yaml so the pipeline deploys itself](tasks/issue-51.md) |
-| #85 | [As the authority, I want production identity, keys, and managed-device checks](tasks/issue-85.md) |
-| #88 | [As Ops, I want load, backup/restore, and chain verification passed in production](tasks/issue-88.md) |
-| #94 | [Phase 1 leftovers: Makefile, canonicalization spec, as-built page](tasks/issue-94.md) |
-| #116 | [Prove failed-release recovery without losing audit or sealed content](tasks/release-recovery.md) |
-| #117 | [Publish versioned task and identity contracts for parallel implementation](tasks/task-contract.md) |
-
-## Owner’s first PR
-
-Review these starter plans against current code. Settle interfaces and the first
-small slice, record available capacity and return the plan PR for review. Keep
-open policy decisions explicit. Extended work can use a separate plan file;
-small work can remain in its linked task plan. Do not duplicate the existing
-observability spec or implementation plans: reference and amend them.
-
-## Acceptance and handover
-
-The epic closes when its child acceptance criteria have retained evidence,
-its interfaces work in the shared flow, and its runbooks/limitations are
-reviewed by another contributor. The primary owner is responsible for integration
-with consumers; Rohit supplies the shared harness and Nikhil reviews product
-behaviour. Humanizer is a prose review step, not technical approval.
+For each implementation PR, retain the accepted contract/plan revision, requirement IDs, code, actual check result and remaining limits. Use [Humanizer](https://github.com/blader/humanizer) for new prose and read it yourself. Preserve quoted source text, IDs, numbers and security rules.

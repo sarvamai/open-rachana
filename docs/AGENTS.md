@@ -19,7 +19,10 @@ Read the root `AGENTS.md` first.
 | `delivery-plan.md` | Sprint baseline, seven completion outcomes, build gates, managed services, handover and roadmap. |
 | `contributor-work-packages.md` | Proposed contributor allocation, module boundaries, first contributions, shared contracts and acceptance responsibilities; not confirmed assignments. |
 | `canonicalization.md` | Existing draft-v0.1 audit bytes; proposed v1 kept separate until ratified. |
-| `plans/README.md` | Epic ownership, checked-in task plans, review/go-ahead workflow and Humanizer readability guidance. |
+| `plans/README.md` | Contributor start page, module routes, 62 task-specific engineering briefs and active implementation work. |
+| `plans/effective-rules.md` | Source conflicts, effective role/application rules and the narrow effect of unresolved decisions. |
+| `plans/coverage.md`, `plans/coverage.json` | One accountable task per numbered requirement; related consumers and narrative obligations. |
+| `prd/` | Retained main/technical PRD text with section anchors, source-artifact provenance and superseded-wording notices. |
 | `architecture.md` | Layers, the state machine, the ten numbered invariants, trust boundaries, non-functional targets. The invariants are the normative part. |
 | `adr/NNNN-<slug>.md` | One decision each, numbered sequentially; preserve its actual accepted/proposed status. |
 | `provider-contracts.md` | The working contract for provider authors: lifecycle, rules, SPI catalogue. |

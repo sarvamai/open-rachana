@@ -1,50 +1,52 @@
-# Plan: Verify the contributor first-run guide and first-PR path
+# #119: Verify the contributor first-run guide and first-PR path
 
-Primary package: [Product acceptance and contributor onboarding](../product.md). Proposed owner: **Nikhil**.
-Technical reviewers: KKT for technical steps; Rohit for testability.
-Issue: #119. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Nikhil**. Technical review: KKT for technical steps; Rohit for testability.
+Epic: [#108](https://github.com/Bodhan-AI/open-rachana/issues/108). [Module route](../product.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Make the repository’s first-run and first-contribution route work for a new person.
 
-## Outcome and boundary
+## Start here
 
-Follow setup as a new contributor; document actual commands, one synthetic acceptance scenario and the reviewed PR process.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own scope, understandable issue briefs, user journeys and product acceptance. Do not invent pilot languages, participant commitments or technical/security approvals.
+First deliverable: Ask a contributor to follow the guide from a clean checkout, locate their first brief and run its smallest available fixture/test.
 
-Expected locations: `product decisions, acceptance examples, contributor documentation`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Current setup commands, contributor’s intended module, engineering handoff, synthetic acceptance scenario and PR review rules.
+- Output: A short start page, verified commands and a recorded second-person walkthrough; failures link to issues instead of being described as working.
 
-#51, #52, #94
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [UI-13](../../requirements.md#req-ui-13) | Every input is labelled; keyboard operation and screen-reader semantics are preserved throughout. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [14.1 Week 1 — Foundation and evidence backbone](../../prd/technical-baseline.md#141-week-1--foundation-and-evidence-backbone)
+- [17.4 Release](../../prd/technical-baseline.md#174-release)
+
+## Behaviour to demonstrate
+
+A newcomer can find their module, its first issue, exact PRD rules and existing implementation PR without reading a chat transcript.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] A second contributor follows the guide from a clean environment.
 - [ ] Failures are tracked rather than described as working.
 - [ ] The guide includes plan review, Humanizer readability, tests and required evidence.
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-The guide includes plan review, Humanizer readability, tests and required evidence.
+Required producer work: [#51](issue-51.md) (KKT), [#52](issue-52.md) (Rohit), [#94](issue-94.md) (KKT).
 
-## Requirement trace
+No new product decision. Keep private credentials and Restricted data out of the public guide; owner availability is not assumed.
 
-Product acceptance, contributor documentation and retained evidence.
+## Engineering choices and review
 
-## Evidence required to close
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

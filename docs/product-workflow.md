@@ -30,7 +30,7 @@ approval is recorded. A translator can work manually while that channel is off.
 
 Paper selection, assembly, paper export, exam delivery, marking, results and
 performance calibration are outside this workflow. The Product Owner
-confirmed the boundary on 14 September 2026 (R3, ADR-0013): curriculum,
+confirmed the boundary on 14 September 2026 (R3, ADR-0015): curriculum,
 generation constraints and candidate counts belong to Rachana; final paper
 selection, ordering and export belong to separate assembly. The mock
 exam-paper UI does not establish a change in scope.

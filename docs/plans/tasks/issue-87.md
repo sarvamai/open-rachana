@@ -1,53 +1,57 @@
-# Plan: As the Accessibility lead, I want a WCAG 2.1 AA audit of authoring and review surfaces closed
+# #87: As the Accessibility lead, I want a WCAG 2.1 AA audit of authoring and review surfaces closed
 
-Primary package: [Workspaces and signed client](../client.md). Proposed owner: **Divyansh**.
-Technical reviewers: Kaustav; Accessibility lead for relevant checks.
-Issue: #87. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Divyansh**. Technical review: Kaustav; Accessibility lead for relevant checks.
+Epic: [#102](https://github.com/Bodhan-AI/open-rachana/issues/102). [Module route](../client.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Qualify all required role surfaces with keyboard, screen reader and supported-script checks.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own task screens, accessible interaction, content-client restrictions and release packaging. Consume server permissions and task responses; never infer authorization from a hidden button.
+First deliverable: Cover a full author-to-review task and configuration/oversight navigation manually, then extend to both accessibility roles and translation.
 
-Expected locations: `apps/client and the content-free configuration/oversight parts of apps/web`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Built signed client and web oversight screens, agreed OS/assistive-technology matrix, synthetic corpus and reference renderer version.
+- Output: Per-surface findings and retest evidence for focus/order/labels/contrast/zoom/tables/equations/language direction; named accessibility acceptance.
 
-#58, #65, #69, #70, #72, #73, #75
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [UI-13](../../requirements.md#req-ui-13) | Every input is labelled; keyboard operation and screen-reader semantics are preserved throughout. | MUST |
+| [PRD-ACC-13](../../requirements.md#req-prd-acc-13) | GAP Test affordances (ACC-02) provided on the reference rendering without altering content: keyboard-only navigation mode with visible focus order; screen-reader-oriented view exposing the accessible name, role and MathML of each element; text-only view; zoom at 200 % and 400 %; contrast measurement per text element; a reading-order outline. | MUST |
+| [PRD-ATH-24](../../requirements.md#req-prd-ath-24) | GAP Scripts and direction: every text field accepts full Unicode, supports right-to-left direction per field, and round-trips the pilot scripts without loss through sanitization, canonicalization and rendering. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [6.7 Accessibility remediation and review · ASM04-ACC](../../prd/technical-baseline.md#67-accessibility-remediation-and-review--asm04-acc)
+- [9.2 Screen requirements](../../prd/technical-baseline.md#92-screen-requirements)
+- [11. Non-functional requirements](../../prd/technical-baseline.md#11-non-functional-requirements)
+- [13.3 Expert and manual verification](../../prd/technical-baseline.md#133-expert-and-manual-verification)
+
+## Behaviour to demonstrate
+
+Complete a review using only keyboard and screen reader. A missing accessible equation name is a recorded defect even when automated accessibility checks pass.
+
+Failure checks: Retain manual keyboard/screen-reader findings for every required surface; automated checks alone do not close the audit.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] WCAG 2.1 AA audit covers Admin editor, all review workspaces, operator/auditor content-free screens
 - [ ] Findings tracked to close
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Retain manual keyboard/screen-reader findings for every required surface; automated checks alone do not close the audit.
+Required producer work: [#58](issue-58.md) (Divyansh), [#65](issue-65.md) (Divyansh), [#69](issue-69.md) (Divyansh), [#70](issue-70.md) (Divyansh), [#72](issue-72.md) (Divyansh), [#73](issue-73.md) (Divyansh), [#75](issue-75.md) (Divyansh).
 
-## Requirement trace
+R5 determines render equivalence; pilot languages/OS/assistive technologies require owner selection. Record tested coverage without claiming support for untested combinations.
 
-QST04-ACC · NFR
+## Engineering choices and review
 
-## Decisions and amendments to check
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-- Resolve the signed-local/reference-rendering and per-OS acceptance contract (R5) before the dependent implementation; native and accessibility checks remain explicit.
-
-## Evidence required to close
-
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

@@ -1,50 +1,53 @@
-# Plan: Connect Next.js server instrumentation to API traces
+# #112: Connect Next.js server instrumentation to API traces
 
-Primary package: [Operational observability](../observability.md). Proposed owner: **Irfan**.
-Technical reviewers: KKT; Rohit for leak and failure checks.
-Issue: #112. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Irfan**. Technical review: KKT; Rohit for leak and failure checks.
+Epic: [#105](https://github.com/Bodhan-AI/open-rachana/issues/105). [Module route](../observability.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Propagate and observe safe request context from Next.js server routes to the Python API.
 
-## Outcome and boundary
+## Start here
 
-Configure server instrumentation, safe request logging and trace propagation without capturing payloads or raw query values.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own diagnostic logs, metrics, traces, Collector configuration, local dashboards and alerts. Session-integrity decisions and durable audit evidence remain with workflow/evidence owners.
+First deliverable: Instrument one server-to-API request using the existing OTel contract; test sentinel fields and exporter-disabled mode.
 
-Expected locations: `runtime instrumentation and deploy/dev observability configuration`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Incoming trusted trace context, sanitised route templates, OTel SDK configuration and outbound API calls.
+- Output: One correlated server trace with safe request logs/errors and bounded metrics; no payload/query/header content exported.
 
-#110, #111
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [DAT-03](../../requirements.md#req-dat-03) | Plaintext content never appears in URLs, analytics, traces, exception messages, infrastructure logs, browser storage, notifications, dashboards or support tickets. | MUST |
+| [PRD-OBS-28](../../requirements.md#req-prd-obs-28) | GAP Application observability (§11): structured logs with correlation and trace identifiers and no content; metrics for active sessions, events per second, telemetry backlog, sealing duration and failure count, chain write latency and lag, outbox lag, assignment pool size; dashboards contain no content. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [6.14 Session integrity, observability and referral · ASR02-OBS](../../prd/technical-baseline.md#614-session-integrity-observability-and-referral--asr02-obs)
+- [11. Non-functional requirements](../../prd/technical-baseline.md#11-non-functional-requirements)
+
+## Behaviour to demonstrate
+
+An API request containing a synthetic question in the query never exports that query value. Its server and API spans remain correlated.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] One request can be followed from Next.js to Python.
 - [ ] Logs/errors pass the sentinel guard.
 - [ ] Missing Collector does not prevent page/API service.
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Missing Collector does not prevent page/API service.
+Required producer work: [#110](obs-python.md) (Irfan), [#111](obs-local.md) (Irfan).
 
-## Requirement trace
+No product decision for basic diagnostics. Agree attribute allowlists with Irfan and keep content/API permission work with its feature owner.
 
-ASR01-EVD-09, DAT-03 and the operational observability contract; diagnostic signals do not satisfy ASR02 integrity evidence.
+## Engineering choices and review
 
-## Evidence required to close
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

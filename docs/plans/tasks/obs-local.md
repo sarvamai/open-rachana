@@ -1,50 +1,53 @@
-# Plan: Provide the local Collector and Grafana observability stack
+# #111: Provide the local Collector and Grafana observability stack
 
-Primary package: [Operational observability](../observability.md). Proposed owner: **Irfan**.
-Technical reviewers: KKT; Rohit for leak and failure checks.
-Issue: #111. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Irfan**. Technical review: KKT; Rohit for leak and failure checks.
+Epic: [#105](https://github.com/Bodhan-AI/open-rachana/issues/105). [Module route](../observability.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Qualify the merged local Collector/Grafana stack for another contributor’s clean environment.
 
-## Outcome and boundary
+## Start here
 
-Provide reproducible local Grafana, Loki, Tempo and Prometheus wiring through the Collector, with documented start, stop and reset commands.
+PR #120 merged deploy/dev and dashboards. The issue is still open; verify remaining acceptance on that implementation.
 
-Own diagnostic logs, metrics, traces, Collector configuration, local dashboards and alerts. Session-integrity decisions and durable audit evidence remain with workflow/evidence owners.
+First deliverable: Run the existing guide on a clean machine instead of rebuilding the stack; record platform prerequisites and any gaps against the issue.
 
-Expected locations: `runtime instrumentation and deploy/dev observability configuration`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: deploy/dev configuration from #120, local ports, exporter endpoints and synthetic API requests.
+- Output: Documented setup with correlated log/trace/metric views and verified safe reset; remaining missing signal wiring tracked separately.
 
-No implementation prerequisite; the plan can be reviewed now.
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [DAT-03](../../requirements.md#req-dat-03) | Plaintext content never appears in URLs, analytics, traces, exception messages, infrastructure logs, browser storage, notifications, dashboards or support tickets. | MUST |
+| [PRD-OBS-28](../../requirements.md#req-prd-obs-28) | GAP Application observability (§11): structured logs with correlation and trace identifiers and no content; metrics for active sessions, events per second, telemetry backlog, sealing duration and failure count, chain write latency and lag, outbox lag, assignment pool size; dashboards contain no content. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [11. Non-functional requirements](../../prd/technical-baseline.md#11-non-functional-requirements)
+- [14.1 Week 1 — Foundation and evidence backbone](../../prd/technical-baseline.md#141-week-1--foundation-and-evidence-backbone)
+
+## Behaviour to demonstrate
+
+Stop the Collector: core health/domain behaviour remains available. Restart it and verify new synthetic signals appear without editing domain code.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] A clean machine starts the stack using the documented command.
 - [ ] Synthetic log, metric and trace are visible and linked.
 - [ ] Backend changes require Collector/configuration changes, not domain-code changes.
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Backend changes require Collector/configuration changes, not domain-code changes.
+No upstream feature is required to prepare the first deliverable.
 
-## Requirement trace
+No product blocker. #120 supplies the stack; final acceptance still requires the requested clean-machine and correlation evidence, including #121’s log wiring.
 
-ASR01-EVD-09, DAT-03 and the operational observability contract; diagnostic signals do not satisfy ASR02 integrity evidence.
+## Engineering choices and review
 
-## Evidence required to close
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

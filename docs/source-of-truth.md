@@ -35,7 +35,7 @@ remain visible until the required owner acts and evidence is retained.
   amendment to ADR-0008 record the placement.
 - Curriculum, generation constraints and candidate counts belong to Rachana.
   Final paper selection, ordering and export belong to the separate assembly
-  module. R3 and ADR-0013 record the boundary.
+  module. R3 and ADR-0015 record the boundary.
 - The repository incorporates the review plan and its actual architecture
   diagram and becomes the standalone reference. External source links are
   omitted at the owner's request. The review deck's slide 4 and all its
@@ -100,3 +100,19 @@ Historical extraction revision (retained for audit, not a live dependency):
 3. Architecture and relevant accepted ADRs.
 4. Traceability, individual requirements and applicable decisions.
 5. Reconciliation items before work that depends on an unresolved boundary.
+
+## Full PRD and engineering handoff
+
+The [retained PRD texts](prd/README.md) preserve the main v2.0 and technical
+v1.3 sections needed to implement the product, including matrices, record
+fields, sample payloads, catalogues, non-functional targets and edge cases.
+The local technical artifact’s 304 source requirement rows match the 302
+unique requirements in the existing retrieved baseline. These imports do not
+ratify proposed decisions or reinstate historical calendars and conflicting
+clauses. The precedence and owner amendments above still apply.
+
+The [engineering handoff](plans/README.md) links those sections directly from
+all 62 task briefs. [Coverage](plans/coverage.md) names a primary task for
+every numbered requirement and accounts for narrative obligations. Each
+brief states inputs, outputs, examples, dependencies and the first deliverable;
+engineers choose implementation details within the contract.

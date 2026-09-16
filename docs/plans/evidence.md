@@ -1,51 +1,27 @@
-# Epic plan: Audit, sealing and vault
+# Audit, sealing and vault
 
-Proposed owner: **Gandharva**. Technical reviewers: Kaustav; Security for key/retention controls.
-Epic: #104.
+Proposed owner: **Gandharva**. Technical reviewers: Kaustav; Security for key/retention controls. Epic: [#104](https://github.com/Bodhan-AI/open-rachana/issues/104).
 
-## Review before implementation
+Start with #46’s persistent atomic evidence contract. Coordinate with PR #101 for #47’s verifier. Publish the receipt, canonical-byte version and failure behaviour consumed by Kaustav before implementing sealing in #77.
 
-Status: draft plan; owner review and go-ahead are pending. Nikhil reviews product
-scope and acceptance. KKT coordinates technical/interface review; Rohit reviews
-the test approach. Record the plan PR, approved revision and go-ahead in the issue.
-Security/accessibility decisions still need their named owners. Existing valid
-approvals and in-flight work are preserved; this plan does not revoke them.
+## Work and first deliverables
 
-Run [Humanizer](https://github.com/blader/humanizer) on prose before requesting
-review, then read it yourself. Preserve requirements, IDs, API names, numbers,
-MUST/MUST NOT rules, acceptance criteria and approval status. Clarity is the
-criterion; an AI-detection score is not. If your agent cannot load the skill,
-apply its documented writing guidance manually and say so.
+The order below is the module’s reading/build sequence. The dependencies in each brief determine integration order; independent fixture and design work can proceed while a producer is being built.
 
-## Scope and interfaces
+| Task | Deliverable |
+|---|---|
+| [#46](tasks/issue-46.md) | Persist the audit chain and make required workflow writes atomic with their evidence and outbox entries. |
+| [#47](tasks/issue-47.md) | Expose content-free audit verification and detect missing, changed or reordered records and invalid anchors. |
+| [#48](tasks/issue-48.md) | Give auditors a restricted evidence search and verification result without a question-content path. |
+| [#77](tasks/issue-77.md) | Seal a fully evidenced version through the dedicated worker and protected KMS/object-store interfaces. |
+| [#78](tasks/issue-78.md) | Prove that routine human and administrator credentials cannot retrieve sealed plaintext. |
+
+## Ownership boundaries
 
 Own durable evidence, canonical bytes, encryption/manifests, sealing retries and verification. The workflow owner decides legal state changes; this package returns verified receipts.
 
-Expected locations: `platform/core audit/sealing workers and provider contracts`. These are shared-code ownership boundaries,
-not new services. Changes to shared contracts need the consuming owner’s review.
+## How to use this handoff
 
-## Child plans
+Read the first task brief, its exact PRD sections and the effective-rule notes. The brief contains the relevant source clauses, inputs, outputs, examples, dependencies and first deliverable. Propose implementation details in that brief or an attached plan PR; consumers review shared interfaces. Existing PRs and valid approvals stay in force. Only the named unresolved decision blocks its dependent behaviour; it does not require the whole module to wait.
 
-| Issue | Plan |
-|---|---|
-| #46 | [As the System, I want every state change written to a persisted hash-chained audit log in the same transaction](tasks/issue-46.md) |
-| #47 | [As an Auditor, I want chain verification to fail on a tampered or missing record](tasks/issue-47.md) |
-| #48 | [As an Auditor, I want to search the audit trail and never see question content](tasks/issue-48.md) |
-| #77 | [As the System, I want to seal a language version after accessibility approval with no human button](tasks/issue-77.md) |
-| #78 | [As any human, including Admin, I cannot read a sealed question](tasks/issue-78.md) |
-
-## Owner’s first PR
-
-Review these starter plans against current code. Settle interfaces and the first
-small slice, record available capacity and return the plan PR for review. Keep
-open policy decisions explicit. Extended work can use a separate plan file;
-small work can remain in its linked task plan. Do not duplicate the existing
-observability spec or implementation plans: reference and amend them.
-
-## Acceptance and handover
-
-The epic closes when its child acceptance criteria have retained evidence,
-its interfaces work in the shared flow, and its runbooks/limitations are
-reviewed by another contributor. The primary owner is responsible for integration
-with consumers; Rohit supplies the shared harness and Nikhil reviews product
-behaviour. Humanizer is a prose review step, not technical approval.
+For each implementation PR, retain the accepted contract/plan revision, requirement IDs, code, actual check result and remaining limits. Use [Humanizer](https://github.com/blader/humanizer) for new prose and read it yourself. Preserve quoted source text, IDs, numbers and security rules.

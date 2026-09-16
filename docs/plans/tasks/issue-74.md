@@ -1,50 +1,60 @@
-# Plan: As a Translator, I want submit blocked if I change locked structure, numbers, or media
+# #74: As a Translator, I want submit blocked if I change locked structure, numbers, or media
 
-Primary package: [Workflow and business rules](../workflow.md). Proposed owner: **Kaustav**.
-Technical reviewers: KKT; Gandharva for transaction/evidence boundaries.
-Issue: #74. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Kaustav**. Technical review: KKT; Gandharva for transaction/evidence boundaries.
+Epic: [#103](https://github.com/Bodhan-AI/open-rachana/issues/103). [Module route](../workflow.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Implement all structural translation checks and scoped, expiring exception enforcement.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own legal transitions, capability policy, assignments, validation, review/language gates, readiness and corrections. State changes and required audit events share one transaction.
+First deliverable: Build one failing fixture per STR code and the active/expired/revoked/wrong-check exception cases before wiring submit.
 
-Expected locations: `platform/core domain services, validators, API and event schemas`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Primary/variant canonical structure, fixed numeric/unit/symbol grammars and exception record with requester/approver/check codes/expiry.
+- Output: Blocking STR-01 through STR-11 findings or a validated submission with applicable exception identifiers recorded in evidence.
 
-#73
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [ASM04-TRN-03](../../requirements.md#req-asm04-trn-03) | Option mapping, correct-answer semantics, marks, assets, equations and structural identifiers are locked and machine-verified on submission. | MUST |
+| [ASM04-TRN-06](../../requirements.md#req-asm04-trn-06) | Deterministic checks run on submission and block it where the variant diverges structurally from the primary: option count and mapping, correct-answer position, marks, asset set, canonical equation set, and every numeric value, unit and symbol. | MUST |
+| [ASM04-TRN-08](../../requirements.md#req-asm04-trn-08) | A blocked structural check can be overridden only by a recorded exception carrying justification and an expiry date, consistent with ASR-04. The override is audited. | MUST |
+| [ASM04-TRN-10](../../requirements.md#req-asm04-trn-10) | Coordinators see language status and artefact ownership, never sealed content. | MUST |
+| [PRD-TRN-13](../../requirements.md#req-prd-trn-13) | GAP Structural check catalogue (TRN-06), each blocking and named in the response: STR-01 option count equal; STR-02 option identifier set and order equal; STR-03 correct-answer position equal; STR-04 marks equal; STR-05 asset set by checksum equal; STR-06 canonical equation multiset equal; STR-07 numeric value multiset equal (numbers including decimals, negatives and percentages, extracted by a fixed grammar); STR-08 unit multiset equal (from a maintained unit lexicon); STR-09 symbol multiset equal (non-alphabetic Unicode symbols from a fixed set); STR-10 table dimensions equal; STR-11 every primary image has alternative text in the variant unless decorative. | MUST |
+| [PRD-TRN-14](../../requirements.md#req-prd-trn-14) | GAP D-15 Exception record: identifier; version identifier; check codes covered; justification (at least 50 characters); requested by; approved by (a Coordinator, re-authenticated, different from the requester); created at; expires at (at most the configured maximum, proposed 30 days); status Active, Expired, Revoked or Consumed; audit references. Only an Active exception matching the failing check code permits the submission; the exception identifier is recorded on the decision and in the manifest. An hourly sweep expires exceptions. An attempted override without a valid exception returns EXCEPTION_REQUIRED. | MUST |
+| [PRD-TRN-11](../../requirements.md#req-prd-trn-11) | GAP Variant creation is part of the primary's sealing transaction. For each required language a new lineage and Draft are created with: empty target-language stem, option bodies, explanation and alternative text; locked fields copied from the primary (option identifiers and order, correct flag, marks, assets by checksum, canonical equations, classification); primary_reference_hash; and a read-only primary reference snapshot holding the primary's rendering and canonical text, classified Restricted and visible only to the assigned translator and translation reviewer. A translation assignment is created by policy. The snapshot is purged when the variant is sealed. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [11. Translation](../../prd/main-baseline.md#11-translation)
+- [6.8 Translation and variant equivalence · ASM04-TRN](../../prd/technical-baseline.md#68-translation-and-variant-equivalence--asm04-trn)
+
+## Behaviour to demonstrate
+
+Changing marks fails STR-04. An Active exception for STR-07 does not permit the marks change. The requester cannot approve their own exception.
+
+Failure checks: Change each locked structural element; refuse without an authorised, unexpired exception covering that exact change.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] Locked: number and order of options; which option is correct; marks; every number, unit and symbol; every equation; every image
 - [ ] A failed check blocks submit and names the check
 - [ ] Only a recorded Admin exception with an expiry date can override a named check
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Change each locked structural element; refuse without an authorised, unexpired exception covering that exact change.
+Required producer work: [#73](issue-73.md) (Divyansh).
 
-## Requirement trace
+D-15/D-23 fix exception policy and numeral handling. Use configurable limits; do not allow a blanket bypass of structural checks.
 
-QST04-TRN equivalence checks
+## Engineering choices and review
 
-## Evidence required to close
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

@@ -107,7 +107,7 @@ to a shorter summary.
   authored; session, capability and re-authentication mechanics still need review.
 - **Generation and rendering (R2/R4/R5).** Full Layer 2 ownership, proposal
   adoption and the server/reference versus signed-local render contract
-  require decisions. R3 is decided in ADR-0013: curriculum, generation
+  require decisions. R3 is decided in ADR-0015: curriculum, generation
   constraints/counts are in Rachana; final paper selection/order/export are
   in separate assembly.
   Use the concrete proposals in `docs/prd-reconciliation.md` to ask owners;

@@ -1,50 +1,26 @@
-# Epic plan: Testing framework and acceptance evidence
+# Testing framework and acceptance evidence
 
-Proposed owner: **Rohit**. Technical reviewers: KKT; feature owners.
-Epic: #107.
+Proposed owner: **Rohit**. Technical reviewers: KKT; feature owners. Epic: [#107](https://github.com/Bodhan-AI/open-rachana/issues/107).
 
-## Review before implementation
+Start by continuing #96 for #52 and #98 for #49. Establish #115’s shared fixtures and the first manual-draft/independent-review path. Feature owners keep responsibility for their own tests; Rohit owns the shared harness and independent failure cases.
 
-Status: draft plan; owner review and go-ahead are pending. Nikhil reviews product
-scope and acceptance. KKT coordinates technical/interface review; Rohit reviews
-the test approach. Record the plan PR, approved revision and go-ahead in the issue.
-Security/accessibility decisions still need their named owners. Existing valid
-approvals and in-flight work are preserved; this plan does not revoke them.
+## Work and first deliverables
 
-Run [Humanizer](https://github.com/blader/humanizer) on prose before requesting
-review, then read it yourself. Preserve requirements, IDs, API names, numbers,
-MUST/MUST NOT rules, acceptance criteria and approval status. Clarity is the
-criterion; an AI-detection score is not. If your agent cannot load the skill,
-apply its documented writing guidance manually and say so.
+The order below is the module’s reading/build sequence. The dependencies in each brief determine integration order; independent fixture and design work can proceed while a producer is being built.
 
-## Scope and interfaces
+| Task | Deliverable |
+|---|---|
+| [#52](tasks/issue-52.md) | Replace placeholder Python CI with actual tests and preserve the aggregate ci gate. |
+| [#49](tasks/issue-49.md) | Make leakage of synthetic Restricted content fail the build across application logs, audit and diagnostics. |
+| [#115](tasks/test-harness.md) | Provide shared fixtures and a contract/integration harness used by all feature owners. |
+| [#86](tasks/issue-86.md) | Run independent security qualification against the implemented interfaces and deployment. |
+
+## Ownership boundaries
 
 Own the shared testing system and independent failure cases. Each feature owner writes tests for their implementation; expert security/accessibility acceptance still needs named people.
 
-Expected locations: `CI, shared fixtures, contract/integration/end-to-end tests and evidence index`. These are shared-code ownership boundaries,
-not new services. Changes to shared contracts need the consuming owner’s review.
+## How to use this handoff
 
-## Child plans
+Read the first task brief, its exact PRD sections and the effective-rule notes. The brief contains the relevant source clauses, inputs, outputs, examples, dependencies and first deliverable. Propose implementation details in that brief or an attached plan PR; consumers review shared interfaces. Existing PRs and valid approvals stay in force. Only the named unresolved decision blocks its dependent behaviour; it does not require the whole module to wait.
 
-| Issue | Plan |
-|---|---|
-| #49 | [As the System, I want CI to fail if logs, errors, or audit fixtures contain question content](tasks/issue-49.md) |
-| #52 | [As an engineer, I want CI to run platform pytest so a green PR is evidence](tasks/issue-52.md) |
-| #86 | [As Security, I want a penetration test against isolation, seal, SoD, and export closed](tasks/issue-86.md) |
-| #115 | [Build shared contract fixtures and the first end-to-end acceptance harness](tasks/test-harness.md) |
-
-## Owner’s first PR
-
-Review these starter plans against current code. Settle interfaces and the first
-small slice, record available capacity and return the plan PR for review. Keep
-open policy decisions explicit. Extended work can use a separate plan file;
-small work can remain in its linked task plan. Do not duplicate the existing
-observability spec or implementation plans: reference and amend them.
-
-## Acceptance and handover
-
-The epic closes when its child acceptance criteria have retained evidence,
-its interfaces work in the shared flow, and its runbooks/limitations are
-reviewed by another contributor. The primary owner is responsible for integration
-with consumers; Rohit supplies the shared harness and Nikhil reviews product
-behaviour. Humanizer is a prose review step, not technical approval.
+For each implementation PR, retain the accepted contract/plan revision, requirement IDs, code, actual check result and remaining limits. Use [Humanizer](https://github.com/blader/humanizer) for new prose and read it yourself. Preserve quoted source text, IDs, numbers and security rules.

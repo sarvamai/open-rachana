@@ -1,71 +1,61 @@
-# Plans and issue workflow
+# Engineering handoff: start here
 
-For the complete task briefs and embedded PRD, use the [engineering handoff in PR #100](https://github.com/Bodhan-AI/open-rachana/blob/pr2-product-reference/docs/plans/README.md). The starter plans on this branch are retained for PR #99 review; the expanded handoff supersedes them when #100 lands.
+This is the repository handoff for all eight modules: 62 task-specific briefs, the complete retained PRD, and a map of all 302 numbered requirements. The briefs state the product contract and leave implementation design to the engineer. They are proposed for technical review; publication does not claim feature delivery or expert acceptance.
 
-Status: proposed workflow in PR #99. These starter plans are ready for owner
-review; they are not recorded implementation approvals.
+If browsing `main` before PR #100 merges, the expanded files are on the `pr2-product-reference` branch. PR #99 contains the contributor allocation; PR #100 carries this complete reference and handoff. Merge #99 first. Both PRs need the repository’s required checks and code-owner approval. No contributor should need the chat history or an external document to locate a product rule.
 
-One person owns each functional epic. The existing M2–M6 epics remain milestone
-acceptance views. A task has one primary owner even when other packages review
-or supply its interfaces.
+## Pick your module
 
-1. The owner checks in the epic plan and the plan for the next small task.
-2. Nikhil reviews product scope and expected behaviour. KKT coordinates
-   technical/interface review; Rohit reviews tests. Record any required
-   Security or Accessibility decisions with their owners.
-3. Record the accepted plan revision and explicit go-ahead in the issue.
-4. Implement a small PR against that plan. A planning skill may turn an
-   approved plan into tickets, but must preserve requirements, dependencies
-   and unresolved decisions. Tool-generated tickets do not approve themselves.
-5. Link implementation, actual checks and retained results. Close only when
-   the acceptance owner agrees. Preserve valid existing approvals and in-flight work.
-
-New gap tickets initially request plan review. Existing tickets retain their
-stories and acceptance criteria, with a planning handoff added at the top.
-No contributor is assigned or committed on their behalf.
-
-## Readability
-
-Use [Humanizer](https://github.com/blader/humanizer) on plans, issue prose and
-PR descriptions before asking another person to review them. Then read the
-result yourself. Keep sentences direct and examples concrete. Preserve IDs,
-API names, commands, numbers, MUST/MUST NOT rules, acceptance criteria and
-approval status. Use the skill's documented manual guidance if an agent does
-not support it. There is no AI-detection score or automatic approval gate.
-
-## Functional epics
-
-| Epic | Proposed owner | Plan |
+| Contributor | Module and issues | Begin with |
 |---|---|---|
-| #102 — Workspaces and signed client | Divyansh | [client.md](client.md) |
-| #103 — Workflow and business rules | Kaustav | [workflow.md](workflow.md) |
-| #104 — Audit, sealing and vault | Gandharva | [evidence.md](evidence.md) |
-| #105 — Operational observability | Irfan | [observability.md](observability.md) |
-| #106 — Platform, identity and integration | KKT | [platform.md](platform.md) |
-| #107 — Testing framework and acceptance evidence | Rohit | [testing.md](testing.md) |
-| #108 — Product acceptance and contributor onboarding | Nikhil | [product.md](product.md) |
-| #109 — Layer 2 intelligence and adapters | Sarvam team — individual lead to be confirmed | [intelligence.md](intelligence.md) |
+| Kaustav | [Workflow and business rules](workflow.md) / [#103](https://github.com/Bodhan-AI/open-rachana/issues/103) | [#42](tasks/issue-42.md) |
+| Divyansh | [Workspaces and signed client](client.md) / [#102](https://github.com/Bodhan-AI/open-rachana/issues/102) | [#118](tasks/client-contract.md) |
+| Gandharva | [Audit, sealing and vault](evidence.md) / [#104](https://github.com/Bodhan-AI/open-rachana/issues/104) | [#46](tasks/issue-46.md) |
+| KKT | [Platform, identity and integration](platform.md) / [#106](https://github.com/Bodhan-AI/open-rachana/issues/106) | [#117](tasks/task-contract.md) |
+| Irfan | [Operational observability](observability.md) / [#105](https://github.com/Bodhan-AI/open-rachana/issues/105) | [#111](tasks/obs-local.md) |
+| Rohit | [Testing framework and acceptance evidence](testing.md) / [#107](https://github.com/Bodhan-AI/open-rachana/issues/107) | [#52](tasks/issue-52.md) |
+| Nikhil | [Product acceptance and contributor onboarding](product.md) / [#108](https://github.com/Bodhan-AI/open-rachana/issues/108) | [#40](tasks/issue-40.md) |
+| Sarvam team — individual lead to be confirmed | [Layer 2 intelligence and adapters](intelligence.md) / [#109](https://github.com/Bodhan-AI/open-rachana/issues/109) | [#54](tasks/issue-54.md) |
 
-## Integration order
+## Read the product contract
 
-Begin with real CI and a shared environment, then identity, persistent audit,
-cycle/version contracts and a manual draft. Add independent review with a
-self-approval refusal, a correlated trace and atomic evidence. Extend the same
-flow through accessibility, sealing, languages and readiness, then qualify
-recovery and operational acceptance. Diagnostic setup and Layer 2 contract
-fixtures can proceed in parallel. Actual dependencies are listed per task.
+- [Current product workflow and permissions](../product-workflow.md): the short explanation of roles, lifecycle and boundaries.
+- [Effective rules and conflicts](effective-rules.md): how source amendments apply; what an engineer may choose; what needs an owner decision.
+- [Full main PRD](../prd/main-baseline.md): includes the complete role matrix and product journeys.
+- [Full technical PRD](../prd/technical-baseline.md): includes field/schema definitions, validation and structural catalogues, errors, sample payloads, performance limits, edge cases and acceptance criteria.
+- [Requirement coverage](coverage.md): one primary task for each of the 302 numbered requirements, with related consumers and narrative obligations.
+- [Decision register](../prd-decisions.md) and [reconciliation](../prd-reconciliation.md): retain actual approval status; a proposed default is not an owner decision.
 
-The current 28 September target does not establish volunteer capacity. Owners
-must confirm availability and interim checkpoints before promising dates.
-No security or acceptance gate is removed to fit the target.
+The retained PRDs contain historical wording and calendars. Use [source precedence](../source-of-truth.md), effective rules and the current [delivery plan](../delivery-plan.md) when they differ. The word `GAP` in a source clause denotes an addition made in the PRD, not missing implementation instructions.
 
-## Coverage and current work
+## First integrated flow
 
-Every open delivery story #39–89 and the related cleanup issue #94 has one
-primary package and a checked-in task plan. Closed historical issues are left
-alone. Issue #92 and PR #93 are existing recovery work; check their status before
-starting overlapping extraction, CI, Makefile or canonicalisation changes.
-The requirement register and unresolved decisions are reviewed in PR #100.
-Owners must map their actual tests to the applicable requirements before closure;
-this task inventory does not claim all 302 requirements are already implemented
-or accepted.
+KKT supplies identity and a shared environment; Gandharva supplies persistent audit/transaction receipts; Kaustav supplies permissions, configuration, draft and decision services; Divyansh consumes those contracts in the signed client. Rohit tests a manual draft through independent review, including a direct-API self-approval refusal. Irfan correlates diagnostics without receiving content. Nikhil verifies the expected user behaviour. The Layer 2 team can develop candidate/provenance fixtures alongside this flow.
+
+Extend that same flow through separate accessibility remediation/review, system sealing, languages and machine-only readiness. Rendering, sealed-reference release and deployment-policy decisions stop only the affected paths. Production acceptance still requires the recorded expert and operating prerequisites.
+
+## Work already in progress
+
+Snapshot checked 16 September 2026 against main `55f3b1c`:
+
+| Work | Current evidence | Contributor action |
+|---|---|---|
+| Python OTel bootstrap and local stack | #120 merged | Reuse it; #110/#111 are not greenfield tasks |
+| Structured logs, audit metrics and provider spans | #121 open | Continue/review that PR before duplicating #110 |
+| Persistent/audit verification work | #101 open | Coordinate #47; verify which backing store it covers |
+| Content-leak CI suite | #98 open | Continue #49 there |
+| Product decision ADRs | #97 open, changes requested | Reconcile source and numbering; do not treat it as accepted |
+| Real Python CI | #96 open | Continue #52; main still has placeholder Python steps |
+| Source/extraction and architecture recovery | #93 open | Coordinate #54/#94 and shared files |
+
+Existing issue assignees and valid approvals are preserved. The names in this plan are proposed ownership, not a claim that someone committed time. Owners confirm capacity; the target date does not establish volunteer availability.
+
+## How to use this handoff
+
+Read the first task brief, its exact PRD sections and the effective-rule notes. The brief contains the relevant source clauses, inputs, outputs, examples, dependencies and first deliverable. Propose implementation details in that brief or an attached plan PR; consumers review shared interfaces. Existing PRs and valid approvals stay in force. Only the named unresolved decision blocks its dependent behaviour; it does not require the whole module to wait.
+
+For each implementation PR, retain the accepted contract/plan revision, requirement IDs, code, actual check result and remaining limits. Use [Humanizer](https://github.com/blader/humanizer) for new prose and read it yourself. Preserve quoted source text, IDs, numbers and security rules.
+
+## Check this handoff
+
+Run `python3 docs/plans/validate_handoff.py` from the repository root to verify task coverage, preserved requirement clauses, dependencies and local section links. This validates the documentation, not product acceptance.

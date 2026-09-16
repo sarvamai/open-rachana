@@ -1,5 +1,8 @@
 # Contributor work packages — proposed allocation
 
+Use the [engineering handoff](plans/README.md) for the complete task briefs, exact PRD sections, first deliverables and current implementation work. This page explains the division of responsibility.
+
+
 This is a proposed work allocation for discussion with the contributors,
 prepared on 14 September 2026. Names follow the Product Owner's list; availability,
 acceptance of these assignments and relevant specialisms remain to be confirmed.

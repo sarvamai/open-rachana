@@ -1,67 +1,43 @@
-# Epic plan: Workflow and business rules
+# Workflow and business rules
 
-Proposed owner: **Kaustav**. Technical reviewers: KKT; Gandharva for transaction/evidence boundaries.
-Epic: #103.
+Proposed owner: **Kaustav**. Technical reviewers: KKT; Gandharva for transaction/evidence boundaries. Epic: [#103](https://github.com/Bodhan-AI/open-rachana/issues/103).
 
-## Review before implementation
+Start with #42: implement and review the policy evaluator against the embedded role matrix. Then agree #45’s version/state model and #44’s configuration with the persistent evidence contract in #46. The first integrated result is manual draft creation, deterministic validation and independent review; translation/correction work comes after its specific reference-release decisions.
 
-Status: draft plan; owner review and go-ahead are pending. Nikhil reviews product
-scope and acceptance. KKT coordinates technical/interface review; Rohit reviews
-the test approach. Record the plan PR, approved revision and go-ahead in the issue.
-Security/accessibility decisions still need their named owners. Existing valid
-approvals and in-flight work are preserved; this plan does not revoke them.
+## Work and first deliverables
 
-Run [Humanizer](https://github.com/blader/humanizer) on prose before requesting
-review, then read it yourself. Preserve requirements, IDs, API names, numbers,
-MUST/MUST NOT rules, acceptance criteria and approval status. Clarity is the
-criterion; an AI-detection score is not. If your agent cannot load the skill,
-apply its documented writing guidance manually and say so.
+The order below is the module’s reading/build sequence. The dependencies in each brief determine integration order; independent fixture and design work can proceed while a producer is being built.
 
-## Scope and interfaces
+| Task | Deliverable |
+|---|---|
+| [#42](tasks/issue-42.md) | Enforce the role-by-operation matrix on every server request and maintain the recognised-capability registry. |
+| [#44](tasks/issue-44.md) | Build versioned cycle, taxonomy and vocabulary configuration with the content-free Admin surface. |
+| [#45](tasks/issue-45.md) | Define artefact identity, immutable versions, lineage and the closed lifecycle used by all workflow services. |
+| [#53](tasks/issue-53.md) | Create and autosave manual drafts under the active cycle, with author cap enforcement and server receipts. |
+| [#61](tasks/issue-61.md) | Implement the complete deterministic validation catalogue and return stable field-specific findings. |
+| [#62](tasks/issue-62.md) | Perform deterministic similarity checks against the same-language sealed bank without revealing sealed text. |
+| [#67](tasks/issue-67.md) | Assign tasks by recognised capability, duty eligibility and deterministic workload order. |
+| [#63](tasks/issue-63.md) | Submit a draft atomically into immutable review with evidence and a reproducible receipt. |
+| [#68](tasks/issue-68.md) | Enforce separation of duties across the entire version lineage and every approval endpoint. |
+| [#66](tasks/issue-66.md) | Record question-review decisions with complete attestations and immutable rejection history. |
+| [#50](tasks/issue-50.md) | Complete authenticated, durable session-integrity ingestion and server-side scoring around the existing session scaffold. |
+| [#71](tasks/issue-71.md) | Declare and verify expected evidence for each protected transition and sealed version. |
+| [#74](tasks/issue-74.md) | Implement all structural translation checks and scoped, expiring exception enforcement. |
+| [#79](tasks/issue-79.md) | Create one current translation draft and task per required language after successful primary sealing. |
+| [#80](tasks/issue-80.md) | Maintain materialised readiness whenever a current seal, policy or lineage input changes. |
+| [#81](tasks/issue-81.md) | Publish machine-only readiness queries for the separate assembly module. |
+| [#82](tasks/issue-82.md) | Accept signed selection/completion notifications and apply Used/Archived transitions idempotently. |
+| [#83](tasks/issue-83.md) | Authorise corrections, revoke readiness immediately and preserve all sealed history through revalidation and supersession. |
+| [#84](tasks/issue-84.md) | Retire approved artefacts with re-authentication, preserved evidence and downstream notification. |
+| [#55](tasks/issue-55.md) | Record generation blueprints and translate their counts and constraints into independent candidate requests. |
+| [#64](tasks/issue-64.md) | Withdraw an unsubmitted draft without deleting its content or evidence. |
+
+## Ownership boundaries
 
 Own legal transitions, capability policy, assignments, validation, review/language gates, readiness and corrections. State changes and required audit events share one transaction.
 
-Expected locations: `platform/core domain services, validators, API and event schemas`. These are shared-code ownership boundaries,
-not new services. Changes to shared contracts need the consuming owner’s review.
+## How to use this handoff
 
-## Child plans
+Read the first task brief, its exact PRD sections and the effective-rule notes. The brief contains the relevant source clauses, inputs, outputs, examples, dependencies and first deliverable. Propose implementation details in that brief or an attached plan PR; consumers review shared interfaces. Existing PRs and valid approvals stay in force. Only the named unresolved decision blocks its dependent behaviour; it does not require the whole module to wait.
 
-| Issue | Plan |
-|---|---|
-| #42 | [As the System, I want every request authorised from the capability matrix](tasks/issue-42.md) |
-| #44 | [As an Admin, I want to configure a cycle and its taxonomy](tasks/issue-44.md) |
-| #45 | [As the System, I want every question to have a QB-id, immutable versions, and a closed state machine](tasks/issue-45.md) |
-| #50 | [As the System, I want content sessions to heartbeat and the first monitoring signal to reach the audit in seconds](tasks/issue-50.md) |
-| #53 | [As an Admin, I want to create a DRAFT and receive a receipt](tasks/issue-53.md) |
-| #55 | [As an Admin, I want to define a blueprint for an assessment](tasks/issue-55.md) |
-| #61 | [As an Admin, I want submit blocked until validation passes, with each finding naming the field](tasks/issue-61.md) |
-| #62 | [As an Admin, I want submit refused when the question is too similar to a sealed question](tasks/issue-62.md) |
-| #63 | [As an Admin, I want submit to freeze the version, hash it, and give me a receipt](tasks/issue-63.md) |
-| #64 | [As an Admin, I want to withdraw a draft instead of deleting it](tasks/issue-64.md) |
-| #66 | [As a Question Reviewer, I want to comment, approve against the checklist, or reject with a reason](tasks/issue-66.md) |
-| #67 | [As the System, I want to assign one eligible reviewer per question per stage by workload](tasks/issue-67.md) |
-| #68 | [As the System, I want self-approval and cross-stage reuse of the same person to fail on the API](tasks/issue-68.md) |
-| #71 | [As the System, I want missing expected evidence to block the next step and raise an alert](tasks/issue-71.md) |
-| #74 | [As a Translator, I want submit blocked if I change locked structure, numbers, or media](tasks/issue-74.md) |
-| #79 | [As the System, I want sealing the original to create the translation drafts](tasks/issue-79.md) |
-| #80 | [As the System, I want FULLY_APPROVED only when the original and every required language are sealed](tasks/issue-80.md) |
-| #81 | [As Assembly, I want a machine-identity API that returns readiness metadata and never content](tasks/issue-81.md) |
-| #82 | [As Assembly, I want to mark a question USED and later ARCHIVED via signed messages](tasks/issue-82.md) |
-| #83 | [As an Admin, I want to authorise a correction that revokes readiness and starts a new lineage](tasks/issue-83.md) |
-| #84 | [As an Admin, I want to retire an approved question rather than delete it](tasks/issue-84.md) |
-
-## Owner’s first PR
-
-Review these starter plans against current code. Settle interfaces and the first
-small slice, record available capacity and return the plan PR for review. Keep
-open policy decisions explicit. Extended work can use a separate plan file;
-small work can remain in its linked task plan. Do not duplicate the existing
-observability spec or implementation plans: reference and amend them.
-
-## Acceptance and handover
-
-The epic closes when its child acceptance criteria have retained evidence,
-its interfaces work in the shared flow, and its runbooks/limitations are
-reviewed by another contributor. The primary owner is responsible for integration
-with consumers; Rohit supplies the shared harness and Nikhil reviews product
-behaviour. Humanizer is a prose review step, not technical approval.
+For each implementation PR, retain the accepted contract/plan revision, requirement IDs, code, actual check result and remaining limits. Use [Humanizer](https://github.com/blader/humanizer) for new prose and read it yourself. Preserve quoted source text, IDs, numbers and security rules.

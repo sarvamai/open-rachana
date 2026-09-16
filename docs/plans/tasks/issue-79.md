@@ -1,54 +1,58 @@
-# Plan: As the System, I want sealing the original to create the translation drafts
+# #79: As the System, I want sealing the original to create the translation drafts
 
-Primary package: [Workflow and business rules](../workflow.md). Proposed owner: **Kaustav**.
-Technical reviewers: KKT; Gandharva for transaction/evidence boundaries.
-Issue: #79. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Kaustav**. Technical review: KKT; Gandharva for transaction/evidence boundaries.
+Epic: [#103](https://github.com/Bodhan-AI/open-rachana/issues/103). [Module route](../workflow.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Create one current translation draft and task per required language after successful primary sealing.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own legal transitions, capability policy, assignments, validation, review/language gates, readiness and corrections. State changes and required audit events share one transaction.
+First deliverable: Use a synthetic sealed-primary event and zero/two required-language configurations; test replay and failure recovery.
 
-Expected locations: `platform/core domain services, validators, API and event schemas`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Primary seal event/hash, current cycle language set, locked source structure and authorised reference-release contract.
+- Output: Idempotent per-language lineage/draft/assignment with primary binding; no draft for the primary language or duplicate event.
 
-#77, #67
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [ASM04-TRN-01](../../requirements.md#req-asm04-trn-01) | Sealing the primary version creates one question or artefact per required language. | MUST |
+| [PRD-TRN-11](../../requirements.md#req-prd-trn-11) | GAP Variant creation is part of the primary's sealing transaction. For each required language a new lineage and Draft are created with: empty target-language stem, option bodies, explanation and alternative text; locked fields copied from the primary (option identifiers and order, correct flag, marks, assets by checksum, canonical equations, classification); primary_reference_hash; and a read-only primary reference snapshot holding the primary's rendering and canonical text, classified Restricted and visible only to the assigned translator and translation reviewer. A translation assignment is created by policy. The snapshot is purged when the variant is sealed. | MUST |
+| [PRD-VLT-14](../../requirements.md#req-prd-vlt-14) | GAP Post-seal removal (VLT-05): in the sealing transaction the plaintext working copy of the sealed version is deleted from the authoring-tier store and its rendering caches are purged. Returned and Withdrawn versions are not sealed; they remain immutable in the authoring tier, reachable only as findings context by the author of the successor draft and as metadata by auditors. | MUST |
+| [PRD-TRN-16](../../requirements.md#req-prd-trn-16) | GAP Revalidation (TRN-09, RES06-COR-03): when a corrected primary is sealed, each variant lineage is flagged requires_revalidation and a revalidate_variant task is created. Its workspace shows a field-level difference between the previous and new primary reference. The translator produces a new variant version bound to the new primary hash; it passes every gate; readiness returns only when every required language is resealed against the new primary. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [11. Translation](../../prd/main-baseline.md#11-translation)
+- [13. Question Lifecycle](../../prd/main-baseline.md#13-question-lifecycle)
+- [6.8 Translation and variant equivalence · ASM04-TRN](../../prd/technical-baseline.md#68-translation-and-variant-equivalence--asm04-trn)
+
+## Behaviour to demonstrate
+
+Deliver the same primary-sealed event twice: exactly one current draft per required language exists. With no required variants, no translation tasks are created.
+
+Failure checks: Replay primary-seal events; create exactly one current task per required language and preserve locked structure without a general vault-read path.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] On original SEALED, one IN_TRANSLATION draft is created per required language
 - [ ] Assignment story places one translator per language
 - [ ] Original bytes are not copied into an editable original; translators see a read view
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Replay primary-seal events; create exactly one current task per required language and preserve locked structure without a general vault-read path.
+Required producer work: [#77](issue-77.md) (Gandharva), [#67](issue-67.md) (Kaustav).
 
-## Requirement trace
+R8 blocks live Restricted reference construction/purge. Agree with #77 how variant creation and seal completion remain consistent; external writes are not magically one database transaction.
 
-QST04-TRN · QST05-VLT
+## Engineering choices and review
 
-## Decisions and amendments to check
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-- Canonicalisation, retention and scoped sealed-reference/emergency contracts have explicit gates (R6/R8, D-24). No routine human sealed-plaintext read path is authorised by this issue.
-
-## Evidence required to close
-
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

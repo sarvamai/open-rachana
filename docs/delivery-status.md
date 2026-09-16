@@ -1,21 +1,25 @@
 # Delivery status and evidence
 
-Snapshot: 14 September 2026, inspected baseline commit
-`5627bd1574beb56ec6a1a8de97f83a5525870c9c`. This documentation change does not
+Snapshot refreshed 16 September 2026 against main `55f3b1c` (merged #120). This documentation change does not
 implement product features. The README's **M0 foundation** status is retained;
 partial M1 session/audit scaffolding exists. No acceptance milestone is closed
 by this inspection.
 
 ## In-flight implementation coordination
 
-PR #93 (architecture/extraction recovery) is open against the same baseline.
-It proposes real Python CI, provider/source code, a Makefile, canonicalisation
+PR #93 (architecture/extraction recovery) remains open. Other active work is
+#96 (Python CI), #97 (product decisions), #98 (content-leak tests), #101
+(audit verification), and #121 (remaining Python diagnostic signals).
+See the [handoff index](plans/README.md#work-already-in-progress) before starting overlapping work.
+
+PR #93 proposes real Python CI, provider/source code, a Makefile, canonicalisation
 and as-built documentation, plus ADR-0012 for deployment/role surfaces.
 This snapshot describes main, not that unmerged implementation. On integration,
 reconcile its canonicalisation/as-built pages and update paths, CI evidence and
 status from the merged code. Do not overwrite its work or close #92/#94 from
-this documentation change. This reference uses ADR-0013 for the separate
-product generation/assembly boundary to avoid the numbering collision.
+this documentation change. This reference uses ADR-0015 for the separate
+product generation/assembly boundary; #93 uses 0012 and #97 proposes 0012–0014.
+Those PRs must reconcile their own remaining overlap before merging.
 
 ## What exists and what it proves
 
@@ -27,7 +31,7 @@ product generation/assembly boundary to avoid the numbering collision.
 | KMS SPI | [protocol](../platform/spi/src/mulyankan_spi/kms.py), [conformance suite](../platform/spi/src/mulyankan_spi/conformance/kms.py), [tests](../platform/spi/tests/test_kms_conformance.py) | Interface and test double; no reference KMS provider or production key service supplied |
 | Web surfaces | [web tree description](../apps/web/AGENTS.md) | Knowledge-base, question-bank/blueprint and exam-paper mocks; no authenticated end-to-end workflow or source-approved assembly scope |
 | Desktop client | [client scaffold](../apps/client/README.md), [ADR-0010](adr/0010-thin-client-tauri.md) | Tauri scaffold; no complete signed, enrolled, contract-connected role client |
-| Observability | [working spec](observability.md), [implementation plan](observability-plan.md) | Design and planned slices; ADR-0011 still Proposed; no deployment or acceptance inferred from plan code snippets |
+| Observability | [working spec](observability.md), [implementation plan](observability-plan.md), [local stack](../deploy/dev/README.md) | #120 merged SDK/bootstrap, content guard, tests and local Collector/Grafana configuration. #121 proposes the remaining logs/request/audit/provider signals. This inspection does not itself verify a live deployment; ADR-0011 proposal status remains visible. |
 
 ## Inspected test definitions
 

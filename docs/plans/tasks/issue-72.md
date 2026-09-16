@@ -1,34 +1,50 @@
-# Plan: As an Integrity Operator, I want a live board of sessions, scores, and events with no content
+# #72: As an Integrity Operator, I want a live board of sessions, scores, and events with no content
 
-Primary package: [Workspaces and signed client](../client.md). Proposed owner: **Divyansh**.
-Technical reviewers: Kaustav; Accessibility lead for relevant checks.
-Issue: #72. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Divyansh**. Technical review: Kaustav; Accessibility lead for relevant checks.
+Epic: [#102](https://github.com/Bodhan-AI/open-rachana/issues/102). [Module route](../client.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Build the content-free Integrity Operator surface and reconnecting live session feed.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own task screens, accessible interaction, content-client restrictions and release packaging. Consume server permissions and task responses; never infer authorization from a hidden button.
+First deliverable: Connect a synthetic snapshot/event stream, test reconnect recovery, then integrate #50’s authenticated durable service.
 
-Expected locations: `apps/client and the content-free configuration/oversight parts of apps/web`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Authorised operator, session snapshots, ordered integrity events, score/referral state and last received event ID.
+- Output: Active-session list, event feed, drill-down, persistent referral alert, distinct critical feedback and reconnect/backoff state.
 
-#42, #50
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [ASR02-OBS-11](../../requirements.md#req-asr02-obs-11) | The operator surface shows all active sessions with role, subject, artefact state, integrity score and time since last heartbeat. | MUST |
+| [ASR02-OBS-12](../../requirements.md#req-asr02-obs-12) | A rolling feed presents newest-first events across all sessions, with severity and pseudonymous actor identifier. | MUST |
+| [ASR02-OBS-13](../../requirements.md#req-asr02-obs-13) | A per-session drill-down shows the full ordered event history and score progression. | MUST |
+| [ASR02-OBS-14](../../requirements.md#req-asr02-obs-14) | The surface updates by server push, not manual reload, and displays a reconnecting state with backoff on transport loss. | MUST |
+| [ASR02-OBS-15](../../requirements.md#req-asr02-obs-15) | On reconnect the surface re-synchronizes session state, so no live session is missing or stale. | MUST |
+| [ASR02-OBS-18](../../requirements.md#req-asr02-obs-18) | The operator role can reach no artefact content through any interface. | MUST |
+| [PRD-OBS-26](../../requirements.md#req-prd-obs-26) | GAP Operator surface transport: a server-push channel (server-sent events or a web socket) carrying session snapshots and events; reconnection with exponential backoff from 1 second to a 30-second cap with jitter; on reconnect the client sends its last event identifier and the server replies with a full session snapshot plus every missed event. Signal to surface p95 ≤ 3 seconds; signal to durable audit p95 ≤ 5 seconds. | MUST |
+| [PRD-OBS-27](../../requirements.md#req-prd-obs-27) | GAP The operator's authorization scope contains no content endpoint at all; the operator API's response schemas are tested for the absence of content field names, and the operator UI is served without the editor or renderer bundles. | MUST |
+| [UI-11](../../requirements.md#req-ui-11) | Operator — live sessions, event feed, per-session drill-down, alert banner, connection state. Distinct visual treatment for the operational context. | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [18. Session Monitoring](../../prd/main-baseline.md#18-session-monitoring)
+- [6.14 Session integrity, observability and referral · ASR02-OBS](../../prd/technical-baseline.md#614-session-integrity-observability-and-referral--asr02-obs)
+- [9.2 Screen requirements](../../prd/technical-baseline.md#92-screen-requirements)
+
+## Behaviour to demonstrate
+
+Disconnect after event E and reconnect: receive a full current snapshot and missed events without hiding an active session or duplicating alerts.
+
+Failure checks: Exercise invalid session access and referral events under the approved scoring policy; confirm the operator payload never carries question content.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] Live sessions list with score and recent events
 - [ ] Signals include (where the client can see them): copy/cut/paste/context menu, print/screenshot chords, devtools, focus loss, tab switch, concurrent tabs, heartbeat gaps
@@ -36,21 +52,14 @@ fixtures while a producer is under construction; real integration is still requi
 - [ ] Screen has no stem, options, or other question body
 - [ ] Admin may hold this screen in the pilot
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Exercise invalid session access and referral events under the approved scoring policy; confirm the operator payload never carries question content.
+Required producer work: [#42](issue-42.md) (Kaustav), [#50](issue-50.md) (Kaustav).
 
-## Requirement trace
+D-03/D-04/D-22 determine operational policy. UI must not expose suspend powers merely because a score crossed a proposed threshold.
 
-ASR02-OBS
+## Engineering choices and review
 
-## Decisions and amendments to check
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-- Heartbeat/scoring/referral values remain governed by the decision register. Existing numeric defaults are proposals until ratified; diagnostic Collector outage never excuses lost integrity evidence.
-
-## Evidence required to close
-
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.

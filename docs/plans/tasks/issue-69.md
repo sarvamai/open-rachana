@@ -1,55 +1,59 @@
-# Plan: As an Accessibility Specialist, I want to remediate accessibility fields only
+# #69: As an Accessibility Specialist, I want to remediate accessibility fields only
 
-Primary package: [Workspaces and signed client](../client.md). Proposed owner: **Divyansh**.
-Technical reviewers: Kaustav; Accessibility lead for relevant checks.
-Issue: #69. Companion reference: PR #100; contributor workflow: PR #99.
+Owner proposed in the delivery plan: **Divyansh**. Technical review: Kaustav; Accessibility lead for relevant checks.
+Epic: [#102](https://github.com/Bodhan-AI/open-rachana/issues/102). [Module route](../client.md).
 
-Draft plan: owner review and implementation go-ahead are pending. Follow the
-[review and readability workflow](../README.md) before implementation.
+Build field-limited accessibility remediation and immutable completion by the Accessibility Specialist.
 
-## Outcome and boundary
+## Start here
 
-Implement the existing story within the package boundary below. Retain its acceptance criteria and record any approved amendments explicitly.
+Read the current implementation snapshot in [delivery status](../../delivery-status.md) before choosing files.
 
-Own task screens, accessible interaction, content-client restrictions and release packaging. Consume server permissions and task responses; never infer authorization from a hidden button.
+First deliverable: Implement the server field allowlist and unchanged-content comparison before exposing the remediation controls.
 
-Expected locations: `apps/client and the content-free configuration/oversight parts of apps/web`. Confirm actual paths before editing.
+## Inputs and outputs
 
-## Dependencies
+- Input: Assigned approved version, accessible rendering, locked source fields, alt/decorative/table/equation-alternative/reading-order fields and self-check.
+- Output: Completed immutable accessibility version, comments and checklist, followed by independent accessibility review.
 
-#66
+## Product rules for this task
 
-Dependencies order implementation, not permission to draft a plan. Use agreed
-fixtures while a producer is under construction; real integration is still required.
+The clauses below are retained source wording. `GAP` identifies an addition in the original PRD; it does not mean the clause is unspecified. Apply [effective rules and source conflicts](../effective-rules.md), especially role naming and the approval status of proposed D-nn values.
 
-## Work sequence
+| Requirement | Required behaviour | Priority |
+|---|---|---|
+| [PRD-ACC-16](../../requirements.md#req-prd-acc-16) | GAP Accessibility remediation task (engineering IN_ACCESSIBILITY): on question-review approval the system creates an accessibility draft derived from the approved version and assigns an Accessibility Specialist by policy. The draft exposes only accessibility fields: alternative text and decorative flags, table headers and captions, equation text alternatives, reading-order markup and accessibility metadata. Stem, options, correct flag, explanation, marks, classification, image bytes and mathematical notation are locked and machine-verified unchanged on completion. The specialist completes the evaluation checklist as a self-check, may comment, and completes the task, which creates the immutable version that enters IN_ACCESSIBILITY_REVIEW. | MUST |
+| [PRD-ACC-17](../../requirements.md#req-prd-acc-17) | GAP A finding that needs an authoring change (wording, image, notation) is recorded by the specialist as a comment and by the reviewer as an RC-A11Y-* rejection to the author; the specialist never edits those fields. | MUST |
+| [PRD-UI-08a](../../requirements.md#req-prd-ui-08a) | GAP Accessibility Remediation — the Accessibility Specialist's screen: rendered artefact with the same test affordances, an editor limited to accessibility fields (alternative text, decorative flags, table headers and captions, equation text alternatives, reading order), the self-check checklist, comments, and Complete. Locked fields are shown read-only and visibly locked. | MUST |
+| [PRD-ACC-18](../../requirements.md#req-prd-acc-18) | GAP The Accessibility Reviewer decides on the completed accessibility version: approval requests sealing; rejection creates an accessibility-correction draft for a different Accessibility Specialist (accessibility findings) or an authoring-correction draft for the author (authoring findings), and the next accessibility review is by a different Accessibility Reviewer (PRD-ASG-10). | MUST |
+| [PRD-ACC-10](../../requirements.md#req-prd-acc-10) | GAP The evaluation checklist implements ACC-03 item by item (table below). Each item is Pass, Fail (with at least one finding) or Not applicable (with reason). | MUST |
 
-1. Inspect the current code and in-flight PRs; agree the input/output and refusal contract with the named reviewers.
-2. Implement one reviewable slice with its relevant allowed, refused and interrupted-operation examples.
-3. Integrate it into the shared flow and retain the result, configuration and remaining limits.
+## Exact PRD sections
 
-## Acceptance criteria
+- [10. Accessibility](../../prd/main-baseline.md#10-accessibility)
+- [6.7 Accessibility remediation and review · ASM04-ACC](../../prd/technical-baseline.md#67-accessibility-remediation-and-review--asm04-acc)
+
+## Behaviour to demonstrate
+
+Changing alt text is permitted; changing an option body, correct flag or image bytes in the same request is refused. A wording problem is returned through the authoring route.
+
+Failure checks: Attempt to change stem, options, key and marks through remediation fields; reject and preserve the immutable source version.
+
+Existing issue acceptance criteria, retained for review:
 
 - [ ] Can add/edit alternative text, mark decorative images, add table headers/captions, add equation text descriptions, fix reading order, comment, complete the task
 - [ ] Cannot change wording, options, answer, marks, mathematical notation, or replace images
 - [ ] Cannot approve or reject
 - [ ] Completing the task sends the item to Accessibility Review
 
-## Failure or boundary proof
+## Dependencies and decisions
 
-Attempt to change stem, options, key and marks through remediation fields; reject and preserve the immutable source version.
+Required producer work: [#66](issue-66.md) (Kaustav).
 
-## Requirement trace
+R5 controls reference rendering; D-07 controls routing after content changes. Specialist completion is never approval.
 
-QST04-ACC
+## Engineering choices and review
 
-## Decisions and amendments to check
+The owner chooses module layout, database design and implementation algorithms within these rules. New shared schemas and transaction/retry behaviour need the named consumers’ technical review. Source defaults marked D-nn are configuration candidates, not approval records. Build tests with explicit synthetic settings while the owner selects deployment values. Only the dependent behaviour listed above waits for a product/security decision.
 
-- Resolve the signed-local/reference-rendering and per-OS acceptance contract (R5) before the dependent implementation; native and accessibility checks remain explicit.
-
-## Evidence required to close
-
-Link the accepted plan revision, implementation PR/commit, actual test or manual
-procedure, dated result/environment and reviewer sign-off. Record remaining
-limitations. A mock, generated test, screenshot or checked box alone is not
-acceptance. Product/security/accessibility signatures remain with their owners.
+Use the issue and this brief as the checked-in plan. For an extended change, add the proposed design and first PR boundary here before implementation review. Keep existing valid approvals and in-flight contributions. Completion needs the implementation, actual test result and acceptance owner; a generated check name is not passing evidence.
