@@ -77,7 +77,7 @@ async def _sweep_forever(monitor: SessionMonitor) -> None:
         try:
             await run_in_threadpool(monitor.sweep)
         except Exception:  # the loop must outlive any single failure
-            logger.exception("session sweep failed; continuing")
+            logger.exception("session.sweep.failed")  # the loop continues
 
 
 def build_app(registry: ProviderRegistry) -> FastAPI:
@@ -177,10 +177,13 @@ def app() -> FastAPI:
     importing this module must stay free of that side effect for tests,
     scripts and tooling.
     """
-    if not os.path.exists(DEFAULT_CONFIG_PATH):
-        logger.warning(
-            "platform config %s not found; starting with no provider bindings",
-            DEFAULT_CONFIG_PATH,
-        )
-        return create_app_from_mapping({})
-    return create_app(DEFAULT_CONFIG_PATH)
+    if os.path.exists(DEFAULT_CONFIG_PATH):
+        return create_app(DEFAULT_CONFIG_PATH)
+    application = create_app_from_mapping({})  # building it installs the log handlers
+    # Event name plus fields (spec §4.4); a config path is an opaque
+    # reference, so it may travel as a field.
+    logger.warning(
+        "platform.config.missing",
+        extra={"mulyankan.object_ref": DEFAULT_CONFIG_PATH},
+    )
+    return application

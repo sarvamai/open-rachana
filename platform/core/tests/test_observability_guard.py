@@ -1,6 +1,7 @@
 """Attribute allowlist guard (ASR02-OBS): unknown keys never reach an exporter."""
 
 from mulyankan_platform.observability.guard import (
+    UNSTRUCTURED_EVENT,
     ALLOWED_METRIC_ATTRIBUTES,
     DROPPED_LABEL_LIMIT,
     ALLOWED_SPAN_ATTRIBUTES,
@@ -233,3 +234,27 @@ def test_asr02obs_guard_preserves_sdk_limit_drop_counts() -> None:
     (exported,) = exporter.get_finished_spans()
     assert exported.dropped_attributes == 2
     assert exported.dropped_events == 1
+
+
+def test_asr02obs_log_guard_replaces_a_free_text_body() -> None:
+    reader, counter = _counter()
+    exporter = InMemoryLogRecordExporter()
+    provider = LoggerProvider()
+    provider.add_log_record_processor(LogAttributeGuard(counter))
+    provider.add_log_record_processor(SimpleLogRecordProcessor(exporter))
+
+    provider.get_logger("demo").emit(
+        LogRecord(
+            body=f"config {SENTINEL} missing", severity_number=SeverityNumber.WARN
+        )
+    )
+    provider.get_logger("uvicorn.error").emit(
+        LogRecord(
+            body="Application startup complete.", severity_number=SeverityNumber.INFO
+        )
+    )
+
+    bodies = [r.log_record.body for r in exporter.get_finished_logs()]
+    assert bodies == [UNSTRUCTURED_EVENT, "Application startup complete."]
+    assert SENTINEL not in " ".join(bodies)
+    assert "body" in _dropped_keys(reader)

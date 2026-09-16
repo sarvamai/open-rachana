@@ -36,7 +36,7 @@ the interface and conformance suite exist.
    validation path.
 
 Daily consequence: **no question content in logs, audit events, exception
-strings, or URLs.**
+strings, URLs, or span and log attributes.**
 
 ## Commands
 
@@ -45,6 +45,8 @@ strings, or URLs.**
 uv pip install -e platform/spi -e "platform/core[dev]"
 python -m pytest platform/spi platform/core -q
 python -m ruff check platform
+# Telemetry is on by default and exports to $OTEL_EXPORTER_OTLP_ENDPOINT;
+# set OTEL_SDK_DISABLED=true to run without it. See docs/observability.md.
 
 # Web
 cd apps/web && pnpm install && pnpm dev

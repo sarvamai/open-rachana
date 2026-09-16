@@ -1,6 +1,7 @@
 """The standing DoD check: no Restricted content in any exported signal, and
 the app survives without a Collector (ASR02-OBS)."""
 
+import logging
 import subprocess
 import sys
 import textwrap
@@ -9,14 +10,20 @@ import pytest
 
 from fastapi import Header
 from fastapi.testclient import TestClient
+from mulyankan_platform.audit import AuditLog
 from mulyankan_platform.core_api.main import create_app_from_mapping
 
 SENTINEL = "SENTINEL-e8b4-ప్రశ్న"  # includes non-ASCII so encoding paths are covered
 HEADER_SENTINEL = "SENTINEL-e8b4-header"  # HTTP header values must be ASCII
 
 
-def test_asr02obs_no_content_reaches_any_exporter(telemetry) -> None:
-    app = create_app_from_mapping({})
+MAPPING = {
+    "providers": {"kms": {"provider": "testkit_fake_provider:FakeKms", "config": {}}}
+}
+
+
+def test_asr02obs_no_content_reaches_any_exporter(telemetry, capsys) -> None:
+    app = create_app_from_mapping(MAPPING)
 
     @app.post("/probe/{item}")
     def probe(
@@ -25,6 +32,13 @@ def test_asr02obs_no_content_reaches_any_exporter(telemetry) -> None:
         q: str | None = None,
         x_probe: str | None = Header(default=None),
     ) -> dict:
+        app.state.registry.get("kms").encrypt("k", SENTINEL.encode())  # a provider span
+        AuditLog().append(
+            actor="author-001", action="probe", payload={"stem": SENTINEL}
+        )
+        log = logging.getLogger("probe")
+        log.info("probe.hit", extra={"stem": SENTINEL})  # a field the allowlist drops
+        log.warning(f"probe {SENTINEL} interpolated")  # a body the grammar rejects
         raise ValueError(f"{item} {q} {x_probe} {body}")
 
     client = TestClient(app, raise_server_exceptions=False)
@@ -37,8 +51,40 @@ def test_asr02obs_no_content_reaches_any_exporter(telemetry) -> None:
 
     exported = telemetry.dump()
     assert "POST /probe/{item}" in exported  # the pipeline did see the request
+    assert "kms.encrypt" in exported  # and the provider span
+    assert "audit.appended" in exported  # and the audit link
+    assert "probe.hit" in exported  # the log pipeline did see the record
+    assert "http.request" in exported  # the request log line, in the same trace
     assert SENTINEL not in exported
     assert HEADER_SENTINEL not in exported
+    stdout = capsys.readouterr().out  # the JSON handler
+    assert "probe.hit" in stdout
+    assert SENTINEL not in stdout
+
+    # The request log line for the failed request sits in the same trace.
+    (server_span,) = [s for s in telemetry.spans() if s.name == "POST /probe/{item}"]
+    (request_log,) = [r for r in telemetry.logs() if r.body == "http.request"]
+    assert request_log.trace_id == server_span.get_span_context().trace_id
+    assert request_log.attributes["http.route"] == "/probe/{item}"
+    assert request_log.attributes["http.response.status_code"] == 500
+
+
+def test_asr02obs_server_timing_carries_the_trace_id(telemetry) -> None:
+    """D12, on a handled response: an unhandled exception is answered by
+    Starlette's outermost error handler, which bypasses the middleware."""
+    client = TestClient(create_app_from_mapping({}))
+    response = client.get("/v1/integrity/sessions")
+    assert response.status_code == 200
+
+    (server_span,) = [
+        s for s in telemetry.spans() if s.name == "GET /v1/integrity/sessions"
+    ]
+    ctx = server_span.get_span_context()
+    assert response.headers["server-timing"] == (
+        f'traceparent;desc="00-{ctx.trace_id:032x}-{ctx.span_id:016x}-{ctx.trace_flags:02x}"'
+    )
+    (request_log,) = [r for r in telemetry.logs() if r.body == "http.request"]
+    assert request_log.span_id == ctx.span_id
 
 
 def test_asr02obs_server_span_carries_route_not_path(telemetry) -> None:
@@ -152,3 +198,18 @@ def test_asr02obs_app_serves_with_collector_unreachable() -> None:
     )
     assert result.returncode == 0, result.stderr
     assert "served" in result.stdout
+
+
+def test_server_timing_tolerates_a_response_without_headers(telemetry) -> None:
+    """A raw ASGI app may omit `headers` on response start; adding the
+    Server-Timing header must not turn that into a KeyError."""
+    app = create_app_from_mapping({})
+
+    async def raw(scope, receive, send) -> None:
+        await send({"type": "http.response.start", "status": 200})
+        await send({"type": "http.response.body", "body": b"raw"})
+
+    app.mount("/raw", raw)
+    response = TestClient(app).get("/raw/x")
+    assert response.status_code == 200
+    assert response.headers["server-timing"].startswith("traceparent;desc=")

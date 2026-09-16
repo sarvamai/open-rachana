@@ -15,6 +15,8 @@ from typing import Any
 
 import yaml
 
+from mulyankan_platform.observability.providers import ObservedProvider
+
 
 class RegistryError(Exception):
     """A binding is missing, malformed, or unloadable."""
@@ -28,6 +30,8 @@ class Binding:
     provider: str  # "module:attr" target as written in configuration
     config: dict
     instance: Any
+    descriptor: dict | None  # `describe()` resolved once, at bind time
+    observed: Any  # the instance wrapped for provider-call spans (spec §4.5)
 
 
 class ProviderRegistry:
@@ -63,8 +67,15 @@ class ProviderRegistry:
                 raise RegistryError(
                     f"provider '{target}' for spi '{spi}' failed to initialise: {exc}"
                 ) from exc
+            describe = getattr(instance, "describe", None)
+            descriptor = describe().as_dict() if callable(describe) else None
             bindings[spi] = Binding(
-                spi=spi, provider=target, config=provider_config, instance=instance
+                spi=spi,
+                provider=target,
+                config=provider_config,
+                instance=instance,
+                descriptor=descriptor,
+                observed=ObservedProvider(spi, instance, descriptor, target),
             )
         return cls(bindings)
 
@@ -76,19 +87,19 @@ class ProviderRegistry:
         return cls.from_mapping(config)
 
     def get(self, spi: str) -> Any:
-        """Return the bound provider for `spi`; refuse unbound capabilities."""
+        """Return the bound provider for `spi`, wrapped so every call is a
+        content-free span (spec §4.5); refuse unbound capabilities."""
         binding = self._bindings.get(spi)
         if binding is None:
             raise RegistryError(f"no provider bound for spi '{spi}'")
-        return binding.instance
+        return binding.observed
 
     def describe(self) -> dict[str, dict]:
         """Report every binding with its descriptor, for /healthz and audits."""
         report: dict[str, dict] = {}
         for spi, binding in self._bindings.items():
-            descriptor = getattr(binding.instance, "describe", None)
             report[spi] = {
                 "provider": binding.provider,
-                "descriptor": descriptor().as_dict() if descriptor else None,
+                "descriptor": binding.descriptor,
             }
         return report

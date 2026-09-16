@@ -239,11 +239,26 @@ Expected: FAIL. `create_app_from_mapping` does not call anything OTel yet, so th
 
 Everything the application knows about telemetry is here. It speaks the OTel
 API only; the sink is whatever `OTEL_EXPORTER_OTLP_ENDPOINT` names.
+
+`configure` and `register_providers` are resolved lazily: `setup` pulls in
+FastAPI, the exporters and the instrumentors, and the audit chain and the
+registry import this package for `metrics` and `providers` alone, which need
+only the OTel API.
 """
 
-from mulyankan_platform.observability.setup import configure, register_providers
+from __future__ import annotations
+
+from typing import Any
 
 __all__ = ["configure", "register_providers"]
+
+
+def __getattr__(name: str) -> Any:
+    if name in __all__:
+        from mulyankan_platform.observability import setup
+
+        return getattr(setup, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 ```
 
 `platform/core/src/mulyankan_platform/observability/setup.py` (first version; Task 8 completes it):
@@ -474,7 +489,9 @@ lines before export (`frames_only`). Metric attributes go through an SDK
 metric drops are not counted and the §7 sentinel test is the check.
 
 This list is what an auditor reads: one entry per line, with the reason.
-Keep it identical to `apps/web/src/observability/allowlist.ts`.
+The Collector's redaction list mirrors the union of the three sets below
+(`tests/test_dev_stack.py` pins that), and the web tier's allowlist will
+mirror it when that slice lands.
 """
 
 from __future__ import annotations
@@ -542,8 +559,8 @@ ALLOWED_METRIC_ATTRIBUTES: frozenset[str] = frozenset(
         "http.response.status_code",
         "url.scheme",
         "network.protocol.version",
-        "server.address",
-        "server.port",
+        # server.address and server.port stay off metrics: the address is the
+        # request's Host header, so a client would control the series count.
         "error.type",  # status class or exception class name
         # mulyankan.observability.attributes_dropped
         "signal",
@@ -558,6 +575,25 @@ ALLOWED_METRIC_ATTRIBUTES: frozenset[str] = frozenset(
         "generation",  # cpython.gc.collections: 0 | 1 | 2
     }
 )
+
+# The log body is not an attribute, so the allowlist cannot see it. The
+# rule (spec §4.4) is that a body is a static, dotted event name such as
+# `draft.submitted`; anything else is an interpolated or free-text message
+# and is replaced before export. Framework loggers (uvicorn) log constants
+# about the process and pass through.
+UNSTRUCTURED_EVENT = "log.unstructured"
+_EVENT_NAME = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$")
+_FRAMEWORK_LOGGERS = ("uvicorn",)
+
+
+def event_name(body: object, logger_name: str) -> str:
+    """The body to export: the event name itself, or the placeholder."""
+    if not isinstance(body, str):
+        return UNSTRUCTURED_EVENT
+    if logger_name.split(".", 1)[0] in _FRAMEWORK_LOGGERS:
+        return body
+    return body if _EVENT_NAME.match(body) else UNSTRUCTURED_EVENT
+
 
 # The `attribute` label of the dropped counter is a key NAME, but names are
 # not always code-controlled: captured request headers become
@@ -721,6 +757,12 @@ class LogAttributeGuard(LogRecordProcessor):
                 inner.attributes, ALLOWED_LOG_ATTRIBUTES, self._dropped, "log"
             ),
         )
+        scope = record.instrumentation_scope
+        exported = event_name(inner.body, scope.name if scope else "")
+        if exported != inner.body:
+            inner.body = exported
+            if self._dropped is not None:
+                self._dropped.add(1, {"signal": "log", "attribute": "body"})
 
     def shutdown(self) -> None:
         return None
@@ -752,16 +794,15 @@ git commit -s -m "Add the content-free attribute guard for spans and logs"
 - Produces: module-level instruments `audit_events` (Counter), `audit_append_duration` (Histogram, seconds), `attributes_dropped` (Counter), and `observe_registry_bindings(registry: ProviderRegistry) -> None`.
 - `AuditLog.append` adds a span event `audit.appended` with `mulyankan.audit.event_id` on the current span and records the two audit instruments.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `platform/core/tests/test_observability_audit.py`:
 
 ```python
 """Audit chain emits metrics and links the span to the event id (ASR02-OBS)."""
 
-from opentelemetry import trace
-
 from mulyankan_platform.audit import AuditLog
+from opentelemetry import trace
 
 
 def _metric_points(telemetry, name):
@@ -778,60 +819,91 @@ def test_asr02obs_audit_append_records_metrics_and_span_link(telemetry) -> None:
     tracer = trace.get_tracer("test")
     log = AuditLog()
     with tracer.start_as_current_span("request"):
-        event = log.append(actor="author-001", action="draft.created",
-                           object_refs=("artefact-a1",), payload={"stem": "x"})
+        event = log.append(
+            actor="author-001",
+            action="draft.created",
+            object_refs=("artefact-a1",),
+            payload={"stem": "x"},
+        )
 
     (span,) = telemetry.spans()
     (audit_event,) = [e for e in span.events if e.name == "audit.appended"]
     assert audit_event.attributes["mulyankan.audit.event_id"] == event.event_id
+    assert log.verify().ok  # nothing telemetry-related touched the chain
 
     # The reader is cumulative for the whole session, so assert on this
     # action's point and on lower bounds rather than exact totals.
-    (count,) = [p for p in _metric_points(telemetry, "mulyankan.audit.events")
-                if p.attributes == {"action": "draft.created"}]
+    (count,) = [
+        p
+        for p in _metric_points(telemetry, "mulyankan.audit.events")
+        if p.attributes == {"action": "draft.created"}
+    ]
     assert count.value >= 1
     (duration,) = _metric_points(telemetry, "mulyankan.audit.append.duration")
     assert duration.count >= 1
+
+
+def test_registry_bindings_gauge_reports_each_binding(telemetry) -> None:
+    from mulyankan_platform.observability.metrics import observe_registry_bindings
+    from mulyankan_platform.registry import ProviderRegistry
+
+    mapping = {
+        "providers": {
+            "kms": {"provider": "testkit_fake_provider:FakeKms", "config": {}}
+        }
+    }
+    registry = ProviderRegistry.from_mapping(mapping)  # held weakly by the gauge
+    observe_registry_bindings(registry)
+    points = _metric_points(telemetry, "mulyankan.registry.bindings")
+    assert {
+        "spi": "kms",
+        "provider.name": "fake-kms",
+        "provider.version": "1.0.0",
+    } in [dict(p.attributes) for p in points]
 ```
 
 `telemetry` is the fixture from Task 8. Until then this test errors on the missing fixture; write it now, run it in Task 8.
 
-- [ ] **Step 2: Implement the instruments**
+- [x] **Step 2: Implement the instruments**
 
 `platform/core/src/mulyankan_platform/observability/metrics.py`:
 
 ```python
 """Domain instruments (spec §3.2). Names are `mulyankan.*`; attributes are
-low-cardinality and content-free. Instruments are created on the API proxy
-meter so they work before and after the SDK is registered.
+low-cardinality and content-free. Instruments are created on the API's
+global meter, so they bind to whichever provider `register_providers`
+installs, the in-memory one in tests included.
 """
 
 from __future__ import annotations
 
 import weakref
-from typing import TYPE_CHECKING, Iterable
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from opentelemetry import metrics
 from opentelemetry.metrics import CallbackOptions, Observation
 
-if TYPE_CHECKING:  # registry imports observability; keep this edge type-only
+if TYPE_CHECKING:  # registry imports this package; keep the edge type-only
     from mulyankan_platform.registry import ProviderRegistry
 
-_meter = metrics.get_meter("mulyankan_platform")
+_meter = metrics.get_meter("mulyankan_platform.observability")
 
+attributes_dropped = _meter.create_counter(
+    "mulyankan.observability.attributes_dropped",
+    unit="1",
+    description="Attributes removed by the content-free guard, by signal and key",
+)
 audit_events = _meter.create_counter(
     "mulyankan.audit.events", unit="{event}", description="Audit events appended"
 )
 audit_append_duration = _meter.create_histogram(
-    "mulyankan.audit.append.duration", unit="s", description="Time to append one audit event"
-)
-attributes_dropped = _meter.create_counter(
-    "mulyankan.observability.attributes_dropped",
-    unit="{attribute}",
-    description="Attributes removed by the content-free guard",
+    "mulyankan.audit.append.duration",
+    unit="s",
+    description="Time to append one audit event",
 )
 
-_registries: "weakref.WeakSet[ProviderRegistry]" = weakref.WeakSet()
+_registries: weakref.WeakSet[ProviderRegistry] = weakref.WeakSet()
 
 
 def _bindings(options: CallbackOptions) -> Iterable[Observation]:
@@ -861,7 +933,7 @@ def observe_registry_bindings(registry: ProviderRegistry) -> None:
     _registries.add(registry)
 ```
 
-- [ ] **Step 3: Instrument `AuditLog.append`**
+- [x] **Step 3: Instrument `AuditLog.append`**
 
 In `audit/chain.py`, add imports:
 
@@ -910,7 +982,7 @@ and change `append` so the body is timed and the event linked. The hashing and c
 
 Add to the module docstring's invariants list: `- Observability links point at events (span event carrying the event id); no telemetry field is ever stored on an event.`
 
-- [ ] **Step 4: Run the existing audit tests**
+- [x] **Step 4: Run the existing audit tests**
 
 Run: `python -m pytest platform/core/tests/test_audit_chain.py -q`
 Expected: 5 passed. Hashes are unchanged because no field was added.
@@ -926,38 +998,47 @@ git commit -s -m "Record audit metrics and link spans to audit event ids"
 
 This task adds `opentelemetry-instrumentation-logging` to `platform/core`'s
 dependencies (its `LoggingHandler` maps `extra` to attributes) and owns the
-log **body** question the attribute guard does not: the sentinel test gains a
-log call whose message interpolates the sentinel, and the handler or the
-formatter must keep the exported body a static event name.
+log body rule (spec §4.4): `guard.event_name` accepts a dotted event name
+and replaces anything else with `log.unstructured`, on both the OTLP path and
+the stdout formatter; the sentinel test gains a log call whose message
+interpolates the sentinel.
 
 **Files:**
 - Create: `platform/core/src/mulyankan_platform/observability/logs.py`
 - Test: `platform/core/tests/test_observability_logs.py`
 
 **Interfaces:**
-- Produces: `JsonFormatter` (a `logging.Formatter`), `configure_logging(logger_provider) -> None` (idempotent; installs a stdout JSON handler and the OTel `LoggingHandler` on the root logger, disables `uvicorn.access`).
+- Produces: `JsonFormatter` (a `logging.Formatter`), `configure_logging(logger_provider) -> None` (idempotent; installs a stdout JSON handler and the OTel `LoggingHandler` on the root logger, disables `uvicorn.access`), and in `guard.py` `event_name(body, logger_name) -> str` plus `UNSTRUCTURED_EVENT`, applied by `LogAttributeGuard.on_emit` and the formatter.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `platform/core/tests/test_observability_logs.py`:
 
 ```python
-"""JSON log lines: event name, allowlisted fields, trace ids (ASR02-OBS)."""
+"""JSON log lines and the log-body rule (ASR02-OBS): a static event name,
+allowlisted fields and trace ids, with no interpolated value."""
 
 import json
 import logging
+import sys
 
+from mulyankan_platform.observability.guard import UNSTRUCTURED_EVENT, event_name
+from mulyankan_platform.observability.logs import JsonFormatter, configure_logging
+from opentelemetry.instrumentation.logging.handler import LoggingHandler
 from opentelemetry import trace
-
-from mulyankan_platform.observability.logs import JsonFormatter
 
 SENTINEL = "SENTINEL-9a2e"
 
 
-def _line(record_kwargs) -> dict:
+def _line(record_kwargs, msg="draft.submitted", args=(), name="demo") -> dict:
     record = logging.LogRecord(
-        name="demo", level=logging.INFO, pathname="x.py", lineno=1,
-        msg="draft.submitted", args=(), exc_info=None,
+        name=name,
+        level=logging.INFO,
+        pathname="x.py",
+        lineno=1,
+        msg=msg,
+        args=args,
+        exc_info=None,
     )
     for key, value in record_kwargs.items():
         setattr(record, key, value)
@@ -986,20 +1067,75 @@ def test_json_line_reports_exception_type_and_stack_without_message() -> None:
     try:
         raise ValueError(SENTINEL)
     except ValueError:
-        import sys
-        record = logging.LogRecord("demo", logging.ERROR, "x.py", 1, "op.failed", (), sys.exc_info())
+        record = logging.LogRecord(
+            "demo", logging.ERROR, "x.py", 1, "op.failed", (), sys.exc_info()
+        )
     line = json.loads(JsonFormatter().format(record))
     assert line["exception.type"] == "ValueError"
     assert "test_observability_logs.py" in line["exception.stacktrace"]
     assert SENTINEL not in json.dumps(line)
+
+
+def test_asr02obs_body_must_be_an_event_name() -> None:
+    assert event_name("draft.submitted", "demo") == "draft.submitted"
+    assert (
+        event_name("platform.config.missing", "mulyankan_platform.core_api.main")
+        == "platform.config.missing"
+    )
+    # Interpolated or free-text messages are replaced before export.
+    assert event_name(f"config {SENTINEL} missing", "demo") == UNSTRUCTURED_EVENT
+    assert event_name("Draft submitted", "demo") == UNSTRUCTURED_EVENT
+    assert event_name("", "demo") == UNSTRUCTURED_EVENT
+    # Framework loggers log constants and pass through.
+    assert (
+        event_name("Application startup complete.", "uvicorn.error")
+        == "Application startup complete."
+    )
+
+
+def test_json_line_replaces_an_interpolated_message_and_drops_args() -> None:
+    line = _line({}, msg=f"config {SENTINEL} missing")
+    assert line["event"] == UNSTRUCTURED_EVENT
+    assert SENTINEL not in json.dumps(line)
+    line = _line({}, msg="config %s missing", args=(SENTINEL,))
+    assert line["event"] == UNSTRUCTURED_EVENT
+    assert SENTINEL not in json.dumps(line)
+
+
+def test_configure_logging_is_idempotent(telemetry) -> None:
+    from mulyankan_platform.observability.setup import register_providers
+
+    root = logging.getLogger()
+    before = list(root.handlers)
+    configure_logging(register_providers().logger_provider)
+    configure_logging(register_providers().logger_provider)
+    assert root.handlers == before
+    assert sum(isinstance(h, LoggingHandler) for h in root.handlers) == 1
+    assert sum(isinstance(h.formatter, JsonFormatter) for h in root.handlers) == 1
+    assert logging.getLogger("uvicorn.access").disabled
+    # uvicorn's loggers reach the root handlers instead of their own plain ones
+    assert logging.getLogger("uvicorn.error").propagate
+    assert not logging.getLogger("uvicorn.error").handlers
+
+
+def test_a_stray_format_argument_neither_raises_nor_exports(telemetry, capsys) -> None:
+    """`logger.info("event", value)` is the slip the convention invites: the
+    OTel handler renders the message too, so both handlers must see a
+    sanitised record instead of raising TypeError into the caller."""
+    logging.getLogger("slip").info("draft.submitted", SENTINEL)
+    (record,) = [r for r in telemetry.logs() if r.body == UNSTRUCTURED_EVENT]
+    assert SENTINEL not in json.dumps(dict(record.attributes or {}))
+    out = capsys.readouterr().out
+    assert '"event": "log.unstructured"' in out
+    assert SENTINEL not in out
 ```
 
-- [ ] **Step 2: Run to see it fail**
+- [x] **Step 2: Run to see it fail**
 
 Run: `python -m pytest platform/core/tests/test_observability_logs.py -q`
 Expected: FAIL with `ModuleNotFoundError`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `platform/core/src/mulyankan_platform/observability/logs.py`:
 
@@ -1012,8 +1148,10 @@ value goes in `extra` under an allowlisted key:
     logger.info("draft.submitted", extra={"mulyankan.object_ref": ref})
 
 Two handlers on the root logger: JSON to stdout for file-based collection,
-and the OTel handler to OTLP. Both apply the log allowlist; the OTel path is
-also guarded by `LogAttributeGuard`.
+and the OTel handler to OTLP. A filter on both rewrites the record once so
+that the body rule (`guard.event_name`) holds on each path and a stray
+format argument can neither raise nor leak; the OTel path is guarded again
+by `LogAttributeGuard`.
 """
 
 from __future__ import annotations
@@ -1022,36 +1160,56 @@ import json
 import logging
 import sys
 import traceback
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import Any
 
 from opentelemetry import trace
-from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.instrumentation.logging.handler import LoggingHandler
+from opentelemetry.sdk._logs import LoggerProvider
+from opentelemetry.trace import format_span_id, format_trace_id
 
-from mulyankan_platform.observability.guard import ALLOWED_LOG_ATTRIBUTES
+from mulyankan_platform.observability.guard import (
+    ALLOWED_LOG_ATTRIBUTES,
+    UNSTRUCTURED_EVENT,
+    event_name,
+)
 
-_STANDARD_KEYS = frozenset(
-    vars(logging.LogRecord("", 0, "", 0, "", (), None)).keys()
-) | {"message", "asctime", "taskName"}
+
+class EventNameFilter(logging.Filter):
+    """Rewrite the record's message to the exported body, once, before any
+    handler renders it. `record.getMessage()` is what the OTel handler
+    exports and it raises on a `%` mismatch, so the arguments are consumed
+    here and the message becomes the event name or the placeholder."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        try:
+            rendered = record.getMessage()
+        except (TypeError, ValueError):  # an event name given %-args
+            rendered = None
+        record.msg = UNSTRUCTURED_EVENT if rendered is None else event_name(rendered, record.name)
+        record.args = ()
+        return True
 
 
 class JsonFormatter(logging.Formatter):
-    """One JSON object per line; never renders a traceback's message line."""
+    """One JSON object per line, with no message value and no traceback
+    message line."""
 
     def format(self, record: logging.LogRecord) -> str:
-        line: dict[str, object] = {
-            "ts": datetime.fromtimestamp(record.created, timezone.utc)
+        line: dict[str, Any] = {
+            "ts": datetime.fromtimestamp(record.created, UTC)
             .isoformat(timespec="milliseconds")
             .replace("+00:00", "Z"),
             "level": record.levelname,
             "logger": record.name,
-            "event": record.getMessage(),
+            "event": event_name(record.getMessage(), record.name),
         }
         ctx = trace.get_current_span().get_span_context()
         if ctx.is_valid:
-            line["trace_id"] = format(ctx.trace_id, "032x")
-            line["span_id"] = format(ctx.span_id, "016x")
+            line["trace_id"] = format_trace_id(ctx.trace_id)
+            line["span_id"] = format_span_id(ctx.span_id)
         for key, value in record.__dict__.items():
-            if key not in _STANDARD_KEYS and key in ALLOWED_LOG_ATTRIBUTES:
+            if key in ALLOWED_LOG_ATTRIBUTES:
                 line[key] = value
         if record.exc_info and record.exc_info[0] is not None:
             line["exception.type"] = record.exc_info[0].__name__
@@ -1067,32 +1225,46 @@ class _StdoutHandler(logging.StreamHandler):
         super().__init__(sys.stdout)
 
     @property
-    def stream(self):  # noqa: ANN201
+    def stream(self) -> Any:
         return sys.stdout
 
     @stream.setter
-    def stream(self, value) -> None:  # noqa: ANN001
+    def stream(self, value: Any) -> None:
         pass
 
 
-def configure_logging(logger_provider: LoggerProvider) -> None:
+def configure_logging(logger_provider: LoggerProvider | None) -> None:
+    """Install the two root handlers once; safe to call again.
+
+    With `logger_provider=None` (the SDK is off) the OTel handler binds to
+    the API's no-op provider, so stdout still gets JSON and nothing exports.
+    """
     root = logging.getLogger()
     if any(isinstance(h, LoggingHandler) for h in root.handlers):
         return
     stdout = _StdoutHandler()
     stdout.setFormatter(JsonFormatter())
-    root.addHandler(stdout)
-    root.addHandler(LoggingHandler(logger_provider=logger_provider))
+    otel = LoggingHandler(logger_provider=logger_provider)
+    for handler in (stdout, otel):
+        handler.addFilter(EventNameFilter())
+        root.addHandler(handler)
     root.setLevel(logging.INFO)
+    # uvicorn installs its own plain-text handlers and stops propagation;
+    # route its loggers through the root so they are JSON on stdout and
+    # reach OTLP like everything else.
+    for name in ("uvicorn", "uvicorn.error"):
+        framework = logging.getLogger(name)
+        framework.handlers.clear()
+        framework.propagate = True
     # The request log middleware replaces uvicorn's access line, which prints
-    # the raw path and query string.
+    # the raw path and query string (`--no-access-log` is then redundant).
     logging.getLogger("uvicorn.access").disabled = True
 ```
 
-- [ ] **Step 4: Run to see the first and third tests pass**
+- [x] **Step 4: Run to see the first and third tests pass**
 
-Run: `python -m pytest platform/core/tests/test_observability_logs.py -q -k "not trace_ids"`
-Expected: 2 passed. The trace-id test needs the Task 8 fixture.
+Run: `python -m pytest platform/core/tests/test_observability_logs.py -q`
+Expected: 6 passed (the fixture from Task 8 already exists).
 
 - [ ] **Step 5: Commit**
 
@@ -1111,7 +1283,7 @@ git commit -s -m "Add JSON structured logging with trace correlation"
 - Produces: `RequestLogMiddleware` (pure ASGI, constructor `(app)`), `route_template(scope) -> str | None`.
 - Consumes: nothing from OTel beyond `trace.get_current_span()`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `platform/core/tests/test_observability_http.py`:
 
@@ -1121,12 +1293,12 @@ git commit -s -m "Add JSON structured logging with trace correlation"
 import json
 import logging
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.testclient import TestClient
-
 from mulyankan_platform.observability.http import RequestLogMiddleware
 
 SENTINEL = "SENTINEL-77b0"
+LOGGER = "mulyankan_platform.observability.http"
 
 
 def _app() -> FastAPI:
@@ -1140,18 +1312,33 @@ def _app() -> FastAPI:
     def boom() -> dict:
         raise RuntimeError(SENTINEL)
 
+    @app.get("/healthz")
+    def healthz() -> dict:
+        return {"status": "ok"}
+
+    router = APIRouter()
+
+    @router.post("/nested/{x}")
+    def nested(x: str) -> dict:
+        return {}
+
+    app.include_router(router)
+
+    async def raw(scope, receive, send) -> None:  # an ASGI app that omits `headers`
+        await send({"type": "http.response.start", "status": 200})
+        await send({"type": "http.response.body", "body": b"raw"})
+
+    app.mount("/raw", raw)
     app.add_middleware(RequestLogMiddleware)
     return app
 
 
 def _request_lines(caplog) -> list[dict]:
-    return [
-        {**r.__dict__} for r in caplog.records if r.getMessage() == "http.request"
-    ]
+    return [{**r.__dict__} for r in caplog.records if r.getMessage() == "http.request"]
 
 
 def test_asr02obs_request_log_uses_route_not_path(caplog) -> None:
-    caplog.set_level(logging.INFO, logger="mulyankan_platform.observability.http")
+    caplog.set_level(logging.INFO, logger=LOGGER)
     client = TestClient(_app())
     response = client.get(f"/items/{SENTINEL}?q={SENTINEL}")
     assert response.status_code == 200
@@ -1160,27 +1347,71 @@ def test_asr02obs_request_log_uses_route_not_path(caplog) -> None:
     assert line["http.request.method"] == "GET"
     assert line["http.response.status_code"] == 200
     assert line["http.response.body.size"] == len(response.content)
+    assert line["mulyankan.http.request.duration"] >= 0
     assert SENTINEL not in json.dumps(line, default=str)
 
 
 def test_request_log_records_500_when_the_handler_raises(caplog) -> None:
-    caplog.set_level(logging.INFO, logger="mulyankan_platform.observability.http")
+    caplog.set_level(logging.INFO, logger=LOGGER)
     client = TestClient(_app(), raise_server_exceptions=False)
     assert client.get("/boom").status_code == 500
     (line,) = _request_lines(caplog)
     assert line["http.response.status_code"] == 500
     assert SENTINEL not in json.dumps(line, default=str)
 
+
+def test_request_log_omits_missing_fields_for_unmatched_routes(caplog) -> None:
+    caplog.set_level(logging.INFO, logger=LOGGER)
+    client = TestClient(_app())
+    assert client.get(f"/nope/{SENTINEL}").status_code == 404
+    (line,) = _request_lines(caplog)
+    assert "http.route" not in line  # no template: omitted, never the path
+    assert line["http.response.status_code"] == 404
+    assert SENTINEL not in json.dumps(line, default=str)
+
+
+def test_request_log_honours_the_excluded_urls(caplog, monkeypatch) -> None:
+    """D9: the same exclusion as the span and the metric, so a probe leaves no line."""
+    monkeypatch.setenv("OTEL_PYTHON_FASTAPI_EXCLUDED_URLS", r"^https?://[^/]+/healthz$")
+    caplog.set_level(logging.INFO, logger=LOGGER)
+    client = TestClient(_app())
+    assert client.get("/healthz").status_code == 200
+    assert client.get("/items/1").status_code == 200
+    assert [line["http.route"] for line in _request_lines(caplog)] == [
+        "/items/{item_id}"
+    ]
+
+
+def test_request_log_route_matches_the_span_for_included_and_partial_routes(caplog) -> None:
+    """The line must join to the span and the metric by route, so it uses the
+    instrumentation's own resolution: included routers and 405s included."""
+    caplog.set_level(logging.INFO, logger=LOGGER)
+    client = TestClient(_app())
+    assert client.post(f"/nested/{SENTINEL}").status_code == 200
+    assert client.get("/nested/1").status_code == 405  # a partial match
+    routes = [line["http.route"] for line in _request_lines(caplog)]
+    assert routes == ["/nested/{x}", "/nested/{x}"]
+    assert SENTINEL not in json.dumps(_request_lines(caplog), default=str)
+
+
+def test_request_log_survives_a_bad_content_length_and_a_headerless_response(caplog) -> None:
+    caplog.set_level(logging.INFO, logger=LOGGER)
+    client = TestClient(_app())
+    assert client.get("/items/1", headers={"content-length": "abc"}).status_code == 200
+    assert client.get("/raw/x").status_code == 200
+    lines = _request_lines(caplog)
+    assert [line["http.response.status_code"] for line in lines] == [200, 200]
+    assert "http.request.body.size" not in lines[0]  # unparseable: omitted
 ```
 
 The `Server-Timing` header needs the server span the OTel middleware creates, so it is asserted in Task 8's pipeline test rather than here.
 
-- [ ] **Step 2: Run to see it fail**
+- [x] **Step 2: Run to see it fail**
 
 Run: `python -m pytest platform/core/tests/test_observability_http.py -q`
 Expected: FAIL with `ModuleNotFoundError`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 `platform/core/src/mulyankan_platform/observability/http.py`:
 
@@ -1189,63 +1420,95 @@ Expected: FAIL with `ModuleNotFoundError`.
 
 Pure ASGI so it sits inside the OTel ASGI middleware: the server span is
 current while it runs, so the log line gets the trace id and the
-`Server-Timing` header can carry it.
+`Server-Timing` header can carry it. Requests the instrumentation excludes
+(D9, `OTEL_PYTHON_FASTAPI_EXCLUDED_URLS`) leave no line either.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 import time
+from collections.abc import Awaitable, Callable, MutableMapping
 from typing import Any
 
 from opentelemetry import trace
-from starlette.datastructures import MutableHeaders
-from starlette.routing import Match
+from opentelemetry.instrumentation.asgi import get_host_port_url_tuple
+from opentelemetry.instrumentation.fastapi import _get_route_details
+from opentelemetry.trace import format_span_id, format_trace_id
+from opentelemetry.util.http import ExcludeList, parse_excluded_urls
+
+Scope = MutableMapping[str, Any]
+Message = MutableMapping[str, Any]
+Receive = Callable[[], Awaitable[Message]]
+Send = Callable[[Message], Awaitable[None]]
+ASGIApp = Callable[[Scope, Receive, Send], Awaitable[None]]
 
 logger = logging.getLogger(__name__)
 
 
-def route_template(scope: dict[str, Any]) -> str | None:
-    """The matched route's template (`/items/{item_id}`), never the path."""
-    app = scope.get("app")
-    routes = getattr(getattr(app, "router", None), "routes", None) or []
-    for route in routes:
-        match, _ = route.matches(scope)
-        if match == Match.FULL:
-            return getattr(route, "path", None)
-    return None
+def route_template(scope: Scope) -> str | None:
+    """The route as the server span records it, such as `/items/{item_id}`,
+    so the log line joins to the span and the metric. Included routers are
+    flattened and a partial match (a 405) still names the route; the raw
+    path is not used."""
+    try:
+        return _get_route_details(scope)
+    except Exception:  # a scope without an app, or a foreign router
+        return None
 
 
-def _header(scope: dict[str, Any], name: bytes) -> str | None:
+def _header(scope: Scope, name: bytes) -> str | None:
     for key, value in scope.get("headers") or []:
         if key == name:
             return value.decode("latin-1")
     return None
 
 
-class RequestLogMiddleware:
-    def __init__(self, app) -> None:  # noqa: ANN001
-        self.app = app
+def _content_length(scope: Scope) -> int | None:
+    value = _header(scope, b"content-length")
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except ValueError:  # a lax server let it through; the line must still emit
+        return None
 
-    async def __call__(self, scope, receive, send) -> None:  # noqa: ANN001
-        if scope["type"] != "http":
+
+def _exclusions() -> ExcludeList | None:
+    pattern = os.environ.get(
+        "OTEL_PYTHON_FASTAPI_EXCLUDED_URLS", os.environ.get("OTEL_PYTHON_EXCLUDED_URLS", "")
+    )
+    return parse_excluded_urls(pattern) if pattern else None
+
+
+class RequestLogMiddleware:
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+        self._excluded = _exclusions()  # resolved once, when the stack is built
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http" or self._is_excluded(scope):
             await self.app(scope, receive, send)
             return
 
+        route = route_template(scope)  # before the router mutates the scope
         started = time.perf_counter()
         status: int | None = None
         response_bytes = 0
 
-        async def send_wrapper(message) -> None:  # noqa: ANN001
+        async def send_wrapper(message: Message) -> None:
             nonlocal status, response_bytes
             if message["type"] == "http.response.start":
                 status = message["status"]
                 ctx = trace.get_current_span().get_span_context()
                 if ctx.is_valid:
-                    MutableHeaders(scope=message).append(
-                        "Server-Timing",
-                        f'traceparent;desc="00-{ctx.trace_id:032x}-{ctx.span_id:016x}-{ctx.trace_flags:02x}"',
+                    headers = message.setdefault("headers", [])  # optional per ASGI
+                    value = (
+                        f'traceparent;desc="00-{format_trace_id(ctx.trace_id)}'
+                        f'-{format_span_id(ctx.span_id)}-{ctx.trace_flags:02x}"'
                     )
+                    headers.append((b"server-timing", value.encode("latin-1")))
             elif message["type"] == "http.response.body":
                 response_bytes += len(message.get("body", b""))
             await send(message)
@@ -1255,20 +1518,33 @@ class RequestLogMiddleware:
         finally:
             fields: dict[str, Any] = {
                 "http.request.method": scope["method"],
-                "http.route": route_template(scope),
                 "http.response.status_code": status if status is not None else 500,
-                "http.request.body.size": int(_header(scope, b"content-length") or 0),
                 "http.response.body.size": response_bytes,
-                "client.address": (scope.get("client") or ("", 0))[0],
                 "mulyankan.http.request.duration": round(time.perf_counter() - started, 6),
             }
+            # Omitted when absent: the handler drops a null attribute with a
+            # warning, and the raw path must not stand in for the route.
+            if route:
+                fields["http.route"] = route
+            request_bytes = _content_length(scope)
+            if request_bytes is not None:
+                fields["http.request.body.size"] = request_bytes
+            client = (scope.get("client") or ("", 0))[0]
+            if client:
+                fields["client.address"] = client
             actor = (scope.get("state") or {}).get("enduser_pseudo_id")
             if actor:
                 fields["enduser.pseudo.id"] = actor  # set by the M1 session dependency
             logger.info("http.request", extra=fields)
+
+    def _is_excluded(self, scope: Scope) -> bool:
+        if self._excluded is None:
+            return False
+        _, _, url = get_host_port_url_tuple(scope)
+        return self._excluded.url_disabled(url)
 ```
 
-- [ ] **Step 4: Run to see them pass**
+- [x] **Step 4: Run to see them pass**
 
 Run: `python -m pytest platform/core/tests/test_observability_http.py -q`
 Expected: 2 passed.
@@ -1291,20 +1567,27 @@ git commit -s -m "Log one content-free line per request with the trace id"
 - Produces: `ObservedProvider(spi: str, instance: Any)`; every public callable of `instance` is wrapped in a span named `<spi>.<method>` with `mulyankan.spi`, `mulyankan.provider.name`, `mulyankan.provider.version`. Wrapping is eager (instance attributes), so `isinstance(proxy, KmsProvider)` still holds under Python 3.12's static protocol check.
 - `ProviderRegistry.get(spi)` returns an `ObservedProvider`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `platform/core/tests/test_observability_providers.py`:
 
 ```python
 """Every provider call is a content-free span (ASR02-OBS, ADR-0003 rule 2)."""
 
-import pytest
+import asyncio
+import sys
+import types
 
+import pytest
+from mulyankan_platform.observability.metrics import observe_registry_bindings
 from mulyankan_platform.registry import ProviderRegistry
+from mulyankan_spi.descriptor import ProviderDescriptor
 from mulyankan_spi.kms import KmsProvider
 
 SENTINEL = b"SENTINEL-c3d1"
-MAPPING = {"providers": {"kms": {"provider": "testkit_fake_provider:FakeKms", "config": {}}}}
+MAPPING = {
+    "providers": {"kms": {"provider": "testkit_fake_provider:FakeKms", "config": {}}}
+}
 
 
 def test_asr02obs_provider_calls_are_spanned_content_free(telemetry) -> None:
@@ -1325,34 +1608,141 @@ def test_asr02obs_provider_calls_are_spanned_content_free(telemetry) -> None:
     assert SENTINEL.decode() not in telemetry.dump()
 
 
-def test_provider_exceptions_propagate_and_are_recorded_without_message(telemetry) -> None:
+def test_provider_exceptions_propagate_and_are_recorded_without_message(
+    telemetry,
+) -> None:
     kms = ProviderRegistry.from_mapping(MAPPING).get("kms")
     with pytest.raises(TypeError):
         kms.encrypt("dev-key-1", None)  # FakeKms concatenates bytes; None raises
     (span,) = telemetry.spans()
     (event,) = [e for e in span.events if e.name == "exception"]
     assert "exception.message" not in event.attributes
+    assert not span.status.description
+
+
+class _Probe:
+    """A provider with the shapes a real one has and FakeKms does not."""
+
+    describe_calls = 0
+
+    class Error(Exception):
+        pass
+
+    def __init__(self, config: dict) -> None:
+        self.config = config
+
+    @property
+    def client(self):  # a lazy connection: touching it is a side effect
+        raise RuntimeError("property evaluated")
+
+    def describe(self) -> ProviderDescriptor:
+        type(self).describe_calls += 1
+        return ProviderDescriptor(
+            name="probe", version="2.0", deterministic=True, data_handling="test"
+        )
+
+    def sync_call(self, x):
+        return x
+
+    async def async_call(self, x):
+        await asyncio.sleep(0.01)
+        raise self.Error(x)
+
+
+class _NoDescribe:
+    def __init__(self, config: dict) -> None:
+        pass
+
+    def call(self):
+        return 1
+
+
+def _register_probe_module():
+    module = types.ModuleType("probe_provider")
+    module.Probe = _Probe
+    module.NoDescribe = _NoDescribe
+    sys.modules["probe_provider"] = module
+
+
+def test_observed_provider_forwards_attributes_and_wraps_once(telemetry) -> None:
+    _register_probe_module()
+    registry = ProviderRegistry.from_mapping(
+        {
+            "providers": {
+                "probe": {"provider": "probe_provider:Probe", "config": {"k": 1}}
+            }
+        }
+    )
+    before = _Probe.describe_calls
+    first, second = registry.get("probe"), registry.get("probe")
+    assert first is second  # wrapped once per binding
+    assert _Probe.describe_calls == before  # the descriptor was resolved at bind time
+    assert first.config == {"k": 1}  # plain attributes forward
+    assert first.Error is _Probe.Error  # a nested class is still a class
+    with pytest.raises(RuntimeError, match="property evaluated"):
+        first.client  # a property is evaluated only when read
+    assert [s.name for s in telemetry.spans()] == []  # and none of that made a span
+
+
+def test_observed_provider_spans_cover_an_async_method(telemetry) -> None:
+    _register_probe_module()
+    registry = ProviderRegistry.from_mapping(
+        {"providers": {"probe": {"provider": "probe_provider:Probe", "config": {}}}}
+    )
+    probe = registry.get("probe")
+    with pytest.raises(_Probe.Error):
+        asyncio.run(probe.async_call(SENTINEL))
+    (span,) = [s for s in telemetry.spans() if s.name == "probe.async_call"]
+    assert (
+        span.end_time - span.start_time >= 10_000_000
+    )  # the await ran inside the span
+    assert any(e.name == "exception" for e in span.events)
+    assert SENTINEL.decode() not in telemetry.dump()
+
+
+def test_span_and_gauge_agree_on_the_provider_name(telemetry) -> None:
+    _register_probe_module()
+    registry = ProviderRegistry.from_mapping(
+        {"providers": {"nd": {"provider": "probe_provider:NoDescribe", "config": {}}}}
+    )
+    observe_registry_bindings(registry)
+    registry.get("nd").call()
+    (span,) = [s for s in telemetry.spans() if s.name == "nd.call"]
+    points = [
+        dict(p.attributes)
+        for rm in telemetry.metric_reader.get_metrics_data().resource_metrics
+        for sm in rm.scope_metrics
+        for m in sm.metrics
+        if m.name == "mulyankan.registry.bindings"
+        for p in m.data.data_points
+        if p.attributes.get("spi") == "nd"
+    ]
+    assert (
+        points
+        and points[0]["provider.name"] == span.attributes["mulyankan.provider.name"]
+    )
 ```
 
-- [ ] **Step 2: Run to see it fail**
+- [x] **Step 2: Run to see it fail**
 
 Run: `python -m pytest platform/core/tests/test_observability_providers.py -q`
 Expected: FAIL (`ModuleNotFoundError` once the fixture exists; until Task 8, fixture error).
 
-- [ ] **Step 3: Implement the proxy**
+- [x] **Step 3: Implement the proxy**
 
 `platform/core/src/mulyankan_platform/observability/providers.py`:
 
 ```python
 """Provider-call spans (spec §4.5). The registry is the only path to a
-provider, so wrapping here makes every interaction visible, content-free:
-arguments and return values are never recorded (the kms SPI handles
-plaintext).
+provider, so wrapping here makes every interaction visible and content-free:
+arguments and return values are not recorded, which matters most for the kms
+SPI, which handles plaintext.
 """
 
 from __future__ import annotations
 
 import functools
+import inspect
 from typing import Any
 
 from opentelemetry import trace
@@ -1361,32 +1751,48 @@ _tracer = trace.get_tracer("mulyankan_platform.registry")
 
 
 class ObservedProvider:
-    """Eagerly wraps every public callable of `instance` in a span.
+    """Wraps every public method of `instance` in a span; forwards the rest.
 
-    Wrapping is eager rather than via `__getattr__` because Python 3.12's
-    `isinstance` check against a runtime-checkable Protocol uses
-    `inspect.getattr_static`, which does not call `__getattr__`.
+    Methods are found statically (`inspect.getattr_static`) so a property is
+    not evaluated and a nested class is not rebound, and they are bound as
+    instance attributes eagerly because Python 3.12's `isinstance` against a
+    runtime-checkable Protocol uses `getattr_static`, which ignores
+    `__getattr__`. Everything else, attributes and properties included, is
+    forwarded on read. Built once per binding by the registry.
     """
 
-    def __init__(self, spi: str, instance: Any) -> None:
+    def __init__(self, spi: str, instance: Any, descriptor: dict | None, target: str) -> None:
         self._spi = spi
         self._instance = instance
-        describe = getattr(instance, "describe", None)
-        descriptor = describe() if callable(describe) else None
+        descriptor = descriptor or {}
         self._attributes = {
             "mulyankan.spi": spi,
-            "mulyankan.provider.name": getattr(descriptor, "name", ""),
-            "mulyankan.provider.version": getattr(descriptor, "version", ""),
+            "mulyankan.provider.name": descriptor.get("name", target),
+            "mulyankan.provider.version": descriptor.get("version", ""),
         }
         for name in dir(instance):
             if name.startswith("_"):
                 continue
-            attr = getattr(instance, name)
-            if callable(attr):
-                setattr(self, name, self._observed(name, attr))
+            static = inspect.getattr_static(instance, name, None)
+            if isinstance(static, (staticmethod, classmethod)):
+                static = static.__func__
+            if inspect.isfunction(static) or inspect.ismethoddescriptor(static):
+                setattr(self, name, self._observed(name, getattr(instance, name)))
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._instance, name)
 
     def _observed(self, name: str, method: Any) -> Any:
         span_name = f"{self._spi}.{name}"
+
+        if inspect.iscoroutinefunction(method):
+
+            @functools.wraps(method)
+            async def observed_async(*args: Any, **kwargs: Any) -> Any:
+                with _tracer.start_as_current_span(span_name, attributes=self._attributes):
+                    return await method(*args, **kwargs)
+
+            return observed_async
 
         @functools.wraps(method)
         def observed(*args: Any, **kwargs: Any) -> Any:
@@ -1405,12 +1811,12 @@ In `registry.py`, `get` becomes:
         binding = self._bindings.get(spi)
         if binding is None:
             raise RegistryError(f"no provider bound for spi '{spi}'")
-        return ObservedProvider(spi, binding.instance)
+        return binding.observed  # wrapped once, at bind time, with its descriptor
 ```
 
 with `from mulyankan_platform.observability.providers import ObservedProvider` imported at module top. `registry.py` now imports the observability package, so nothing in that package may import `registry` at runtime: `metrics.py` (Task 4) and `setup.py` (Task 8) import `ProviderRegistry` under `TYPE_CHECKING` only.
 
-- [ ] **Step 4: Run the registry tests**
+- [x] **Step 4: Run the registry tests**
 
 Run: `python -m pytest platform/core/tests/test_registry.py -q`
 Expected: 5 passed, including `isinstance(provider, KmsProvider)`.
@@ -1434,7 +1840,7 @@ git commit -s -m "Span every provider call at the registry boundary"
 - Produces: `register_providers(*, span_exporter=None, metric_reader=None, log_exporter=None) -> Providers` (dataclass with `tracer_provider`, `meter_provider`, `logger_provider`; idempotent, returns the existing set on repeat calls), and the completed `configure(app, registry)`.
 - Test fixture `telemetry` with `.spans()`, `.logs()`, `.metric_reader`, `.dump() -> str`, `.reset()`.
 
-- [ ] **Step 1: Complete `setup.py`**
+- [x] **Step 1: Complete `setup.py`**
 
 ```python
 """SDK bootstrap: build providers from the OTel environment, instrument the app.
@@ -1572,7 +1978,7 @@ def configure(app: FastAPI, registry: ProviderRegistry | None = None) -> None:
 
 `OTEL_PYTHON_FASTAPI_EXCLUDED_URLS` is read by the instrumentor from the environment, so `/healthz` exclusion is configuration (§5), not code.
 
-- [ ] **Step 2: Rewrite the one existing log call**
+- [x] **Step 2: Rewrite the one existing log call**
 
 In `core_api/main.py`, `_default_app`:
 
@@ -1585,7 +1991,7 @@ In `core_api/main.py`, `_default_app`:
 
 (A config path is not question content; it is an opaque reference for the operator.)
 
-- [ ] **Step 3: Add the telemetry fixture**
+- [x] **Step 3: Add the telemetry fixture**
 
 Append to `platform/core/tests/conftest.py`:
 
@@ -1771,7 +2177,7 @@ git commit -s -m "Wire the OTel SDK into core-api and prove it content-free"
 **Files:**
 - Modify: `platform/core/AGENTS.md`, `platform/AGENTS.md`, `AGENTS.md`, `docs/traceability.md`
 
-- [ ] **Step 1: `platform/core/AGENTS.md`**
+- [x] **Step 1: `platform/core/AGENTS.md`**
 
 Add to "What is here", after the `core_api/main.py` bullet:
 
@@ -1806,11 +2212,11 @@ value goes in `extra` under an allowlisted key (`mulyankan.object_ref`,
 finding. `uvicorn.access` is disabled; the request log middleware replaces it.
 ```
 
-- [ ] **Step 2: `platform/AGENTS.md`**
+- [x] **Step 2: `platform/AGENTS.md`**
 
 In the package table, `platform/core` depends on: `mulyankan-spi`, fastapi, uvicorn, pyyaml, opentelemetry-api/sdk, the OTLP HTTP exporter, the FastAPI and system-metrics instrumentations.
 
-- [ ] **Step 3: Root `AGENTS.md`**
+- [x] **Step 3: Root `AGENTS.md`**
 
 The "Daily consequence" line becomes: **no question content in logs, audit events, exception strings, URLs, or span and log attributes.** Add under Commands, after the pytest line:
 
@@ -1819,7 +2225,7 @@ The "Daily consequence" line becomes: **no question content in logs, audit event
 # set OTEL_SDK_DISABLED=true to run without it. See docs/observability.md.
 ```
 
-- [ ] **Step 4: `docs/traceability.md`**
+- [x] **Step 4: `docs/traceability.md`**
 
 The ASR02-OBS row's "Closed in" column becomes `M1 (pipeline: this slice); M3 (operator surface)` and a new line under the table:
 

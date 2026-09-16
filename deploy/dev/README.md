@@ -15,12 +15,14 @@ block in `otel-collector.yaml` and nothing else.
     source deploy/dev/.env.example   # the OTel SDK variables (spec §5)
 
     # core-api, from the repo root
-    OTEL_SERVICE_NAME=core-api uvicorn --factory mulyankan_platform.core_api.main:app --no-access-log --port 8000
+    OTEL_SERVICE_NAME=core-api uvicorn --factory mulyankan_platform.core_api.main:app --port 8000
 
 Open http://localhost:3001 (admin / admin), Explore, Tempo, and search
 `service.name = core-api`: every request except `/healthz` is a trace named
 by its route. Prometheus has `http_server_request_duration_seconds` by route
-and the `process_*` runtime metrics. `OTEL_SDK_DISABLED=true` turns the SDK
+and the `process_*` runtime metrics. Loki has the structured logs: the body is
+an event name such as `platform.config.missing`, fields are attributes, and
+`trace_id` links a line to its trace. `OTEL_SDK_DISABLED=true` turns the SDK
 off; the app serves either way. `--factory` matters: `app` is a function, so
 importing the module never starts an exporter.
 
@@ -32,7 +34,7 @@ importing the module never starts an exporter.
 | Grafana | the UI for everything below | http://localhost:3001, admin / admin |
 | Tempo | traces | Explore, datasource "Tempo", TraceQL `{ resource.service.name = "core-api" }` |
 | Prometheus | metrics | Explore, datasource "Prometheus", PromQL `http_server_request_duration_seconds_count` |
-| Loki | logs (empty until the structured-logs task lands) | Explore, datasource "Loki" |
+| Loki | logs: one `http.request` record per request plus event records, each with `trace_id` | Explore, datasource "Loki", LogQL `{service_name="core-api"}` |
 
 In Grafana: **Dashboards, Mulyankan** for the three provisioned dashboards;
 **Explore** for ad-hoc queries, with the datasource picker top left. From a
@@ -52,8 +54,7 @@ back; provisioned dashboards cannot be saved from the UI. Keep them keyed on
 attribute; `platform/core/tests/test_dev_stack.py` checks the basics.
 
 The web app joins the stack with the Next.js slice of the plan
-(`docs/observability-plan.md`, Tasks 11 to 14); structured logs in Loki
-arrive with Task 5.
+(`docs/observability-plan.md`, Tasks 11 to 14).
 
 ## Stop and reset
 

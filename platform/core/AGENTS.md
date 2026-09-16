@@ -9,7 +9,9 @@ session-monitoring surface of ASR02-OBS-01).
 - `registry.py` — `ProviderRegistry` resolves `"module:attr"` bindings from
   `platform.yaml` via `importlib`. The core never imports a provider any
   other way; malformed or unloadable bindings raise at startup, an unbound
-  capability at call time.
+  capability at call time. `get()` returns the provider wrapped in
+  `ObservedProvider`, which spans each call; the wrapping is eager so runtime
+  Protocol checks still pass.
 - `audit/chain.py` — the append-only audit chain (below).
 - `core_api/main.py` — reads `platform.yaml`
   (`$MULYANKAN_PLATFORM_CONFIG`); no such file is committed, and with none
@@ -22,7 +24,11 @@ session-monitoring surface of ASR02-OBS-01).
 - `observability/` — OTel wiring (ADR-0011, `docs/observability.md`):
   `setup.py` installs the providers from the `OTEL_*` environment and
   instruments FastAPI and the process metrics; `guard.py` holds the
-  attribute allowlists that keep every span, log and metric content-free.
+  attribute allowlists that keep every span, log and metric content-free;
+  `logs.py`, `http.py`, `providers.py` and `metrics.py` are the structured
+  log, the request log, the provider-call proxy and the domain instruments.
+  The package `__init__` is lazy: `audit/` and `registry.py` import
+  `metrics` and `providers` without pulling in FastAPI or the exporters.
   Add an attribute only by adding it to the allowlist with a reason; the
   sentinel test `test_asr02obs_no_content_reaches_any_exporter` fails
   otherwise. `OTEL_SDK_DISABLED=true` turns it all off.
@@ -71,8 +77,28 @@ session-monitoring surface of ASR02-OBS-01).
 - `append(payload=...)` hashes the payload and discards it. Never add a
   field that retains it — events stay content-free (opaque refs + payload
   hash).
+- `append` records two metrics and adds a span event carrying the event id.
+  Telemetry links point at events; no telemetry field is stored on an event,
+  so the canonical bytes are unaffected.
 - The in-memory `AuditLog` is M0 scaffolding; M1's database store must
   produce byte-identical events. Treat its semantics as the specification.
+
+## Logging
+
+Standard library `logging`. The message is a static dotted event name, and
+every value goes in `extra` under an allowlisted key such as
+`mulyankan.object_ref` or `mulyankan.state.to`:
+
+```python
+logger.info("draft.submitted", extra={"mulyankan.object_ref": ref})
+```
+
+`observability/logs.py` renders JSON to stdout and forwards to OTLP. A body
+that is not a dotted event name (an f-string, say, or a sentence) is
+exported as `log.unstructured` and counted. `extra` keys off the allowlist
+are dropped and counted. uvicorn's access log is disabled; `observability/http.py` replaces it with
+one `http.request` record per request, keyed on the route template and
+carrying the trace id, and sets the `Server-Timing` header (D12).
 
 ## Tests
 

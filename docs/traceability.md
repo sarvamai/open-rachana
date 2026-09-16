@@ -10,7 +10,7 @@ row gains its test list at the milestone that closes it.
 | QST01-CFG (cycle, syllabus, taxonomy) | configuration services | M1 |
 | FND04-CAP (capability, identity) | authz engine, identity SPI | M1 |
 | ASR01-EVD (evidence, audit) | `platform/core` audit chain | M1 |
-| ASR02-OBS (observability, integrity) | telemetry SPI, operator surface | M1/M3 |
+| ASR02-OBS (observability, integrity) | telemetry SPI, operator surface | M1 (pipeline: `platform/core/observability`, landed); M3 (operator surface) |
 | QST03-ATH (authoring) | web editor, artefact services | M2 |
 | QST03-VAL (validation, similarity) | validation services, similarity SPI | M2 |
 | QST03-REV (review) | review workspace, decisions service | M3 |
@@ -22,6 +22,19 @@ row gains its test list at the milestone that closes it.
 | QST06-LFC (downstream states) | lifecycle states, notify SPI | M4 |
 | ARC-01..12 (architecture) | cross-cutting | per milestone |
 | SEC-01..14, DAT-01..08, INT-01..11 | cross-cutting | per milestone |
+
+ASR02-OBS tests: `test_asr02obs_no_content_reaches_any_exporter`,
+`test_asr02obs_request_log_uses_route_not_path`,
+`test_asr02obs_unknown_span_attributes_are_dropped_and_counted`,
+`test_asr02obs_unknown_log_attributes_are_dropped_and_counted`,
+`test_asr02obs_unknown_metric_attributes_are_dropped`,
+`test_asr02obs_body_must_be_an_event_name`,
+`test_asr02obs_app_serves_with_collector_unreachable`,
+`test_asr02obs_app_serves_with_sdk_disabled`,
+`test_asr02obs_provider_calls_are_spanned_content_free`,
+`test_asr02obs_audit_append_records_metrics_and_span_link`,
+`test_asr02obs_healthz_is_excluded_from_traces`,
+`test_asr02obs_server_timing_carries_the_trace_id`.
 
 ## ASR02-OBS-01 — session heartbeat and first monitoring signal (M1)
 

@@ -238,10 +238,17 @@ logger.info("draft.submitted", extra={"object_ref": ref, "seq": event.seq})
 The message is a static event name in the same dotted style as audit
 actions, and every value goes in `extra`, where the OTel handler turns it
 into an attribute and the guard (§4.2) can allowlist or drop it. Values are
-limited to opaque ids, counts, route templates and state names. The one
-existing call in `core_api/main.py` is rewritten to this style. The guard
-cannot inspect the message itself, so a value interpolated into the message
-is a review finding, and the sentinel test in §7 is the backstop.
+limited to opaque ids, counts, route templates and state names. The two
+existing calls in `core_api/main.py` are rewritten to this style.
+
+The body has its own rule, a grammar: an exported body must be a dotted
+event name (`^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$`). Anything else, such as an
+f-string or a sentence, is exported as `log.unstructured` and counted in
+`mulyankan.observability.attributes_dropped` under `attribute=body`, on
+both the OTLP path (`LogAttributeGuard`) and the stdout formatter. The
+framework's own loggers (`uvicorn.*`) log constants about the process and
+pass through. The sentinel test in §7 includes a message that interpolates
+the sentinel.
 
 On the Node side (§4.7), pino is the logger and the pino instrumentation
 from the auto-instrumentations bundle adds trace and span ids and forwards
@@ -250,8 +257,9 @@ applies.
 
 ### 4.5 `providers.py` — provider-call spans at the registry
 
-`ProviderRegistry.get()` returns the provider wrapped in a thin proxy that
-opens a span named `<spi>.<method>` around each public method call, with
+`ProviderRegistry.get()` returns the provider wrapped, once per binding, in
+a thin proxy that opens a span named `<spi>.<method>` around each public
+method call (async methods included), with
 `mulyankan.spi`, `mulyankan.provider.name` and
 `mulyankan.provider.version` from the descriptor. Arguments and return
 values are never recorded; the `kms` SPI in particular handles plaintext.

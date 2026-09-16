@@ -9,6 +9,9 @@ Invariants (v4 §1.10, ARC-02, DAT-05):
   hash, never artefact plaintext (ASR01-EVD-09, DAT-03).
 - Canonical bytes follow `docs/canonicalization.md` (draft v0.1) and are
   versioned; the verifier refuses unknown schema versions.
+- Observability links point at events: `append` adds a span event carrying
+  the event id. No telemetry field is stored on an event, so the canonical
+  bytes are unaffected.
 - `append` is atomic. Reading the tail, numbering the event, and storing it is
   one indivisible step, so concurrent writers cannot mint two events with the
   same `seq` and `prev_hash` — a break `verify` reports and nothing can repair,
@@ -21,10 +24,15 @@ from __future__ import annotations
 import hashlib
 import json
 import threading
+import time
 import uuid
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from typing import Sequence
+
+from opentelemetry import trace
+
+from mulyankan_platform.observability.metrics import audit_append_duration, audit_events
 
 CANONICAL_SCHEMA_VERSION = "draft-v0.1"
 GENESIS_HASH = "0" * 64
@@ -124,6 +132,7 @@ class AuditLog:
         ts: datetime | None = None,
     ) -> AuditEvent:
         """Append one event atomically; `payload` is hashed and discarded."""
+        started = time.perf_counter()
         if payload is None:
             payload_hash = ""
         else:
@@ -144,6 +153,13 @@ class AuditLog:
             )
             event = replace(event, hash=compute_hash(event))
             self._events.append(event)
+        # Observability (ASR02-OBS): the span points at the event id and the
+        # event stays as built, so the canonical bytes above are untouched.
+        audit_append_duration.record(time.perf_counter() - started)
+        audit_events.add(1, {"action": action})
+        trace.get_current_span().add_event(
+            "audit.appended", {"mulyankan.audit.event_id": event.event_id}
+        )
         return event
 
     @property

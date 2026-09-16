@@ -102,6 +102,25 @@ ALLOWED_METRIC_ATTRIBUTES: frozenset[str] = frozenset(
     }
 )
 
+# The log body is not an attribute, so the allowlist cannot see it. The
+# rule (spec §4.4) is that a body is a static, dotted event name such as
+# `draft.submitted`; anything else is an interpolated or free-text message
+# and is replaced before export. Framework loggers (uvicorn) log constants
+# about the process and pass through.
+UNSTRUCTURED_EVENT = "log.unstructured"
+_EVENT_NAME = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$")
+_FRAMEWORK_LOGGERS = ("uvicorn",)
+
+
+def event_name(body: object, logger_name: str) -> str:
+    """The body to export: the event name itself, or the placeholder."""
+    if not isinstance(body, str):
+        return UNSTRUCTURED_EVENT
+    if logger_name.split(".", 1)[0] in _FRAMEWORK_LOGGERS:
+        return body
+    return body if _EVENT_NAME.match(body) else UNSTRUCTURED_EVENT
+
+
 # The `attribute` label of the dropped counter is a key NAME, but names are
 # not always code-controlled: captured request headers become
 # `http.request.header.<name>` keys, and a client picks the name. Bucket
@@ -264,6 +283,12 @@ class LogAttributeGuard(LogRecordProcessor):
                 inner.attributes, ALLOWED_LOG_ATTRIBUTES, self._dropped, "log"
             ),
         )
+        scope = record.instrumentation_scope
+        exported = event_name(inner.body, scope.name if scope else "")
+        if exported != inner.body:
+            inner.body = exported
+            if self._dropped is not None:
+                self._dropped.add(1, {"signal": "log", "attribute": "body"})
 
     def shutdown(self) -> None:
         return None

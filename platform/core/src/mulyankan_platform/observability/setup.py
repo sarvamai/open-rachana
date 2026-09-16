@@ -43,11 +43,14 @@ from mulyankan_platform.observability.guard import (
     SpanAttributeGuard,
     metric_views,
 )
-from mulyankan_platform.observability.metrics import attributes_dropped
+from mulyankan_platform.observability.http import RequestLogMiddleware
+from mulyankan_platform.observability.logs import configure_logging
+from mulyankan_platform.observability.metrics import (
+    attributes_dropped,
+    observe_registry_bindings,
+)
 
-if (
-    TYPE_CHECKING
-):  # registry will import this package (plan Task 7); keep the edge type-only
+if TYPE_CHECKING:  # registry imports this package; keep the edge type-only
     from mulyankan_platform.registry import ProviderRegistry
 
 # Process-level instruments only; host metrics come from the Collector (§6.3).
@@ -124,6 +127,7 @@ def register_providers(
     else:
         logger_provider.add_log_record_processor(SimpleLogRecordProcessor(log_exporter))
     set_logger_provider(logger_provider)
+    configure_logging(logger_provider)
 
     instrumentor = SystemMetricsInstrumentor(config=_PROCESS_METRICS)
     if not instrumentor.is_instrumented_by_opentelemetry:
@@ -134,14 +138,19 @@ def register_providers(
 
 
 def configure(app: FastAPI, registry: ProviderRegistry | None = None) -> None:
-    """Instrument `app`; does nothing when the SDK is disabled. Never raises:
-    a bad endpoint surfaces as exporter warnings, and the app serves.
+    """Instrument `app`. With the SDK disabled only the structured stdout log
+    and the request log remain; nothing exports. Never raises: a bad
+    endpoint surfaces as exporter warnings, and the app serves.
 
-    `registry` is unused until the provider-call spans land (plan Task 7).
+    `registry` feeds the `mulyankan.registry.bindings` gauge.
     """
     if sdk_disabled():
+        configure_logging(None)
+        app.add_middleware(RequestLogMiddleware)  # no span: the line has no trace id
         return
     providers = register_providers()
+    # Added first so it runs inside the OTel middleware (added by instrument_app).
+    app.add_middleware(RequestLogMiddleware)
     FastAPIInstrumentor.instrument_app(
         app,
         tracer_provider=providers.tracer_provider,
@@ -155,3 +164,5 @@ def configure(app: FastAPI, registry: ProviderRegistry | None = None) -> None:
         ),
         exclude_spans=["receive", "send"],  # the ASGI message spans are noise
     )
+    if registry is not None:
+        observe_registry_bindings(registry)
