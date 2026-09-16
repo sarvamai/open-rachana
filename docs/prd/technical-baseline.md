@@ -1,6 +1,6 @@
 > Retained PRD baseline for section-level reference. Current owner amendments and conflicts are in [source precedence](../source-of-truth.md) and [reconciliation](../prd-reconciliation.md). Historical dates, role names, proposed defaults and superseded clauses below are source text, not fresh approval. Use the [engineering handoff](../plans/README.md) for the applicable task and effective rules. External source links are omitted.
 
-National Examination Stack · Assessment group · Project Rachana Project Rachana — Content Creation MVP Product Requirements Document 
+National Examination Stack · Assessment group · Project Rachana Project Rachana — Content Creation MVP Product Requirements Document
 
 The part of the stack that turns a blank page into an approved, sealed, exam-ready question — and the evidence that proves it happened properly.
 
@@ -18,24 +18,24 @@ The part of the stack that turns a blank page into an approved, sealed, exam-rea
 
 ## Contents
 
-- Summary — what we are building and why 
-- Scope — where the MVP starts and where it ends; convergence with the engineering PRD (2.7) 
-- Goals, success measures and release gates 
-- Users, roles and the permission matrix 
-- Domain model and artefact lifecycle 
-- Functional requirements (6.1 – 6.15) 
-- Interface requirements and API contract 
-- Data requirements, canonicalization and manifests 
-- Screens 
-- Architecture and security constraints 
-- Non-functional requirements 
-- Edge cases and required behaviour 
-- Test and verification strategy 
-- Delivery plan — start line to finish line 
-- Decision register 
-- Preconditions, dependencies, risks and open questions 
-- Definition of Done and release criteria 
-- Appendix A — Traceability · Appendix B — Glossary · Appendix C — Sample payloads 
+- Summary — what we are building and why
+- Scope — where the MVP starts and where it ends; convergence with the engineering PRD (2.7)
+- Goals, success measures and release gates
+- Users, roles and the permission matrix
+- Domain model and artefact lifecycle
+- Functional requirements (6.1 – 6.15)
+- Interface requirements and API contract
+- Data requirements, canonicalization and manifests
+- Screens
+- Architecture and security constraints
+- Non-functional requirements
+- Edge cases and required behaviour
+- Test and verification strategy
+- Delivery plan — start line to finish line
+- Decision register
+- Preconditions, dependencies, risks and open questions
+- Definition of Done and release criteria
+- Appendix A — Traceability · Appendix B — Glossary · Appendix C — Sample payloads
 
 # 1. Summary
 
@@ -52,11 +52,11 @@ When all four jobs are complete for the primary language and for every required 
 
 ## 1.2 The problem this solves
 
-- Confidentiality. A leaked question invalidates an examination. Content must never leave the hardened environment, never appear in logs, telemetry or error messages, and must become unreadable to humans once sealed. 
-- Independence. The person who writes a question is never the person who approves it. The API enforces this on its own, so bypassing the interface changes nothing. 
-- Provable evidence. Every step must produce agreed evidence. Missing evidence blocks sealing and raises an alert. Silence is never treated as success. 
-- Equivalence. Every language version and every accessible route must be as hard as the original — not harder, not easier. 
-- Human judgement only. Every judgement about a question is made by a qualified person or by a published, fixed rule. The intelligence layer (§1.5) drafts candidates and translations; it never validates, reviews, approves, seals or monitors. 
+- Confidentiality. A leaked question invalidates an examination. Content must never leave the hardened environment, never appear in logs, telemetry or error messages, and must become unreadable to humans once sealed.
+- Independence. The person who writes a question is never the person who approves it. The API enforces this on its own, so bypassing the interface changes nothing.
+- Provable evidence. Every step must produce agreed evidence. Missing evidence blocks sealing and raises an alert. Silence is never treated as success.
+- Equivalence. Every language version and every accessible route must be as hard as the original — not harder, not easier.
+- Human judgement only. Every judgement about a question is made by a qualified person or by a published, fixed rule. The intelligence layer (§1.5) drafts candidates and translations; it never validates, reviews, approves, seals or monitors.
 
 ## 1.3 Principles that settle arguments
 
@@ -167,11 +167,11 @@ Each row is an interface the MVP has with something it does not build. The count
 
 ## 2.6 Explicit non-goals
 
-- It does not assemble papers, select questions, or decide which question a candidate sees. 
-- It does not register candidates, run the exam day, mark work, or publish results. 
-- It does not track how questions perform in a live examination. 
-- It does not let artificial intelligence validate, review, approve, seal or monitor anything. Layer 1 contains no model; Layer 2 drafts only (§1.5). 
-- It does not offer download, print, export or persistent browser storage of content to anyone. 
+- It does not assemble papers, select questions, or decide which question a candidate sees.
+- It does not register candidates, run the exam day, mark work, or publish results.
+- It does not track how questions perform in a live examination.
+- It does not let artificial intelligence validate, review, approve, seal or monitor anything. Layer 1 contains no model; Layer 2 drafts only (§1.5).
+- It does not offer download, print, export or persistent browser storage of content to anyone.
 
 ## 2.7 Convergence with the engineering PRD
 
@@ -231,14 +231,14 @@ The canonical state enumeration for implementation is the engineering one, exten
 
 ### Adopted from the engineering PRD without change
 
-- State and role names above; question identifiers of the form `QB-nnnnn` with no relation to final numbering. 
-- The two-role accessibility flow: the Accessibility Specialist works, the Accessibility Reviewer approves or rejects. 
-- After any rejection the corrected work goes to a different reviewer (`PRD-ASG-10`). 
-- The reviewer-isolation list: no assessment name, title or identifier; no final question number; no other questions; no candidate-pool membership or selection status; no other reviewers; no audit history (`PRD-REV-19`). 
-- Comments at every review stage; every substantive modification is versioned and re-reviewed; the original question is never replaced; each language is independently trackable with its own translator, version, review status, reviewer, comments and approval history. 
-- Version records preserve previous content, new content, editor, timestamp, reason and review status — provided here by the immutable version plus the decision record (§8.2). 
-- The question metadata list (question type, marks, subject, grade, curriculum, Bloom's level, difficulty, learning objective, competency, language, source curriculum, chapter, page and context, status, version, timestamps, generation identifier, model and configuration) — added to the content model in §6.4. 
-- The generation-validation list (grounding, type, marks, blueprint constraints, Bloom's, difficulty, duplicates, answer validity, completeness, metadata completeness) — mapped onto the validation catalogue in §6.5; questions failing automated validation never reach human review. 
+- State and role names above; question identifiers of the form `QB-nnnnn` with no relation to final numbering.
+- The two-role accessibility flow: the Accessibility Specialist works, the Accessibility Reviewer approves or rejects.
+- After any rejection the corrected work goes to a different reviewer (`PRD-ASG-10`).
+- The reviewer-isolation list: no assessment name, title or identifier; no final question number; no other questions; no candidate-pool membership or selection status; no other reviewers; no audit history (`PRD-REV-19`).
+- Comments at every review stage; every substantive modification is versioned and re-reviewed; the original question is never replaced; each language is independently trackable with its own translator, version, review status, reviewer, comments and approval history.
+- Version records preserve previous content, new content, editor, timestamp, reason and review status — provided here by the immutable version plus the decision record (§8.2).
+- The question metadata list (question type, marks, subject, grade, curriculum, Bloom's level, difficulty, learning objective, competency, language, source curriculum, chapter, page and context, status, version, timestamps, generation identifier, model and configuration) — added to the content model in §6.4.
+- The generation-validation list (grounding, type, marks, blueprint constraints, Bloom's, difficulty, duplicates, answer validity, completeness, metadata completeness) — mapped onto the validation catalogue in §6.5; questions failing automated validation never reach human review.
 
 ### Engineering open questions, answered
 
@@ -290,11 +290,11 @@ Not in the engineering PRD but retained from the specification: multi-factor aut
 
 ### Release gates
 
-- No unresolved Critical or High finding from the penetration test or the accessibility audit. 
-- Stated capacity, latency and recovery targets met under load, with evidence retained. 
-- Backup, restore and chain verification pass end to end; hashes verify after restore. 
-- Every runbook has a named owner and has been walked through once. 
-- Signatures from Product, Architecture, Security, Accessibility, Content Operations, QA and Operations. 
+- No unresolved Critical or High finding from the penetration test or the accessibility audit.
+- Stated capacity, latency and recovery targets met under load, with evidence retained.
+- Backup, restore and chain verification pass end to end; hashes verify after restore.
+- Every runbook has a named owner and has been walked through once.
+- Signatures from Product, Architecture, Security, Accessibility, Content Operations, QA and Operations.
 
 # 4. Users, roles and the permission matrix
 
@@ -467,21 +467,21 @@ Every transition writes its audit event in the same database transaction (`ARC-0
 
 #### Invariants
 
-- I1 A version in any state other than `DRAFT`, `IN_ACCESSIBILITY` or `IN_TRANSLATION` is byte-for-byte immutable; its content hash never changes. Each editable state permits only its own field set. 
-- I2 No delete operation exists for artefact content in any state (`SEC-08`); "Delete" is Withdraw or Retire. 
-- I3 For each artefact and language, at most one version is current (`SEALED`, `USED` or `ARCHIVED` and not `SUPERSEDED`). The pointer flips in the sealing transaction. 
-- I4 Every transition and its audit event commit together or not at all. 
-- I5 A rejected version is never edited. Its successor draft records `derived_from` and carries the findings and comments. 
-- I6 A version never moves backwards. Remediation is always a new version, and the next review of it is by a different reviewer. 
-- I7 The original (primary) question is never replaced by a translation; every language version is retained. 
+- I1 A version in any state other than `DRAFT`, `IN_ACCESSIBILITY` or `IN_TRANSLATION` is byte-for-byte immutable; its content hash never changes. Each editable state permits only its own field set.
+- I2 No delete operation exists for artefact content in any state (`SEC-08`); "Delete" is Withdraw or Retire.
+- I3 For each artefact and language, at most one version is current (`SEALED`, `USED` or `ARCHIVED` and not `SUPERSEDED`). The pointer flips in the sealing transaction.
+- I4 Every transition and its audit event commit together or not at all.
+- I5 A rejected version is never edited. Its successor draft records `derived_from` and carries the findings and comments.
+- I6 A version never moves backwards. Remediation is always a new version, and the next review of it is by a different reviewer.
+- I7 The original (primary) question is never replaced by a translation; every language version is retained.
 
 ## 5.4 Variants, readiness and revalidation
 
-- Variant creation. Sealing the primary creates one `IN_TRANSLATION` draft per required language of the cycle (`ASM04-TRN-01`). Each carries the locked structure — option identifiers and order, correct-answer flag, marks, assets, canonical equations, classification — and a read-only snapshot of the primary's rendering and canonical text, visible only to the assigned Translator and, later, the Translation Reviewer. 
-- Variant gates. A variant goes through Submit → `IN_TRANSLATION_REVIEW` (with the equivalence judgement inside the checklist) → its own `IN_ACCESSIBILITY` and `IN_ACCESSIBILITY_REVIEW` → sealing. No additional lifecycle state exists beyond these (`ASM04-TRN-07`). 
-- Readiness rule. An artefact is `FULLY_APPROVED` when: the current primary is `SEALED`; for every required language a `SEALED` variant exists whose `primary_reference_hash` equals the current primary's content hash; no variant carries `requires_revalidation`; the artefact is not `USED`, `ARCHIVED` or `RETIRED`; and readiness has not been revoked by an open correction (`ASM07-RDY-01`). 
-- Approval reset (revalidation). When the Admin corrects an approved or sealed question, readiness is revoked immediately, a new lineage starts, every dependent variant is flagged `requires_revalidation`, and the Translator is shown a field-level difference between the old and new primary reference (`ASM04-TRN-09`, `RES06-COR-03`). The full pipeline runs again. 
-- Remediation routing. Whether a version rejected at accessibility review must repeat question review is cycle policy (`ASM04-ACC-06`). The default repeats question review when the successor draft changed content, answer or metadata — stem, option bodies, correct flag, explanation, classification or marks. A change confined to accessibility fields — alternative text, decorative flag, table headers or caption, equation text alternatives — goes back to accessibility review only. "Changed" is computed as a field-level difference of canonical content against the rejected version. GAP D-07 
+- Variant creation. Sealing the primary creates one `IN_TRANSLATION` draft per required language of the cycle (`ASM04-TRN-01`). Each carries the locked structure — option identifiers and order, correct-answer flag, marks, assets, canonical equations, classification — and a read-only snapshot of the primary's rendering and canonical text, visible only to the assigned Translator and, later, the Translation Reviewer.
+- Variant gates. A variant goes through Submit → `IN_TRANSLATION_REVIEW` (with the equivalence judgement inside the checklist) → its own `IN_ACCESSIBILITY` and `IN_ACCESSIBILITY_REVIEW` → sealing. No additional lifecycle state exists beyond these (`ASM04-TRN-07`).
+- Readiness rule. An artefact is `FULLY_APPROVED` when: the current primary is `SEALED`; for every required language a `SEALED` variant exists whose `primary_reference_hash` equals the current primary's content hash; no variant carries `requires_revalidation`; the artefact is not `USED`, `ARCHIVED` or `RETIRED`; and readiness has not been revoked by an open correction (`ASM07-RDY-01`).
+- Approval reset (revalidation). When the Admin corrects an approved or sealed question, readiness is revoked immediately, a new lineage starts, every dependent variant is flagged `requires_revalidation`, and the Translator is shown a field-level difference between the old and new primary reference (`ASM04-TRN-09`, `RES06-COR-03`). The full pipeline runs again.
+- Remediation routing. Whether a version rejected at accessibility review must repeat question review is cycle policy (`ASM04-ACC-06`). The default repeats question review when the successor draft changed content, answer or metadata — stem, option bodies, correct flag, explanation, classification or marks. A change confined to accessibility fields — alternative text, decorative flag, table headers or caption, equation text alternatives — goes back to accessibility review only. "Changed" is computed as a field-level difference of canonical content against the rejected version. GAP D-07
 
 # 6. Functional requirements
 
@@ -507,9 +507,9 @@ Boundary block. The MVP consumes the construct, syllabus and taxonomy as configu
 
 #### Acceptance criteria
 
-- A coordinator creates a cycle with two required languages and activates it; an author in that cycle can create a draft; an author in a Draft or Closed cycle cannot, and receives `CYCLE_INACTIVE`. 
-- Retiring a topic blocks its selection in new drafts (`TAXONOMY_RETIRED`) while an existing version that references it still renders its classification. 
-- Changing the required languages of an Active cycle is refused without re-authentication and, once made, appears as a `policy.changed` domain event with the new policy version. 
+- A coordinator creates a cycle with two required languages and activates it; an author in that cycle can create a draft; an author in a Draft or Closed cycle cannot, and receives `CYCLE_INACTIVE`.
+- Retiring a topic blocks its selection in new drafts (`TAXONOMY_RETIRED`) while an existing version that references it still renders its classification.
+- Changing the required languages of an Active cycle is refused without re-authentication and, once made, appears as a `policy.changed` domain event with the new policy version.
 
 ## 6.2 Recognized capability and access · INS04-CAP
 
@@ -539,9 +539,9 @@ Boundary block. The official record of who in the authoring workforce is recogni
 
 #### Acceptance criteria
 
-- Sign-in from a workstation without a valid device certificate, or with a stale posture assertion, is refused before any content surface loads, and a security event reaches the monitoring platform. 
-- Revoking a reviewer's entry while their review workspace is open causes the very next request from that workspace to be denied with `FORBIDDEN_CAPABILITY_EXPIRED`; the decision they recorded a minute earlier remains valid. 
-- A user holding Author and Reviewer entries who authored version V cannot record a decision on V through the interface or through a hand-crafted API call. 
+- Sign-in from a workstation without a valid device certificate, or with a stale posture assertion, is refused before any content surface loads, and a security event reaches the monitoring platform.
+- Revoking a reviewer's entry while their review workspace is open causes the very next request from that workspace to be denied with `FORBIDDEN_CAPABILITY_EXPIRED`; the decision they recorded a minute earlier remains valid.
+- A user holding Author and Reviewer entries who authored version V cannot record a decision on V through the interface or through a hand-crafted API call.
 
 ## 6.3 Work assignment and My Work
 
@@ -568,9 +568,9 @@ Assignment is cross-cutting: it is the only way any workforce user reaches any v
 
 #### Acceptance criteria
 
-- Submitting a version produces a review assignment within 5 seconds to an eligible reviewer who did not author it, and that reviewer's open My Work updates without a reload. 
-- Two reviewers open the same task; the first decision succeeds, the second receives `CONFLICT_ALREADY_DECIDED` and sees the task leave their list. 
-- An assignment past its expiry appears in coordinator aging, is audited as expired, and is picked up by the next eligible reviewer. 
+- Submitting a version produces a review assignment within 5 seconds to an eligible reviewer who did not author it, and that reviewer's open My Work updates without a reload.
+- Two reviewers open the same task; the first decision succeeds, the second receives `CONFLICT_ALREADY_DECIDED` and sees the task leave their list.
+- An assignment past its expiry appears in coordinator aging, is audited as expired, and is picked up by the next eligible reviewer.
 
 ## 6.4 Authoring · ASM03-ATH
 
@@ -608,10 +608,10 @@ Implements the authoring half of ASM-03: writing the question inside a hardened 
 
 #### Acceptance criteria
 
-- A representative author creates, validates, previews, autosaves and submits a question with an image, a table and two equations without assistance (Week 2 closure). 
-- A stale write is rejected with `CONFLICT_STALE_WRITE` and no data is lost; a page refresh restores the same draft state. 
-- Pasting into the stem is blocked, the author sees the blocked notice without losing focus, and the event appears on the operator surface within 3 seconds. 
-- An equation using `\newcommand` is rejected with a message naming the bounded subset; a 6 × 6 matrix renders within budget. 
+- A representative author creates, validates, previews, autosaves and submits a question with an image, a table and two equations without assistance (Week 2 closure).
+- A stale write is rejected with `CONFLICT_STALE_WRITE` and no data is lost; a page refresh restores the same draft state.
+- Pasting into the stem is blocked, the author sees the blocked notice without losing focus, and the event appears on the operator surface within 3 seconds.
+- An equation using `\newcommand` is rejected with a message naming the bounded subset; a 6 × 6 matrix renders within budget.
 
 ## 6.5 Validation and submission · ASM03-VAL
 
@@ -659,9 +659,9 @@ Implements the authoring half of ASM-03: writing the question inside a hardened 
 
 #### Acceptance criteria
 
-- Every blocking rule in the catalogue has an automated test that produces the finding against the named field and an automated test that passes when corrected. 
-- A near-duplicate of a seeded bank question is refused at submission naming the matched identifier; a question sharing only common phrasing is not. 
-- A submitted version's content hash equals the hash recomputed from its stored canonical bytes; editing the successor draft leaves the hash unchanged. 
+- Every blocking rule in the catalogue has an automated test that produces the finding against the named field and an automated test that passes when corrected.
+- A near-duplicate of a seeded bank question is refused at submission naming the matched identifier; a question sharing only common phrasing is not.
+- A submitted version's content hash equals the hash recomputed from its stored canonical bytes; editing the successor draft leaves the hash unchanged.
 
 ## 6.6 Question review · ASM03-REV
 
@@ -713,10 +713,10 @@ Implements the review half of ASM-03: an independent Question Reviewer assesses 
 
 #### Acceptance criteria
 
-- Approval with any checklist item unanswered or any attestation without a source is refused server-side with field-level detail. 
-- A return produces a new Draft carrying the findings; the returned version's hash, state and decision are unchanged afterwards. 
-- A multi-role user is refused approval of their own work through the interface and through a hand-crafted API call. 
-- Keyboard-only and screen-reader review of the workspace passes (Week 3 closure). 
+- Approval with any checklist item unanswered or any attestation without a source is refused server-side with field-level detail.
+- A return produces a new Draft carrying the findings; the returned version's hash, state and decision are unchanged afterwards.
+- A multi-role user is refused approval of their own work through the interface and through a hand-crafted API call.
+- Keyboard-only and screen-reader review of the workspace passes (Week 3 closure).
 
 ## 6.7 Accessibility remediation and review · ASM04-ACC
 
@@ -762,9 +762,9 @@ Implements CND-02 Accessibility and accommodations at artefact level, and the ac
 
 #### Acceptance criteria
 
-- An approval records a deliverable / equivalent-route value for every accommodation declared by the cycle; omitting one is refused. 
-- Marking any accommodation as needs equivalent route creates a coordinator escalation and an alert; the artefact is not silently approved. 
-- A return names the affected element and required remediation, and the successor draft shows them beside the element. 
+- An approval records a deliverable / equivalent-route value for every accommodation declared by the cycle; omitting one is refused.
+- Marking any accommodation as needs equivalent route creates a coordinator escalation and an alert; the artefact is not silently approved.
+- A return names the affected element and required remediation, and the successor draft shows them beside the element.
 
 ## 6.8 Translation and variant equivalence · ASM04-TRN
 
@@ -792,9 +792,9 @@ Implements the language half of ASM-04: every language version must be as hard a
 
 #### Acceptance criteria
 
-- Sealing a primary in a cycle with two required languages creates exactly two variant drafts with translation assignments; a coordinator sees both languages as "Translation in progress". 
-- A variant that changes a numeric value or the position of the correct option is refused at submission naming `STR-07` or `STR-03`; with a valid, unexpired exception covering that code the submission succeeds and the exception identifier appears on the decision and manifest. 
-- One primary plus two language variants reach readiness and every manifest verifies (Week 4 closure). 
+- Sealing a primary in a cycle with two required languages creates exactly two variant drafts with translation assignments; a coordinator sees both languages as "Translation in progress".
+- A variant that changes a numeric value or the position of the correct option is refused at submission naming `STR-07` or `STR-03`; with a valid, unexpired exception covering that code the submission succeeds and the exception identifier appears on the decision and manifest.
+- One primary plus two language variants reach readiness and every manifest verifies (Week 4 closure).
 
 ## 6.9 Sealing and the repository · ASM05-VLT
 
@@ -836,9 +836,9 @@ Implements ASM-05: where approved artefacts are kept, which version is current, 
 
 #### Acceptance criteria
 
-- A sealing job replayed three times yields one sealed object, one manifest and one audit event; the version's hash is unchanged. 
-- With the key service unavailable, the job fails, the version remains Sealing Requested, nothing is written to the repository, and the retry succeeds after recovery. 
-- No human role, including a platform administrator with database and object-store access, can obtain sealed plaintext through any interface; the manifest signature verifies with the public key. 
+- A sealing job replayed three times yields one sealed object, one manifest and one audit event; the version's hash is unchanged.
+- With the key service unavailable, the job fails, the version remains Sealing Requested, nothing is written to the repository, and the retry succeeds after recovery.
+- No human role, including a platform administrator with database and object-store access, can obtain sealed plaintext through any interface; the manifest signature verifies with the public key.
 
 ## 6.10 Readiness and handoff to assembly · ASM07-RDY
 
@@ -859,8 +859,8 @@ Boundary block. This is the outbound edge of the MVP: a metadata-only contract r
 
 #### Acceptance criteria
 
-- A human bearer token and a workload token with a different audience are both refused; the approved identity succeeds and receives metadata only (Week 4 closure). 
-- An automated test asserts that no field of any readiness response matches a content field name or a content value from the synthetic corpus. 
+- A human bearer token and a workload token with a different audience are both refused; the approved identity succeeds and receives metadata only (Week 4 closure).
+- An automated test asserts that no field of any readiness response matches a content field name or a content value from the synthetic corpus.
 
 ## 6.11 Correction and supersession (approval reset) · RES06-COR
 
@@ -883,8 +883,8 @@ Boundary block. Implements RES-06 at artefact level: when something changes afte
 
 #### Acceptance criteria
 
-- Authorizing a correction on a ready artefact revokes readiness within the same request and the assembly interface stops returning it as ready on its next call. 
-- After the corrected primary seals, the old version reads Superseded with `replaced_by` set, both variants show `requires_revalidation`, and the supersession event reaches the registered consumer; withholding the acknowledgement past the window raises the alert. 
+- Authorizing a correction on a ready artefact revokes readiness within the same request and the assembly interface stops returning it as ready on its next call.
+- After the corrected primary seals, the old version reads Superseded with `replaced_by` set, both variants show `requires_revalidation`, and the supersession event reaches the registered consumer; withholding the acknowledgement past the window raises the alert.
 
 ## 6.12 Downstream lifecycle states · ASM06-LFC
 
@@ -905,8 +905,8 @@ Boundary block. Blind assembly is performed by a separate service; this MVP owns
 
 #### Acceptance criteria
 
-- A simulated signed selection notification moves the primary and both variants to Used atomically; a replay returns the same result without a second transition; exam completion moves them to Archived and the audit chain carries the artefact-set hash (Week 4 closure). 
-- After archival the wrapped data key references the archive-tier key and the rotation is present in audit. 
+- A simulated signed selection notification moves the primary and both variants to Used atomically; a replay returns the same result without a second transition; exam completion moves them to Archived and the audit chain carries the artefact-set hash (Week 4 closure).
+- After archival the wrapped data key references the archive-tier key and the rotation is present in audit.
 
 ## 6.13 Expected evidence and audit · ASR01-EVD
 
@@ -948,9 +948,9 @@ Implements ASR-01: agreeing beforehand what proof each step must produce, so tha
 
 #### Acceptance criteria
 
-- Chain verification passes on seeded data and detects a deliberately altered event in a copy of the store (Week 1 closure); it still passes after backup and restore (Week 5). 
-- Deleting an expected evidence record blocks the next transition and raises the alert naming the step and record (Week 3 closure). 
-- The chain writer sustains 200 events per second in the integration environment with p95 write latency under 50 ms. 
+- Chain verification passes on seeded data and detects a deliberately altered event in a copy of the store (Week 1 closure); it still passes after backup and restore (Week 5).
+- Deleting an expected evidence record blocks the next transition and raises the alert naming the step and record (Week 3 closure).
+- The chain writer sustains 200 events per second in the integration environment with p95 write latency under 50 ms.
 
 ## 6.14 Session integrity, observability and referral · ASR02-OBS
 
@@ -1006,10 +1006,10 @@ Implements ASR-02: spotting patterns that suggest something is wrong and referri
 
 #### Acceptance criteria
 
-- A deliberate copy attempt is blocked, scored, visible on the operator surface within 3 seconds and durable in the audit chain within 5 seconds, carrying no content (Week 2 closure). 
-- Opening developer tools refers the session; a second critical signal updates the existing alert instead of creating a new one. 
-- Dropping the operator transport shows the reconnecting state; on reconnect no live session is missing or stale. 
-- The build fails when a telemetry event with an extra field is accepted by the schema. 
+- A deliberate copy attempt is blocked, scored, visible on the operator surface within 3 seconds and durable in the audit chain within 5 seconds, carrying no content (Week 2 closure).
+- Opening developer tools refers the session; a second critical signal updates the existing alert instead of creating a new one.
+- Dropping the operator transport shows the reconnecting state; on reconnect no live session is missing or stale.
+- The build fails when a telemetry event with an extra field is accepted by the schema.
 
 ## 6.15 Notifications and alerts (cross-cutting)
 
@@ -1187,10 +1187,10 @@ GAP Field lists are minimum requirements; the migration set may add operational 
 
 ## 8.3 Relationships, constraints and indexes
 
-- Artefact 1 → many Lineage; Lineage 1 → many Version (ordered by sequence); Version 1 → 2..8 Option; Version 0..6 Asset; Version 0..many Decision; Version 0..1 Manifest; Version 0..1 BankIndex row. 
-- Database constraints: exactly one `is_correct` per version; unique (lineage, sequence); unique (chain, sequence); a trigger rejects any update to a Version whose state is not Draft; a trigger rejects deletes on Version, Option, Asset, Decision, Manifest and AuditEvent. 
-- Indexes: Assignment by (audit_id, status); Version by (state, cycle); BankIndex by (language, classification), by (is_current, artefact_id); ReadinessRecord by (cycle_code, readiness_status, updated_at); AuditEvent by (subject_id), (actor_id, occurred_at), (action, occurred_at); IntegrityEvent by (session_id, client_seq). 
-- Row-level visibility: content columns are readable only through the application's authorization layer; no reporting user or replica exposes them. 
+- Artefact 1 → many Lineage; Lineage 1 → many Version (ordered by sequence); Version 1 → 2..8 Option; Version 0..6 Asset; Version 0..many Decision; Version 0..1 Manifest; Version 0..1 BankIndex row.
+- Database constraints: exactly one `is_correct` per version; unique (lineage, sequence); unique (chain, sequence); a trigger rejects any update to a Version whose state is not Draft; a trigger rejects deletes on Version, Option, Asset, Decision, Manifest and AuditEvent.
+- Indexes: Assignment by (audit_id, status); Version by (state, cycle); BankIndex by (language, classification), by (is_current, artefact_id); ReadinessRecord by (cycle_code, readiness_status, updated_at); AuditEvent by (subject_id), (actor_id, occurred_at), (action, occurred_at); IntegrityEvent by (session_id, client_seq).
+- Row-level visibility: content columns are readable only through the application's authorization layer; no reporting user or replica exposes them.
 
 ## 8.4 Canonicalization rule v1
 
@@ -1235,10 +1235,10 @@ A manifest is the verifiable evidence for one sealed version. Its canonical JSON
 
 ## 8.7 Schema versioning and migration (DAT-06)
 
-- Every version and manifest records `canonical_schema_version` and `canonicalization_rule_version`. The verifier keeps an implementation of every historical rule version for as long as any sealed artefact references it. 
-- Migrations are additive: new columns and tables only; sealed canonical bytes, manifests and audit events are never rewritten. 
-- A change to the canonical form or rule bumps the version, is applied only to newly sealed versions, and is accepted only when the stability corpus in §8.4 still verifies under every prior version. 
-- Migrations run from the pipeline with no manual step, are reversible for the working store, and never touch the repository or audit store except to add tables. 
+- Every version and manifest records `canonical_schema_version` and `canonicalization_rule_version`. The verifier keeps an implementation of every historical rule version for as long as any sealed artefact references it.
+- Migrations are additive: new columns and tables only; sealed canonical bytes, manifests and audit events are never rewritten.
+- A change to the canonical form or rule bumps the version, is applied only to newly sealed versions, and is accepted only when the stability corpus in §8.4 still verifies under every prior version.
+- Migrations run from the pipeline with no manual step, are reversible for the working store, and never touch the repository or audit store except to add tables.
 
 ## 8.8 Classification, retention and backups
 
@@ -1249,9 +1249,9 @@ A manifest is the verifiable evidence for one sealed version. Its canonical JSON
 | Identifiers, hashes, states, classification, decision outcomes, scores, timestamps | Internal | All role surfaces per matrix; audit; telemetry; monitoring; readiness interface. |
 | Pseudonym mapping | Restricted, tighter | Sign-in service only. |
 
-- Retention lock period for sealed objects and manifests is configuration supplied by Content Operations and Legal before Week 4 D-24; the software refuses to seal into a bucket without a lock configured. 
-- Backups are encrypted, access-separated from the application identities, immutable for their retention, and restoration is tested in Week 5 with chain verification afterwards (`SEC-13`, `ASR01-EVD-04`). 
-- Recovery targets: RTO ≤ 4 hours, RPO ≤ 15 minutes; autosave bounds draft loss to ≤ 30 seconds. 
+- Retention lock period for sealed objects and manifests is configuration supplied by Content Operations and Legal before Week 4 D-24; the software refuses to seal into a bucket without a lock configured.
+- Backups are encrypted, access-separated from the application identities, immutable for their retention, and restoration is tested in Week 5 with chain verification afterwards (`SEC-13`, `ASR01-EVD-04`).
+- Recovery targets: RTO ≤ 4 hours, RPO ≤ 15 minutes; autosave bounds draft loss to ≤ 30 seconds.
 
 # 9. Screens
 
@@ -1259,11 +1259,11 @@ No visual design is specified here. Each screen is defined by who uses it, what 
 
 ## 9.1 Shared shell and the four states
 
-- Shell. Every surface shares one shell: a header carrying the classification marking ("RESTRICTED — examination content" on content surfaces), the user's role, the session timeout countdown and sign-out; role-filtered navigation that shows only surfaces the user's capability entries allow. 
-- Four states. Every screen implements loading (skeletons in the shape of the content), empty (explanatory, not an error, no spinner), error (inline plus notification, with retry) and success. 
-- Always visible on content screens. Classification marking, session timeout, last-save status, active version identifier and hash prefix, assignment, workflow state. 
-- Hardened region. Any region that renders content is visually marked and is the region where signal capture and blocking apply (§6.14). Print styles render nothing inside it. 
-- No exits. No screen contains a link to an external site, a download control, a print control, an export control or a browsable list of unassigned content. 
+- Shell. Every surface shares one shell: a header carrying the classification marking ("RESTRICTED — examination content" on content surfaces), the user's role, the session timeout countdown and sign-out; role-filtered navigation that shows only surfaces the user's capability entries allow.
+- Four states. Every screen implements loading (skeletons in the shape of the content), empty (explanatory, not an error, no spinner), error (inline plus notification, with retry) and success.
+- Always visible on content screens. Classification marking, session timeout, last-save status, active version identifier and hash prefix, assignment, workflow state.
+- Hardened region. Any region that renders content is visually marked and is the region where signal capture and blocking apply (§6.14). Print styles render nothing inside it.
+- No exits. No screen contains a link to an external site, a download control, a print control, an export control or a browsable list of unassigned content.
 
 ## 9.2 Screen requirements
 
@@ -1302,15 +1302,15 @@ No visual design is specified here. Each screen is defined by who uses it, what 
 
 ## 9.4 Accessibility of the surfaces
 
-- Role surfaces and the reference rendering conform to WCAG 2.1 AA (§11) and are built accessible by construction, not remediated. 
-- Every input has a programmatic label; every control is reachable and operable by keyboard with a visible focus state; a documented keyboard map covers the editor, the checklist and the option selector. 
-- Save status, validation findings and integrity feedback are announced through live regions without stealing focus. 
-- Motion respects reduced-motion preferences; colour never carries meaning alone; the interface is locale-aware and right-to-left ready. 
+- Role surfaces and the reference rendering conform to WCAG 2.1 AA (§11) and are built accessible by construction, not remediated.
+- Every input has a programmatic label; every control is reachable and operable by keyboard with a visible focus state; a documented keyboard map covers the editor, the checklist and the option selector.
+- Save status, validation findings and integrity feedback are announced through live regions without stealing focus.
+- Motion respects reduced-motion preferences; colour never carries meaning alone; the interface is locale-aware and right-to-left ready.
 
 ## 9.5 Refresh and resume
 
-- Refreshing any screen restores equivalent state from the server: the same task, the same draft content (as of the last autosave), the same checklist progress (persisted server-side on each change), the same filters. 
-- Token expiry mid-session refreshes silently; if the refresh window has also expired, the client autosaves, redirects to sign-in and returns to the same task (§6.4). 
+- Refreshing any screen restores equivalent state from the server: the same task, the same draft content (as of the last autosave), the same checklist progress (persisted server-side on each change), the same filters.
+- Token expiry mid-session refreshes silently; if the refresh window has also expired, the client autosaves, redirects to sign-in and returns to the same task (§6.4).
 
 # 10. Architecture and security constraints
 
@@ -1373,19 +1373,19 @@ Non-negotiable. A failure here is disqualifying, not a defect.
 
 GAP D-28 The stack is the Technical Lead's proposal in Week 1. Any proposal is acceptable that provides all of the following; a proposal missing one is rejected.
 
-- A relational database with serializable or equivalent transactions, row locks and constraint triggers, so state change, audit event and outbox message commit together. 
-- A transactional outbox and a relay with at-least-once delivery and idempotent consumers. 
-- A private object store with versioning and a compliance-mode retention lock whose period is configuration. 
-- A key management service offering envelope encryption with per-object data keys, asymmetric signing and verification, per-identity key policies and a usage log. 
-- Short-lived workload identities and mutual TLS for every service and worker; no static credentials anywhere. 
-- Network policy capable of default-deny egress with an explicit allowlist, and of segregating the repository segment. 
-- A server-push transport for the operator surface and My Work with resumable streams. 
-- A deterministic, versioned server-side renderer for restricted HTML and the LaTeX subset that emits MathML and text alternatives, with no network access at render time. 
-- An HTML sanitizer driven by an explicit allowlist and a LaTeX parser that rejects anything outside the grammar before rendering. 
-- Integration with the enterprise malware scanner, monitoring platform and identity provider through their supported protocols. 
-- A pipeline that builds immutable, signed artefacts, runs the mandated test suites (§13) on every change, and deploys to a clean environment with no manual step. 
-- Infrastructure as code for every environment, with the authoring zone and repository zone as separate definitions. 
-- No dependency, service, model file or runtime configuration that provides AI capability; the dependency manifest is scanned for this on every build (`ARC-12`). 
+- A relational database with serializable or equivalent transactions, row locks and constraint triggers, so state change, audit event and outbox message commit together.
+- A transactional outbox and a relay with at-least-once delivery and idempotent consumers.
+- A private object store with versioning and a compliance-mode retention lock whose period is configuration.
+- A key management service offering envelope encryption with per-object data keys, asymmetric signing and verification, per-identity key policies and a usage log.
+- Short-lived workload identities and mutual TLS for every service and worker; no static credentials anywhere.
+- Network policy capable of default-deny egress with an explicit allowlist, and of segregating the repository segment.
+- A server-push transport for the operator surface and My Work with resumable streams.
+- A deterministic, versioned server-side renderer for restricted HTML and the LaTeX subset that emits MathML and text alternatives, with no network access at render time.
+- An HTML sanitizer driven by an explicit allowlist and a LaTeX parser that rejects anything outside the grammar before rendering.
+- Integration with the enterprise malware scanner, monitoring platform and identity provider through their supported protocols.
+- A pipeline that builds immutable, signed artefacts, runs the mandated test suites (§13) on every change, and deploys to a clean environment with no manual step.
+- Infrastructure as code for every environment, with the authoring zone and repository zone as separate definitions.
+- No dependency, service, model file or runtime configuration that provides AI capability; the dependency manifest is scanned for this on every build (`ARC-12`).
 
 ## 10.5 Asset pipeline
 
@@ -1404,17 +1404,17 @@ GAP Implements `ARC-04` and `SEC-09`.
 
 GAP Implements `SEC-04` and `ASM06-LFC-05`. The procedure is documented as a runbook by the Technical Writer and walked through once before go-live.
 
-- It exists outside the routine workflow: no role surface offers it, and no routine identity can perform it. 
-- It requires two named approvers from different functions (for example Security and Assessment), a ticket reference, a stated purpose (audit or dispute), a named artefact and a time box of at most 4 hours. 
-- It is executed by a dedicated break-glass identity through privileged-access management, which decrypts the named sealed version in memory and renders it only inside the hardened studio; nothing is written to disk, exported or printed. 
-- Every access writes `breakglass.accessed` to the audit chain with approvers, ticket, purpose, artefact and duration, and raises a security event to the monitoring platform. 
-- It is tested in the closeout operations simulation with a synthetic artefact. 
+- It exists outside the routine workflow: no role surface offers it, and no routine identity can perform it.
+- It requires two named approvers from different functions (for example Security and Assessment), a ticket reference, a stated purpose (audit or dispute), a named artefact and a time box of at most 4 hours.
+- It is executed by a dedicated break-glass identity through privileged-access management, which decrypts the named sealed version in memory and renders it only inside the hardened studio; nothing is written to disk, exported or printed.
+- Every access writes `breakglass.accessed` to the audit chain with approvers, ticket, purpose, artefact and duration, and raises a security event to the monitoring platform.
+- It is tested in the closeout operations simulation with a synthetic artefact.
 
 ## 10.7 Egress, secrets, environments
 
-- Egress allowlist (`ARC-07`): identity provider, key management, monitoring platform, malware scanner, object store endpoints, assembly service endpoints, package mirror at build time only. Everything else is denied and logged. The client's content-security policy restricts connections to the application origin. 
-- Secrets (`ARC-08`, `SEC-12`): only the approved secret manager; injected at runtime to workload identities; rotated; scanned for in source and images on every build. 
-- Environments D-30: development and integration (synthetic content only, test identity tenant), staging (production-like, real enterprise services in test mode) and production. Immutable signed artefacts are promoted through them without rebuild. No real examination content exists outside production. 
+- Egress allowlist (`ARC-07`): identity provider, key management, monitoring platform, malware scanner, object store endpoints, assembly service endpoints, package mirror at build time only. Everything else is denied and logged. The client's content-security policy restricts connections to the application origin.
+- Secrets (`ARC-08`, `SEC-12`): only the approved secret manager; injected at runtime to workload identities; rotated; scanned for in source and images on every build.
+- Environments D-30: development and integration (synthetic content only, test identity tenant), staging (production-like, real enterprise services in test mode) and production. Immutable signed artefacts are promoted through them without rebuild. No real examination content exists outside production.
 
 # 11. Non-functional requirements
 
@@ -1523,12 +1523,12 @@ GAP The specification's Definition of Done requires automated tests, an authoriz
 
 ## 13.1 Levels
 
-- Unit: canonicalization, hashing, validation rules, structural checks, similarity, scoring, state machine, policy evaluation. 
-- Contract: every endpoint against the published interface definition; the definition is generated from or verified against the implementation on every build (`INT-01`). 
-- Integration: workflow end to end on a clean environment with the synthetic corpus; outbox delivery; sealing with real key management and object store in the integration tenant. 
-- Security and negative: the suites in §13.2 that must fail the build. 
-- Non-functional: load, soak, resilience, failover, restore, accessibility, penetration. 
-- Acceptance: the Definition of Done in §17 executed with real role users and recorded in the evidence pack. 
+- Unit: canonicalization, hashing, validation rules, structural checks, similarity, scoring, state machine, policy evaluation.
+- Contract: every endpoint against the published interface definition; the definition is generated from or verified against the implementation on every build (`INT-01`).
+- Integration: workflow end to end on a clean environment with the synthetic corpus; outbox delivery; sealing with real key management and object store in the integration tenant.
+- Security and negative: the suites in §13.2 that must fail the build.
+- Non-functional: load, soak, resilience, failover, restore, accessibility, penetration.
+- Acceptance: the Definition of Done in §17 executed with real role users and recorded in the evidence pack.
 
 ## 13.2 Mandated automated suites
 
@@ -1552,17 +1552,17 @@ GAP The specification's Definition of Done requires automated tests, an authoriz
 
 ## 13.3 Expert and manual verification
 
-- External penetration test starting Week 3 against the integration environment, repeated on the release candidate in Week 5; Critical and High findings closed before authorization. 
-- Accessibility pre-assessment in Week 3 and a formal WCAG 2.1 AA audit in Week 5 by the Accessibility Specialist, covering role surfaces and the reference rendering. 
-- Multilingual user-acceptance testing in Week 5 with the named authors, reviewers, accessibility professional and translators, executing §17.2 on synthetic content in three languages. 
-- Operations simulation in closeout: dependency outage during sealing, stuck sealing job replay, credential revocation mid-task, break-glass access, incident escalation. 
-- Restore drill in Week 5: timed restore of all stores followed by full chain verification and manifest verification. 
+- External penetration test starting Week 3 against the integration environment, repeated on the release candidate in Week 5; Critical and High findings closed before authorization.
+- Accessibility pre-assessment in Week 3 and a formal WCAG 2.1 AA audit in Week 5 by the Accessibility Specialist, covering role surfaces and the reference rendering.
+- Multilingual user-acceptance testing in Week 5 with the named authors, reviewers, accessibility professional and translators, executing §17.2 on synthetic content in three languages.
+- Operations simulation in closeout: dependency outage during sealing, stuck sealing job replay, credential revocation mid-task, break-glass access, incident escalation.
+- Restore drill in Week 5: timed restore of all stores followed by full chain verification and manifest verification.
 
 ## 13.4 Synthetic corpus
 
-- Built in Week 1: a generator producing realistic but synthetic questions in the three pilot languages with images, tables and equations, plus deliberately invalid, near-duplicate, malicious and pathological cases. 
-- Every corpus string is registered so the no-content suites can search for it; the corpus is versioned with the code. 
-- No real examination content ever exists outside production. 
+- Built in Week 1: a generator producing realistic but synthetic questions in the three pilot languages with images, tables and equations, plus deliberately invalid, near-duplicate, malicious and pathological cases.
+- Every corpus string is registered so the no-content suites can search for it; the corpus is versioned with the code.
+- No real examination content ever exists outside production.
 
 ## 13.5 Evidence pack
 
@@ -1583,24 +1583,24 @@ Goal. Close the decisions, stand up the pipeline, and prove the two mechanisms e
 
 #### What is built
 
-- Integration environment, delivery pipeline, signed build baseline, synthetic corpus generator (§13.4). 
-- Identity sign-in with pseudonymization; cycle and taxonomy configuration with seed data; capability registry with validity windows (§6.1, §6.2). 
-- Artefact, lineage and version model; the canonicalization rule implemented to the ratified specification with the stability corpus (§8.4). 
-- Transactional outbox, hash-chained audit with genesis and checkpoints, runnable chain verification, throughput benchmark (§6.13). 
-- Session registration and telemetry ingest with the schema test (§6.14). 
-- Device posture and network-zone check for sign-in (`INS04-CAP-11`). 
-- Published interface definition v1 with the resource catalogue of §7.3 and the error contract of §7.2. 
-- Walking skeleton: sign in → create a draft → persist → chained audit event. 
+- Integration environment, delivery pipeline, signed build baseline, synthetic corpus generator (§13.4).
+- Identity sign-in with pseudonymization; cycle and taxonomy configuration with seed data; capability registry with validity windows (§6.1, §6.2).
+- Artefact, lineage and version model; the canonicalization rule implemented to the ratified specification with the stability corpus (§8.4).
+- Transactional outbox, hash-chained audit with genesis and checkpoints, runnable chain verification, throughput benchmark (§6.13).
+- Session registration and telemetry ingest with the schema test (§6.14).
+- Device posture and network-zone check for sign-in (`INS04-CAP-11`).
+- Published interface definition v1 with the resource catalogue of §7.3 and the error contract of §7.2.
+- Walking skeleton: sign in → create a draft → persist → chained audit event.
 
 #### Closure — all of the following, evidenced
 
-- Every decision in §15 due by Week 1 is ratified in writing, with the canonicalization rule fixed and versioned. 
-- A clean environment deploys from the pipeline with no manual step. 
-- Chain verification passes on seeded data and detects a deliberately altered event. 
-- A telemetry signal reaches durable audit within the stated latency and carries no content. 
-- Sign-in from a non-compliant device is refused and raises a security event. 
-- The chain writer meets the throughput target in §11. 
-- No design question remains open that would block Week 2. 
+- Every decision in §15 due by Week 1 is ratified in writing, with the canonicalization rule fixed and versioned.
+- A clean environment deploys from the pipeline with no manual step.
+- Chain verification passes on seeded data and detects a deliberately altered event.
+- A telemetry signal reaches durable audit within the stated latency and carries no content.
+- Sign-in from a non-compliant device is refused and raises a security event.
+- The chain writer meets the throughput target in §11.
+- No design question remains open that would block Week 2.
 
 Full time: Technical Lead, DevSecOps Engineer, 2 Backend Engineers, 1 Frontend Engineer, QA Lead, Product Owner. Assessment and Security decision owners on call with a one-business-day turnaround.
 
@@ -1610,23 +1610,23 @@ Goal. An author completes create-to-submit inside the hardened tool, and every a
 
 #### What is built
 
-- My Work and assignment-scoped authorization gated on a current capability entry (§6.3). 
-- Single-select editor, classification metadata, autosave, optimistic concurrency, save-state feedback (§6.4). 
-- Restricted rich text with the allowlist, asset quarantine and sanitization pipeline (§10.5), equation rendering in the subset, alternative-text enforcement. 
-- In-tool resources: reference material, symbol and equation palettes, glossary (`ASM03-ATH-13`). 
-- Reference renderer, used identically by preview and both later gates (`PRD-ATH-18`). 
-- Deterministic validation catalogue, bank-wide similarity check (`ASM03-VAL-06`), immutable submission, content hash, receipt (§6.5). 
-- Client signal capture, integrity scoring and the in-workspace integrity panel (§6.14). 
-- Authorization matrix oracle and no-content suites running in the pipeline (§13.2). 
+- My Work and assignment-scoped authorization gated on a current capability entry (§6.3).
+- Single-select editor, classification metadata, autosave, optimistic concurrency, save-state feedback (§6.4).
+- Restricted rich text with the allowlist, asset quarantine and sanitization pipeline (§10.5), equation rendering in the subset, alternative-text enforcement.
+- In-tool resources: reference material, symbol and equation palettes, glossary (`ASM03-ATH-13`).
+- Reference renderer, used identically by preview and both later gates (`PRD-ATH-18`).
+- Deterministic validation catalogue, bank-wide similarity check (`ASM03-VAL-06`), immutable submission, content hash, receipt (§6.5).
+- Client signal capture, integrity scoring and the in-workspace integrity panel (§6.14).
+- Authorization matrix oracle and no-content suites running in the pipeline (§13.2).
 
 #### Closure — all of the following, evidenced
 
-- A representative author creates, validates, previews, autosaves and submits without assistance. 
-- A deliberate copy attempt is blocked, scored, visible to the operator and durable in the audit chain within the stated latency. 
-- A near-duplicate of a seeded bank question is refused at submission, naming the match. 
-- A stale write is rejected without data loss; a page refresh restores equivalent state. 
-- Authorization-bypass, injection, malicious-upload and concurrency tests pass. 
-- No Restricted content appears in any log, trace, telemetry event or error message. 
+- A representative author creates, validates, previews, autosaves and submits without assistance.
+- A deliberate copy attempt is blocked, scored, visible to the operator and durable in the audit chain within the stated latency.
+- A near-duplicate of a seeded bank question is refused at submission, naming the match.
+- A stale write is rejected without data loss; a page refresh restores equivalent state.
+- Authorization-bypass, injection, malicious-upload and concurrency tests pass.
+- No Restricted content appears in any log, trace, telemetry event or error message.
 
 Full time: Technical Lead, 2 Backend Engineers, 2 Frontend Engineers, QA Lead, QA Automation Engineer, Product Designer, DevSecOps Engineer, Product Owner. Named Author available daily for usability feedback.
 
@@ -1636,24 +1636,24 @@ Goal. Independent approval is enforced and un-bypassable, and the operator can s
 
 #### What is built
 
-- Policy-driven assignment on subject, language, workload, capability and separation of duties (§6.3). 
-- Review workspace in read-only mode, mandatory checklist, immutable decisions (§6.6). 
-- Reviewer attestations for language, public-domain and scope compliance (`ASM03-REV-11`) and difficulty assignment (`ASM03-REV-12`). 
-- Accessibility workspace on the reference renderer, structured findings, accommodation capability, equivalent-route flagging (§6.7). 
-- Return lineage, remediation routing, locking, expiry, reassignment. 
-- Expected-evidence model and the blocking completeness assertion (§6.13). 
-- Operator surface: live sessions, event feed, drill-down, threshold referral, reconnection (§6.14). 
-- Evidence view or scripted procedure D-27. 
-- External penetration test and accessibility pre-assessment begin. 
+- Policy-driven assignment on subject, language, workload, capability and separation of duties (§6.3).
+- Review workspace in read-only mode, mandatory checklist, immutable decisions (§6.6).
+- Reviewer attestations for language, public-domain and scope compliance (`ASM03-REV-11`) and difficulty assignment (`ASM03-REV-12`).
+- Accessibility workspace on the reference renderer, structured findings, accommodation capability, equivalent-route flagging (§6.7).
+- Return lineage, remediation routing, locking, expiry, reassignment.
+- Expected-evidence model and the blocking completeness assertion (§6.13).
+- Operator surface: live sessions, event feed, drill-down, threshold referral, reconnection (§6.14).
+- Evidence view or scripted procedure D-27.
+- External penetration test and accessibility pre-assessment begin.
 
 #### Closure — all of the following, evidenced
 
-- The full primary lifecycle reaches approved-for-sealing with real role users. 
-- A multi-role user is refused approval of their own work through the interface and through a hand-crafted API call. 
-- A return produces a new linked draft carrying findings; the returned version stays immutable. 
-- Deleting an expected evidence record blocks the next transition and raises the alert. 
-- An expired capability blocks new assignment and flags in-flight work without voiding recorded decisions. 
-- Keyboard and screen-reader review of both gate workspaces passes. 
+- The full primary lifecycle reaches approved-for-sealing with real role users.
+- A multi-role user is refused approval of their own work through the interface and through a hand-crafted API call.
+- A return produces a new linked draft carrying findings; the returned version stays immutable.
+- Deleting an expected evidence record blocks the next transition and raises the alert.
+- An expired capability blocks new assignment and flags in-flight work without voiding recorded decisions.
+- Keyboard and screen-reader review of both gate workspaces passes.
 
 Full time: Technical Lead, 3 Backend Engineers, 2 Frontend Engineers, QA Lead, QA Automation Engineer, Accessibility Specialist, DevSecOps Engineer, Product Owner. Named Reviewer and Accessibility Professional available daily.
 
@@ -1663,22 +1663,22 @@ Goal. The artefact reaches readiness in three languages, content leaves human re
 
 #### What is built
 
-- Translation tasks, read-only primary comparison, structural locks and blocking equivalence checks, reviewer equivalence judgement, exception path with expiry (§6.8). 
-- Target-language accessibility check. 
-- Correction authorization and seeding, readiness revocation, variant revalidation with change visibility (§6.11). 
-- Sealing worker: revalidation, canonicalization, sanitization, encryption, signed manifest, immutable retention, bank indexing including difficulty and the similarity fingerprint (§6.9). 
-- Readiness calculation and the machine-only interface on workload identity (§6.10). 
-- Downstream lifecycle states Used and Archived with the signed notification contracts (§6.12); supersession notification and acknowledgement. 
-- Idempotent retry, dependency-outage handling, tamper verification, post-sealing access denial. 
+- Translation tasks, read-only primary comparison, structural locks and blocking equivalence checks, reviewer equivalence judgement, exception path with expiry (§6.8).
+- Target-language accessibility check.
+- Correction authorization and seeding, readiness revocation, variant revalidation with change visibility (§6.11).
+- Sealing worker: revalidation, canonicalization, sanitization, encryption, signed manifest, immutable retention, bank indexing including difficulty and the similarity fingerprint (§6.9).
+- Readiness calculation and the machine-only interface on workload identity (§6.10).
+- Downstream lifecycle states Used and Archived with the signed notification contracts (§6.12); supersession notification and acknowledgement.
+- Idempotent retry, dependency-outage handling, tamper verification, post-sealing access denial.
 
 #### Closure — all of the following, evidenced
 
-- One primary plus two language variants reach readiness; every manifest verifies. 
-- A variant that changes a numeric value or the position of the correct option is refused, naming the failing check. 
-- No human role — including administrator — can retrieve sealed plaintext. 
-- A human token and a wrong-audience workload token are both refused by the readiness interface; the approved identity succeeds. 
-- A simulated selection notification moves the primary and both variants to Used atomically; exam completion moves them to Archived. 
-- Key management, audit, scanner or object-store failure leaves no partially sealed artefact, and retry succeeds after recovery. 
+- One primary plus two language variants reach readiness; every manifest verifies.
+- A variant that changes a numeric value or the position of the correct option is refused, naming the failing check.
+- No human role — including administrator — can retrieve sealed plaintext.
+- A human token and a wrong-audience workload token are both refused by the readiness interface; the approved identity succeeds.
+- A simulated selection notification moves the primary and both variants to Used atomically; exam completion moves them to Archived.
+- Key management, audit, scanner or object-store failure leaves no partially sealed artefact, and retry succeeds after recovery.
 
 Full time: Technical Lead, 3 Backend Engineers, 2 Frontend Engineers, QA Lead, QA Automation Engineer, DevSecOps Engineer, Accessibility Specialist, Product Owner. Named Translators for both pilot languages available daily.
 
@@ -1688,21 +1688,21 @@ Goal. A release candidate is installed in production with the evidence required 
 
 #### What is built
 
-- Production infrastructure and installation from immutable promoted artefacts. 
-- Real identity, key management, object lock with the ratified retention period, scanning, monitoring, alerting, backup and restore. 
-- Load, soak, resilience, failover, recovery and data-integrity verification against §11. 
-- Formal penetration test and WCAG 2.1 AA audit, with findings closed. 
-- Multilingual user-acceptance testing and priority defect closure. 
-- Runbooks (sealing failure, chain verification failure, break-glass, dependency outage, credential revocation, restore), support model, on-call ownership, access review, rollback plan. 
+- Production infrastructure and installation from immutable promoted artefacts.
+- Real identity, key management, object lock with the ratified retention period, scanning, monitoring, alerting, backup and restore.
+- Load, soak, resilience, failover, recovery and data-integrity verification against §11.
+- Formal penetration test and WCAG 2.1 AA audit, with findings closed.
+- Multilingual user-acceptance testing and priority defect closure.
+- Runbooks (sealing failure, chain verification failure, break-glass, dependency outage, credential revocation, restore), support model, on-call ownership, access review, rollback plan.
 
 #### Closure — all of the following, evidenced
 
-- The release candidate is installed in production and smoke-tested with representative role accounts. 
-- No unresolved Critical or High finding from the penetration test or the accessibility audit. 
-- Stated capacity, latency and recovery targets are met under load, with evidence retained. 
-- Backup, restore and chain verification pass end to end, and hashes still verify after restore. 
-- Every runbook has a named owner and has been walked through once. 
-- Assurance leads recommend release in writing. 
+- The release candidate is installed in production and smoke-tested with representative role accounts.
+- No unresolved Critical or High finding from the penetration test or the accessibility audit.
+- Stated capacity, latency and recovery targets are met under load, with evidence retained.
+- Backup, restore and chain verification pass end to end, and hashes still verify after restore.
+- Every runbook has a named owner and has been walked through once.
+- Assurance leads recommend release in writing.
 
 Full time: Technical Lead, 2 Backend Engineers, 1 Frontend Engineer, QA Lead, QA Automation Engineer, DevSecOps Engineer, Security Engineer, Accessibility Specialist, Product Owner, Technical Writer.
 
@@ -1743,13 +1743,13 @@ Every role is full-time on this MVP for its stated weeks — not shared with ano
 
 ## 14.8 Build order and critical path
 
-- Walking skeleton first. Sign-in, one draft, one audit event, one telemetry event, deployed from the pipeline — before any feature. 
-- Audit chain and telemetry before features, because Week 2 closure needs a copy attempt durable in the chain, and the chain's throughput must be known before it carries telemetry. 
-- The renderer in Week 2, because three gates and the sealed rendition all depend on its identity; changing it later invalidates accessibility approvals. 
-- The authorization oracle from Week 2, so every endpoint added in Weeks 3 and 4 is born with its matrix row. 
-- Design the sealing worker in Week 1, build it in Week 4. Its key policy, object lock and identity need the enterprise services provisioned early; its code needs the approvals that only exist after Week 3. 
-- Assembly contract agreed by Week 2, so the Week 4 readiness and notification work is not blocked on negotiation. 
-- Critical path: decisions D-01, D-02, D-14, D-28 → skeleton and chain → editor and renderer → gates and evidence model → sealing and machine contracts → hardening and audit. A slip in any of the first three weeks cannot be recovered. 
+- Walking skeleton first. Sign-in, one draft, one audit event, one telemetry event, deployed from the pipeline — before any feature.
+- Audit chain and telemetry before features, because Week 2 closure needs a copy attempt durable in the chain, and the chain's throughput must be known before it carries telemetry.
+- The renderer in Week 2, because three gates and the sealed rendition all depend on its identity; changing it later invalidates accessibility approvals.
+- The authorization oracle from Week 2, so every endpoint added in Weeks 3 and 4 is born with its matrix row.
+- Design the sealing worker in Week 1, build it in Week 4. Its key policy, object lock and identity need the enterprise services provisioned early; its code needs the approvals that only exist after Week 3.
+- Assembly contract agreed by Week 2, so the Week 4 readiness and notification work is not blocked on negotiation.
+- Critical path: decisions D-01, D-02, D-14, D-28 → skeleton and chain → editor and renderer → gates and evidence model → sealing and machine contracts → hardening and audit. A slip in any of the first three weeks cannot be recovered.
 
 ## 14.9 If you find yourself building this, stop
 
@@ -1873,11 +1873,11 @@ Conditions of operation that this team does not build. Each needs a named owner 
 
 ## 16.4 Assumptions
 
-- The organisation's identity provider can issue tokens with a multi-factor claim and supports a test tenant. 
-- The enterprise key management service supports asymmetric signing and per-identity key policies. 
-- The assembly service can call mutual-TLS endpoints and sign notifications with a key the MVP can verify. 
-- The pilot involves one cycle, one primary language and two required languages, and one item type. 
-- Synthetic content is sufficient for every non-production environment and for production smoke tests. 
+- The organisation's identity provider can issue tokens with a multi-factor claim and supports a test tenant.
+- The enterprise key management service supports asymmetric signing and per-identity key policies.
+- The assembly service can call mutual-TLS endpoints and sign notifications with a key the MVP can verify.
+- The pilot involves one cycle, one primary language and two required languages, and one item type.
+- Synthetic content is sufficient for every non-production environment and for production smoke tests.
 
 ## 16.5 Open questions for the Product Owner
 
@@ -1895,38 +1895,38 @@ Conditions of operation that this team does not build. Each needs a named owner 
 
 ## 17.1 Every requirement
 
-- Implemented, peer-reviewed, and covered by automated tests at the appropriate level. 
-- Authorization verified by test, including a wrong-role and a separation-of-duties case. 
-- Audit events emitted and verified. 
-- No Restricted content in logs, traces, telemetry or error messages. 
-- Loading, empty, error and success states implemented for any user-facing element. 
-- Labelled, keyboard-operable and screen-reader-navigable. 
+- Implemented, peer-reviewed, and covered by automated tests at the appropriate level.
+- Authorization verified by test, including a wrong-role and a separation-of-duties case.
+- Audit events emitted and verified.
+- No Restricted content in logs, traces, telemetry or error messages.
+- Loading, empty, error and success states implemented for any user-facing element.
+- Labelled, keyboard-operable and screen-reader-navigable.
 
 ## 17.2 The four jobs, end to end
 
-- An author creates, validates, previews, autosaves and submits an immutable version. 
-- A reviewer approves; a return instead produces a new linked draft carrying findings. 
-- An accessibility specialist approves against the rendered artefact and records accommodation capability. 
-- Two required languages complete their own review and accessibility check, including the structural and equivalence checks. 
-- The system seals every version — no human seal control exists. 
-- The artefact becomes ready and the assembly consumer reads metadata only. 
-- No human role can retrieve sealed plaintext. 
-- A primary correction revokes readiness and marks variants for revalidation. 
+- An author creates, validates, previews, autosaves and submits an immutable version.
+- A reviewer approves; a return instead produces a new linked draft carrying findings.
+- An accessibility specialist approves against the rendered artefact and records accommodation capability.
+- Two required languages complete their own review and accessibility check, including the structural and equivalence checks.
+- The system seals every version — no human seal control exists.
+- The artefact becomes ready and the assembly consumer reads metadata only.
+- No human role can retrieve sealed plaintext.
+- A primary correction revokes readiness and marks variants for revalidation.
 
 ## 17.3 Evidence and observability
 
-- Chain verification passes across the full data set, and detects an altered event in a copy of the store. 
-- Verification still passes after backup and restore. 
-- Removing an expected evidence record blocks sealing and raises an alert. 
-- A deliberate blocked action appears on the operator surface within the stated latency, scored and attributed, carrying no content. 
-- Threshold breach refers the session and raises an alert; transport loss and recovery lose no session state. 
+- Chain verification passes across the full data set, and detects an altered event in a copy of the store.
+- Verification still passes after backup and restore.
+- Removing an expected evidence record blocks sealing and raises an alert.
+- A deliberate blocked action appears on the operator surface within the stated latency, scored and attributed, carrying no content.
+- Threshold breach refers the session and raises an alert; transport loss and recovery lose no session state.
 
 ## 17.4 Release
 
-- Every criterion above signed in one shared evidence pack (§13.5). 
-- Release gates in §3 met: no open Critical or High finding; non-functional targets met with evidence; restore drill passed; runbooks owned; seven signatures. 
-- Support ownership and the two-week hyper-care roster active and named. 
-- Go-live decision recorded with its rationale. 
+- Every criterion above signed in one shared evidence pack (§13.5).
+- Release gates in §3 met: no open Critical or High finding; non-functional targets met with evidence; restore drill passed; runbooks owned; seven signatures.
+- Support ownership and the two-week hyper-care roster active and named.
+- Go-live decision recorded with its rationale.
 
 # Appendix A — Traceability
 
