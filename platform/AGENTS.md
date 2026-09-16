@@ -5,7 +5,7 @@ Python 3.12+, hatchling. Root `AGENTS.md` has the invariants.
 | Package | Distribution | Depends on |
 |---|---|---|
 | `platform/spi` | `mulyankan-spi` | nothing (`dependencies = []`) |
-| `platform/core` | `mulyankan-platform` | `mulyankan-spi`, fastapi, uvicorn, pyyaml |
+| `platform/core` | `mulyankan-platform` | `mulyankan-spi`, fastapi, uvicorn, pyyaml, the OpenTelemetry API/SDK, OTLP HTTP exporter and the FastAPI, logging and system-metrics instrumentations (ADR-0011) |
 
 Each package carries its own `AGENTS.md` with the rules that apply only
 there — read the one nearest the file you are editing.

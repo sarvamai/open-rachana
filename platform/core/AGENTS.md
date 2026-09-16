@@ -14,7 +14,18 @@ session-monitoring surface of ASR02-OBS-01).
 - `core_api/main.py` — reads `platform.yaml`
   (`$MULYANKAN_PLATFORM_CONFIG`); no such file is committed, and with none
   the app starts with zero bindings. Serves the session-monitoring endpoints
-  (`/v1/sessions...`, `/v1/integrity/sessions`).
+  (`/v1/sessions...`, `/v1/integrity/sessions`). `app` is a uvicorn
+  factory (`uvicorn --factory ...main:app`), not an instance: `build_app`
+  calls `observability.configure`, and importing the module must stay free
+  of side effects, so nothing is built or instrumented until the factory
+  runs.
+- `observability/` — OTel wiring (ADR-0011, `docs/observability.md`):
+  `setup.py` installs the providers from the `OTEL_*` environment and
+  instruments FastAPI and the process metrics; `guard.py` holds the
+  attribute allowlists that keep every span, log and metric content-free.
+  Add an attribute only by adding it to the allowlist with a reason; the
+  sentinel test `test_asr02obs_no_content_reaches_any_exporter` fails
+  otherwise. `OTEL_SDK_DISABLED=true` turns it all off.
 - `sessions/monitor.py` — session register/heartbeat/close (ASR02-OBS-01, a
   platform concern per ADR-0004) and the first monitoring signal:
   client-reported copy/cut/paste or a server-detected heartbeat gap. A signal
@@ -68,7 +79,10 @@ session-monitoring surface of ASR02-OBS-01).
 `tests/conftest.py` synthesises an importable `testkit_fake_provider` in
 `sys.modules` so the registry's `importlib` path is testable without a real
 provider; use that double rather than adding a provider package to make a
-test pass.
+test pass. It also installs in-memory OTel exporters at import time, before
+any test module imports `core_api.main`; the `telemetry` fixture exposes
+them. Tests that need a fresh process (SDK disabled, Collector unreachable)
+run a subprocess.
 
 ```bash
 python -m pytest platform/core -q

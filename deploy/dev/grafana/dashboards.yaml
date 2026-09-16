@@ -1,0 +1,14 @@
+# Grafana dashboard provider for the local stack (spec §6.2). Mounted by
+# compose.yaml into Grafana's provisioning directory; the JSON files are
+# mounted at the path below. Development convenience only: nothing in the
+# system depends on these dashboards.
+apiVersion: 1
+
+providers:
+  - name: mulyankan
+    folder: Mulyankan
+    type: file
+    allowUiUpdates: false
+    options:
+      path: /otel-lgtm/dashboards
+      foldersFromFilesStructure: false

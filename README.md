@@ -119,6 +119,12 @@ inspected test definitions, UI mocks and planned work. The table below lists
 | [`docs/requirements.md`](docs/requirements.md) | All 302 unique numbered requirements, v4 aliases and planned verification |
 | [`docs/canonicalization.md`](docs/canonicalization.md) | Current audit bytes and the unratified PRD v1 proposal |
 | [`apps/web/README.md`](apps/web/README.md) | Web app: running it, and the vendored design system |
+| [`deploy/dev/README.md`](deploy/dev/README.md) | Local observability stack: Collector and Grafana for development |
+
+## Local observability
+
+Traces and metrics from a local run are viewable in Grafana with the compose
+stack under `deploy/dev/`; see [`deploy/dev/README.md`](deploy/dev/README.md).
 
 ## Contributing
 

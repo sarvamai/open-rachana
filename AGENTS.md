@@ -22,9 +22,10 @@ ls providers db contracts tests/conformance platform.yaml 2>&1
 ```
 
 Every one of those is absent today. If a task needs one, create it explicitly
-and say so — don't code as if it were already there.
+and say so — don't code as if it were already there. `deploy/dev/` does exist
+(the local observability stack, `docs/observability.md` §6).
 Only the KMS interface, conformance suite and test double exist; no reference
-provider is delivered. `docs/canonicalization.md` now records the existing
+provider is delivered. `docs/canonicalization.md` records the existing
 draft-v0.1 format and the unratified PRD v1 proposal. It changes no bytes.
 
 ## Invariants (`docs/architecture.md` has all ten)

@@ -1,0 +1,114 @@
+# The portable artefact (spec §6.1): production keeps this file and changes
+# only `exporters`. Redaction here is defence in depth; the applications
+# apply the same allowlist in-process, which is the control.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+  batch: {}
+  redaction:
+    allow_all_keys: false
+    # Despite the name, `ignored_keys` are NOT dropped: the processor skips
+    # them before the allowlist check, so they pass through untouched
+    # ("ignored" by the redaction, not by the pipeline). The processor also
+    # runs the allowlist over resource attributes, and without this list it
+    # strips service.name and the rest of the descriptor, which breaks every
+    # service-based query. Resource attributes are the operator's descriptor
+    # (ADR-0011; spec §4.2 says they are not filtered). Add a key when the
+    # descriptor grows (e.g. resourcedetection's host.*).
+    ignored_keys:
+      - service.name
+      - service.namespace
+      - service.version
+      - service.instance.id
+      - deployment.environment.name
+      - telemetry.sdk.name
+      - telemetry.sdk.language
+      - telemetry.sdk.version
+      - telemetry.distro.name
+      - telemetry.distro.version
+    # One processor for all three pipelines: the union of the span, log and
+    # metric allowlists in platform/core/.../guard.py, which a test pins.
+    allowed_keys:
+      # The union of the three Python allowlists (guard.py), nothing more.
+      # The web tier's keys (url.path, a query-stripped url.full, next.*,
+      # the RUM keys) are added in the PR that lands apps/web's allowlist,
+      # so this list never admits a key nothing in the tree emits.
+      - http.request.method
+      - http.route
+      - http.response.status_code
+      - http.request.body.size
+      - http.response.body.size
+      - url.scheme
+      - server.address
+      - server.port
+      - network.protocol.version
+      - client.address
+      - error.type
+      - exception.type
+      - exception.stacktrace
+      - enduser.pseudo.id
+      - mulyankan.spi
+      - mulyankan.provider.name
+      - mulyankan.provider.version
+      - mulyankan.audit.event_id
+      - mulyankan.object_ref
+      - mulyankan.state.from
+      - mulyankan.state.to
+      - mulyankan.http.request.duration
+      - db.system.name
+      - db.operation.name
+      - db.collection.name
+      # log records
+      - code.function.name
+      - code.file.path
+      - code.line.number
+      # metric data points (ALLOWED_METRIC_ATTRIBUTES)
+      - signal
+      - attribute
+      - action
+      - spi
+      - provider.name
+      - provider.version
+      - from_state
+      - to_state
+      - type
+      - generation
+    summary: debug
+
+exporters:
+  otlp_http:
+    endpoint: http://lgtm:4318
+    tls:
+      insecure: true
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  telemetry:
+    metrics:
+      level: normal
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, redaction, batch]
+      exporters: [otlp_http]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, redaction, batch]
+      exporters: [otlp_http]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, redaction, batch]
+      exporters: [otlp_http]
