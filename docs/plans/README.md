@@ -1,5 +1,7 @@
 # Plans and issue workflow
 
+For the complete task briefs and embedded PRD, use the [engineering handoff in PR #100](https://github.com/Bodhan-AI/open-rachana/blob/pr2-product-reference/docs/plans/README.md). The starter plans on this branch are retained for PR #99 review; the expanded handoff supersedes them when #100 lands.
+
 Status: proposed workflow in PR #99. These starter plans are ready for owner
 review; they are not recorded implementation approvals.
 
