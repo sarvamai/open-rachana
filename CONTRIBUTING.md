@@ -1,12 +1,32 @@
 # Contributing
 
-Thanks for helping build Open Mulyankan. A few rules keep the project trustworthy.
+Thanks for helping build Project Rachana. A few rules keep the project trustworthy.
 
 Start with [AGENTS.md](AGENTS.md) — it records what actually exists in the tree
 today, the invariants a change must not break, and how to run each stack. The
 nested `AGENTS.md` files (`platform/`, `apps/web/`, `design-system/`, `docs/`)
 carry the rules specific to those trees. It is written for coding agents and is
 just as useful to a new human contributor.
+
+For product work, begin with the [PRD source map](docs/source-of-truth.md),
+[workflow](docs/product-workflow.md) and [open reconciliation items](docs/prd-reconciliation.md).
+Use [traceability](docs/traceability.md) to find the individual requirement,
+its historical ID and planned verification. Do not treat a source default,
+mock UI or planned test label as an approved or delivered capability.
+
+## Plan and review the work
+
+Pick an existing issue from the [contributor plan](docs/contributor-work-packages.md).
+Its epic owner maintains the [checked-in plan](docs/plans/README.md). Review
+product scope with Nikhil, technical interfaces through KKT and verification
+with Rohit. Record the approved plan revision and implementation go-ahead in
+the issue. Existing valid approvals and in-flight contributions are preserved.
+
+Before asking people to review a plan, document or PR description, use
+[Humanizer](https://github.com/blader/humanizer) and read the result yourself.
+Keep the requirements, numbers, API names and acceptance rules intact. If the
+agent cannot load the skill, apply its documented guidance manually. The
+purpose is clear writing; it is not an automatic approval or AI-detection test.
 
 ## Ground rules
 
@@ -61,12 +81,17 @@ If findings look truncated, the run timed out — comment `/review` again.
 
 Every PR is gated on the `ci` context, which aggregates:
 
-- **`shift-left-security`** — the org-wide stage (`sarvamai/security-redirect`).
 - **`semgrep`** — SAST over the committed source: OWASP Top Ten plus the Python and
   JS/TS/React rulepacks.
 - **`gitleaks`** — secret detection across the whole git history.
 - **`trivy`** — dependency CVEs, secrets and misconfiguration.
-- **`web`** / **`build-and-test`** — lint, types, build.
+- **`web`** — frontend lint, types and build.
+- **`build-and-test`** — currently placeholder echo steps; does not run Python tests.
+
+The org-wide `shift-left-security` reusable call is commented out because its
+workflow repository is private while this repository is public. Do not infer
+that it ran, or that Python acceptance tests passed, from a green aggregate
+status. See [delivery status](docs/delivery-status.md).
 
 None of these needs a credential. The one job that does is the `/review` reviewer
 above, which reads the repository secret `SARVAM_API_KEY`. It is not part of `ci`, so

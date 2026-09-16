@@ -1,4 +1,4 @@
-# Code review — open-mulyankan
+# Code review — Project Rachana
 
 Layer 1 workflow core of a national exam content-authoring engine: author →
 review → accessibility → translate → system seal → ready. Python/FastAPI in

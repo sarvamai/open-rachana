@@ -1,25 +1,32 @@
 # Working in this repository
 
-Layer 1 workflow core of a national exam content-authoring engine:
-author → review → accessibility → translate → system seal → ready.
+Layer 1 workflow core for Project Rachana. The product includes Layer 2
+drafting through a governed connector, backed by Layer 3 managed services.
+The repository documentation is the maintained reference: read
+`docs/source-of-truth.md`, `docs/product-workflow.md`, `docs/delivery-plan.md`
+and `docs/prd-reconciliation.md` before product-facing changes.
+Admin authors → question review → accessibility remediation + review →
+primary seal → translation + review + accessibility per language → seals → ready.
 Python/FastAPI in `platform/`, Next.js in `apps/web`, a Tauri thin
 client in `apps/client/`.
 
 ## The docs plan M6; the tree is at M0
 
-`docs/` is written in the present tense about locations later milestones will
-create. **The tree is the fact; the doc is the intent.** Before importing a
+`docs/` describes targets for the three-week sprint ending 28 September 2026.
+M0–M6 are dependency/evidence gates, not calendar weeks. **The tree is the fact; the doc is the intent.** `docs/delivery-status.md`
+records inspected code/test definitions and their limits. Before importing a
 path you read in a doc, check it exists:
 
 ```bash
-ls providers db contracts tests/conformance platform.yaml docs/canonicalization.md 2>&1
+ls providers db contracts tests/conformance platform.yaml 2>&1
 ```
 
 Every one of those is absent today. If a task needs one, create it explicitly
 and say so — don't code as if it were already there. `deploy/dev/` does exist
 (the local observability stack, `docs/observability.md` §6).
-`docs/provider-contracts.md` claims M0 ships a `kms` reference provider; only
-the interface and conformance suite exist.
+Only the KMS interface, conformance suite and test double exist; no reference
+provider is delivered. `docs/canonicalization.md` records the existing
+draft-v0.1 format and the unratified PRD v1 proposal. It changes no bytes.
 
 ## Invariants (`docs/architecture.md` has all ten)
 
@@ -29,9 +36,13 @@ the interface and conformance suite exist.
 3. Audit events are append-only, hash-chained, **content-free** — opaque refs
    and a payload hash, never plaintext.
 4. No human seal control exists. Never add a path that seals, unseals, or
-   reads sealed plaintext, for any role, administrators included.
+   reads sealed plaintext, for any routine role, administrators included.
+   PRD translation references, correction seeding and emergency access need
+   separately decided contracts (R8); this alignment authorises no read path.
 5. No AI in the core. Models only *propose* via the `gateway` SPI; a human
-   adopts before it becomes a draft.
+   submits before review. The existing ADR's adoption-before-draft rule and
+   the PRD's generated-draft transition are unresolved in R4; do not implement
+   a choice silently. AI never validates, approves, seals or monitors.
 6. Validation is deterministic — nothing probabilistic or external on a
    validation path.
 
@@ -81,17 +92,26 @@ to a shorter summary.
   ADR-0001. Never leave a decision only in a PR description.
 - Requirement-facing tests carry the requirement ID:
   `test_asrevd02_chain_verifies_after_appends`. IDs live in
-  `docs/traceability.md`.
+  `docs/traceability.md` and `docs/requirements.md`. New work cites canonical
+  PRD IDs (ASM/INS); existing QST/FND names remain valid through the crosswalk.
+  Planned check labels in the register are not existing or passing tests.
 - `git commit -s` (DCO). One concern per PR.
 - British spelling in prose (`licence`, `artefact`).
 
 ## Open questions — ask, don't pick
 
-- **Which app serves which role.** `docs/architecture.md` maps all role
-  surfaces to `apps/web`; ADR-0008 gives content roles a separate signed thin
-  client meeting the server at `contracts/`. The client's scaffold exists
-  (`apps/client/`, ADR-0010) but serves no role until `contracts/` is
-  authored; the question stays open until then.
+- **R1 is decided; contracts remain to build.** On 2026-09-14 the Product
+  Owner chose Admin authoring/unsealed-content work in the signed client and
+  configuration/content-free oversight in the web UI. ADR-0008 records the
+  amendment. The client scaffold serves no role until its contracts are
+  authored; session, capability and re-authentication mechanics still need review.
+- **Generation and rendering (R2/R4/R5).** Full Layer 2 ownership, proposal
+  adoption and the server/reference versus signed-local render contract
+  require decisions. R3 is decided in ADR-0015: curriculum, generation
+  constraints/counts are in Rachana; final paper selection/order/export are
+  in separate assembly.
+  Use the concrete proposals in `docs/prd-reconciliation.md` to ask owners;
+  do independent work while these remain open.
 - Pilot languages are deliberately unnamed (ADR-0006) — still pending for the
   platform. `apps/web` now carries a working list for its question language
   field (`apps/web/src/components/question-bank/languages.ts`: the Eighth
@@ -99,8 +119,8 @@ to a shorter summary.
   array in the client, standing in for `cycle.required_languages` until there
   is an API to read; the ADR's own status is unchanged, and nothing in
   `platform/` names a language.
-- Canonicalization is `draft-v0.1`; `docs/canonicalization.md` is unwritten.
-  Changing the byte format changes every audit hash.
+- Canonicalization is `draft-v0.1`; `docs/canonicalization.md` documents it.
+  PRD v1 is pending D-01/R6. Changing the byte format changes every audit hash.
 
 ## Keeping this file true
 

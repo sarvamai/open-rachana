@@ -1,0 +1,1645 @@
+{
+  "baseline": "55f3b1c",
+  "date": "2026-09-16",
+  "requirements": 302,
+  "tasks": [
+    {
+      "issue": 39,
+      "owner": "Nikhil",
+      "module": "product",
+      "file": "tasks/issue-39.md",
+      "requirements": [
+        "PRD-ASG-03"
+      ],
+      "primary_requirements": [],
+      "source_sections": "main:5,15,17;technical:14.0,14.7,16.1",
+      "dependencies": []
+    },
+    {
+      "issue": 40,
+      "owner": "Nikhil",
+      "module": "product",
+      "file": "tasks/issue-40.md",
+      "requirements": [
+        "INT-09"
+      ],
+      "primary_requirements": [],
+      "source_sections": "main:20,23;technical:15",
+      "dependencies": []
+    },
+    {
+      "issue": 41,
+      "owner": "KKT",
+      "module": "platform",
+      "file": "tasks/issue-41.md",
+      "requirements": [
+        "INS04-CAP-01",
+        "INS04-CAP-02",
+        "INS04-CAP-03",
+        "PRD-CAP-12",
+        "PRD-CAP-13",
+        "PRD-CAP-14",
+        "PRD-CAP-17",
+        "DAT-02",
+        "UI-01"
+      ],
+      "primary_requirements": [
+        "INS04-CAP-01",
+        "INS04-CAP-02",
+        "INS04-CAP-03",
+        "PRD-CAP-12",
+        "PRD-CAP-13",
+        "PRD-CAP-14",
+        "PRD-CAP-17",
+        "DAT-02",
+        "UI-01"
+      ],
+      "source_sections": "main:17;technical:6.2,7.1",
+      "dependencies": [
+        51
+      ]
+    },
+    {
+      "issue": 42,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-42.md",
+      "requirements": [
+        "INS04-CAP-04",
+        "INS04-CAP-09",
+        "INS04-CAP-10",
+        "PRD-CAP-16",
+        "PRD-CAP-18",
+        "PRD-CAP-19",
+        "INT-09",
+        "ARC-01",
+        "SEC-05",
+        "INS04-CAP-07",
+        "INS04-CAP-08",
+        "PRD-CAP-12",
+        "PRD-CAP-13",
+        "PRD-CAP-17"
+      ],
+      "primary_requirements": [
+        "INS04-CAP-04",
+        "INS04-CAP-09",
+        "INS04-CAP-10",
+        "PRD-CAP-16",
+        "PRD-CAP-18",
+        "PRD-CAP-19",
+        "INT-09",
+        "ARC-01",
+        "SEC-05"
+      ],
+      "source_sections": "main:5,17;technical:6.2,4.4,7.1",
+      "dependencies": [
+        41
+      ]
+    },
+    {
+      "issue": 43,
+      "owner": "KKT",
+      "module": "platform",
+      "file": "tasks/issue-43.md",
+      "requirements": [
+        "INS04-CAP-11",
+        "PRD-CAP-15"
+      ],
+      "primary_requirements": [
+        "INS04-CAP-11",
+        "PRD-CAP-15"
+      ],
+      "source_sections": "main:17;technical:6.2,10.7",
+      "dependencies": [
+        41
+      ]
+    },
+    {
+      "issue": 44,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-44.md",
+      "requirements": [
+        "ASM01-CFG-01",
+        "ASM01-CFG-02",
+        "ASM01-CFG-03",
+        "ASM01-CFG-04",
+        "ASM01-CFG-05",
+        "PRD-CFG-06",
+        "PRD-CFG-07",
+        "PRD-CFG-08",
+        "PRD-CFG-09",
+        "PRD-CFG-10",
+        "PRD-CFG-11",
+        "UI-10"
+      ],
+      "primary_requirements": [
+        "ASM01-CFG-01",
+        "ASM01-CFG-02",
+        "ASM01-CFG-03",
+        "ASM01-CFG-04",
+        "ASM01-CFG-05",
+        "PRD-CFG-06",
+        "PRD-CFG-07",
+        "PRD-CFG-08",
+        "PRD-CFG-09",
+        "PRD-CFG-10",
+        "PRD-CFG-11",
+        "UI-10"
+      ],
+      "source_sections": "main:6;technical:6.1,8.2",
+      "dependencies": [
+        39,
+        42,
+        46
+      ]
+    },
+    {
+      "issue": 45,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-45.md",
+      "requirements": [
+        "SEC-07",
+        "SEC-08",
+        "PRD-ATH-15"
+      ],
+      "primary_requirements": [
+        "SEC-07",
+        "SEC-08"
+      ],
+      "source_sections": "main:6,13,14;technical:5,8.2",
+      "dependencies": [
+        46
+      ]
+    },
+    {
+      "issue": 46,
+      "owner": "Gandharva",
+      "module": "evidence",
+      "file": "tasks/issue-46.md",
+      "requirements": [
+        "ASR01-EVD-01",
+        "ASR01-EVD-07",
+        "PRD-EVD-11",
+        "PRD-EVD-12",
+        "PRD-EVD-13",
+        "PRD-EVD-15",
+        "INT-10",
+        "DAT-05",
+        "DAT-06",
+        "ARC-02",
+        "ARC-03"
+      ],
+      "primary_requirements": [
+        "ASR01-EVD-01",
+        "ASR01-EVD-07",
+        "PRD-EVD-11",
+        "PRD-EVD-12",
+        "PRD-EVD-13",
+        "PRD-EVD-15",
+        "INT-10",
+        "DAT-05",
+        "DAT-06",
+        "ARC-02",
+        "ARC-03"
+      ],
+      "source_sections": "main:19;technical:6.13,8.4,8.5",
+      "dependencies": [
+        51
+      ]
+    },
+    {
+      "issue": 47,
+      "owner": "Gandharva",
+      "module": "evidence",
+      "file": "tasks/issue-47.md",
+      "requirements": [
+        "ASR01-EVD-02",
+        "ASR01-EVD-03",
+        "PRD-EVD-14"
+      ],
+      "primary_requirements": [
+        "ASR01-EVD-02",
+        "ASR01-EVD-03",
+        "PRD-EVD-14"
+      ],
+      "source_sections": "main:19;technical:6.13,8.5",
+      "dependencies": [
+        46
+      ]
+    },
+    {
+      "issue": 48,
+      "owner": "Gandharva",
+      "module": "evidence",
+      "file": "tasks/issue-48.md",
+      "requirements": [
+        "ASR01-EVD-08",
+        "PRD-EVD-17",
+        "UI-12"
+      ],
+      "primary_requirements": [
+        "ASR01-EVD-08",
+        "PRD-EVD-17",
+        "UI-12"
+      ],
+      "source_sections": "main:5.8,19;technical:6.13,9.2",
+      "dependencies": [
+        42,
+        46
+      ]
+    },
+    {
+      "issue": 49,
+      "owner": "Rohit",
+      "module": "testing",
+      "file": "tasks/issue-49.md",
+      "requirements": [
+        "ASR01-EVD-09",
+        "PRD-EVD-18",
+        "ASR02-OBS-17",
+        "PRD-OBS-21",
+        "DAT-01",
+        "DAT-03",
+        "PRD-DAT-10",
+        "SEC-14",
+        "ASR02-OBS-16"
+      ],
+      "primary_requirements": [
+        "ASR01-EVD-09",
+        "PRD-EVD-18",
+        "ASR02-OBS-17",
+        "PRD-OBS-21",
+        "DAT-01",
+        "DAT-03",
+        "PRD-DAT-10",
+        "SEC-14"
+      ],
+      "source_sections": "main:17,19;technical:6.13,6.14,13.2",
+      "dependencies": [
+        52
+      ]
+    },
+    {
+      "issue": 50,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-50.md",
+      "requirements": [
+        "ASR02-OBS-01",
+        "ASR02-OBS-05",
+        "ASR02-OBS-06",
+        "ASR02-OBS-07",
+        "ASR02-OBS-08",
+        "ASR02-OBS-09",
+        "ASR02-OBS-10",
+        "ASR02-OBS-16",
+        "PRD-OBS-19",
+        "PRD-OBS-20",
+        "PRD-OBS-23",
+        "PRD-OBS-24",
+        "PRD-OBS-25",
+        "PRD-OBS-21"
+      ],
+      "primary_requirements": [
+        "ASR02-OBS-01",
+        "ASR02-OBS-05",
+        "ASR02-OBS-06",
+        "ASR02-OBS-07",
+        "ASR02-OBS-08",
+        "ASR02-OBS-09",
+        "ASR02-OBS-10",
+        "ASR02-OBS-16",
+        "PRD-OBS-19",
+        "PRD-OBS-20",
+        "PRD-OBS-23",
+        "PRD-OBS-24",
+        "PRD-OBS-25"
+      ],
+      "source_sections": "main:18;technical:6.14",
+      "dependencies": [
+        41,
+        46
+      ]
+    },
+    {
+      "issue": 51,
+      "owner": "KKT",
+      "module": "platform",
+      "file": "tasks/issue-51.md",
+      "requirements": [
+        "PRD-DAT-09"
+      ],
+      "primary_requirements": [
+        "PRD-DAT-09"
+      ],
+      "source_sections": "technical:10.4,10.7,14.1",
+      "dependencies": []
+    },
+    {
+      "issue": 52,
+      "owner": "Rohit",
+      "module": "testing",
+      "file": "tasks/issue-52.md",
+      "requirements": [
+        "ARC-12",
+        "ASR02-OBS-17",
+        "PRD-ARC-13"
+      ],
+      "primary_requirements": [
+        "ARC-12"
+      ],
+      "source_sections": "technical:13.1,13.2",
+      "dependencies": []
+    },
+    {
+      "issue": 53,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-53.md",
+      "requirements": [
+        "ASM03-ATH-01",
+        "ASM03-ATH-06",
+        "ASM03-ATH-12",
+        "PRD-ATH-22",
+        "INT-04",
+        "PRD-ATH-15",
+        "PRD-ATH-26",
+        "ASM01-CFG-02",
+        "INT-03"
+      ],
+      "primary_requirements": [
+        "ASM03-ATH-01",
+        "ASM03-ATH-06",
+        "ASM03-ATH-12",
+        "PRD-ATH-22",
+        "INT-04"
+      ],
+      "source_sections": "main:8;technical:6.4,7.1,8.2",
+      "dependencies": [
+        42,
+        44,
+        45,
+        46
+      ]
+    },
+    {
+      "issue": 54,
+      "owner": "Sarvam team \u2014 individual lead to be confirmed",
+      "module": "intelligence",
+      "file": "tasks/issue-54.md",
+      "requirements": [
+        "ARC-04",
+        "PRD-ATH-25",
+        "PRD-ATH-26"
+      ],
+      "primary_requirements": [],
+      "source_sections": "main:6,7;technical:1.5,10.5",
+      "dependencies": [
+        41,
+        51
+      ]
+    },
+    {
+      "issue": 55,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-55.md",
+      "requirements": [
+        "PRD-ATH-25",
+        "PRD-CFG-06",
+        "PRD-ATH-27"
+      ],
+      "primary_requirements": [],
+      "source_sections": "main:6,7;technical:1.5",
+      "dependencies": [
+        44
+      ]
+    },
+    {
+      "issue": 56,
+      "owner": "Sarvam team \u2014 individual lead to be confirmed",
+      "module": "intelligence",
+      "file": "tasks/issue-56.md",
+      "requirements": [
+        "PRD-ATH-25",
+        "PRD-ATH-26",
+        "PRD-ARC-13",
+        "ARC-12",
+        "ASM03-VAL-01"
+      ],
+      "primary_requirements": [
+        "PRD-ATH-25",
+        "PRD-ATH-26",
+        "PRD-ARC-13"
+      ],
+      "source_sections": "main:7;technical:1.5,6.4,10.2",
+      "dependencies": [
+        54,
+        55,
+        45,
+        61
+      ]
+    },
+    {
+      "issue": 57,
+      "owner": "Sarvam team \u2014 individual lead to be confirmed",
+      "module": "intelligence",
+      "file": "tasks/issue-57.md",
+      "requirements": [
+        "PRD-ARC-14"
+      ],
+      "primary_requirements": [
+        "PRD-ARC-14"
+      ],
+      "source_sections": "main:11;technical:1.5,10.2",
+      "dependencies": [
+        40
+      ]
+    },
+    {
+      "issue": 58,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-58.md",
+      "requirements": [
+        "ASM03-ATH-02",
+        "ASM03-ATH-03",
+        "ASM03-ATH-04",
+        "ASM03-ATH-05",
+        "ASM03-ATH-07",
+        "ASM03-ATH-13",
+        "PRD-ATH-14",
+        "PRD-ATH-15",
+        "PRD-ATH-19",
+        "PRD-ATH-20",
+        "PRD-ATH-23",
+        "PRD-ATH-24",
+        "UI-04",
+        "UI-14",
+        "PRD-ATH-26",
+        "INT-04",
+        "PRD-INT-14"
+      ],
+      "primary_requirements": [
+        "ASM03-ATH-02",
+        "ASM03-ATH-03",
+        "ASM03-ATH-04",
+        "ASM03-ATH-05",
+        "ASM03-ATH-07",
+        "ASM03-ATH-13",
+        "PRD-ATH-14",
+        "PRD-ATH-15",
+        "PRD-ATH-19",
+        "PRD-ATH-20",
+        "PRD-ATH-23",
+        "PRD-ATH-24",
+        "UI-04",
+        "UI-14"
+      ],
+      "source_sections": "main:8;technical:6.4,9.2",
+      "dependencies": [
+        53,
+        44
+      ]
+    },
+    {
+      "issue": 59,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-59.md",
+      "requirements": [
+        "ASM03-ATH-08",
+        "ASM03-ATH-09",
+        "PRD-ATH-16",
+        "PRD-ATH-17",
+        "ARC-04",
+        "SEC-09",
+        "SEC-10",
+        "ASM03-ATH-04",
+        "ASM03-ATH-07",
+        "PRD-ATH-14"
+      ],
+      "primary_requirements": [
+        "ASM03-ATH-08",
+        "ASM03-ATH-09",
+        "PRD-ATH-16",
+        "PRD-ATH-17",
+        "ARC-04",
+        "SEC-09",
+        "SEC-10"
+      ],
+      "source_sections": "main:8;technical:6.4,10.5",
+      "dependencies": [
+        53
+      ]
+    },
+    {
+      "issue": 60,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-60.md",
+      "requirements": [
+        "ASM03-ATH-10",
+        "PRD-ATH-21",
+        "ASR02-OBS-02",
+        "ASR02-OBS-03",
+        "ASR02-OBS-04",
+        "PRD-OBS-22",
+        "UI-05"
+      ],
+      "primary_requirements": [
+        "ASM03-ATH-10",
+        "PRD-ATH-21",
+        "ASR02-OBS-02",
+        "ASR02-OBS-03",
+        "ASR02-OBS-04",
+        "PRD-OBS-22",
+        "UI-05"
+      ],
+      "source_sections": "main:8.2,17,18;technical:6.4,6.14",
+      "dependencies": [
+        50,
+        58
+      ]
+    },
+    {
+      "issue": 61,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-61.md",
+      "requirements": [
+        "PRD-ATH-27",
+        "ASM03-VAL-01",
+        "ASM03-VAL-02",
+        "ASM03-VAL-03",
+        "PRD-VAL-07",
+        "PRD-VAL-08"
+      ],
+      "primary_requirements": [
+        "PRD-ATH-27",
+        "ASM03-VAL-01",
+        "ASM03-VAL-02",
+        "ASM03-VAL-03",
+        "PRD-VAL-07",
+        "PRD-VAL-08"
+      ],
+      "source_sections": "main:8.3;technical:6.5",
+      "dependencies": [
+        44,
+        59
+      ]
+    },
+    {
+      "issue": 62,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-62.md",
+      "requirements": [
+        "ASM03-VAL-06",
+        "PRD-VAL-09"
+      ],
+      "primary_requirements": [
+        "ASM03-VAL-06",
+        "PRD-VAL-09"
+      ],
+      "source_sections": "main:8.3;technical:6.5",
+      "dependencies": [
+        61,
+        45
+      ]
+    },
+    {
+      "issue": 63,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-63.md",
+      "requirements": [
+        "ASM03-VAL-04",
+        "ASM03-VAL-05",
+        "PRD-VAL-10",
+        "PRD-VAL-11",
+        "ARC-02",
+        "ARC-03",
+        "INT-03",
+        "ASM03-REV-01"
+      ],
+      "primary_requirements": [
+        "ASM03-VAL-04",
+        "ASM03-VAL-05",
+        "PRD-VAL-10",
+        "PRD-VAL-11"
+      ],
+      "source_sections": "main:8.4;technical:6.5,8.4",
+      "dependencies": [
+        53,
+        61,
+        67
+      ]
+    },
+    {
+      "issue": 64,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-64.md",
+      "requirements": [
+        "ASM03-ATH-11",
+        "SEC-08"
+      ],
+      "primary_requirements": [
+        "ASM03-ATH-11"
+      ],
+      "source_sections": "main:8,14;technical:6.4",
+      "dependencies": [
+        53,
+        42
+      ]
+    },
+    {
+      "issue": 65,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-65.md",
+      "requirements": [
+        "UI-02",
+        "UI-03",
+        "ASM03-REV-02",
+        "ASM03-REV-03",
+        "PRD-REV-19",
+        "PRD-REV-20",
+        "UI-06",
+        "UI-07",
+        "SEC-02",
+        "SEC-03",
+        "ARC-01",
+        "PRD-REV-18"
+      ],
+      "primary_requirements": [
+        "UI-02",
+        "UI-03",
+        "ASM03-REV-02",
+        "ASM03-REV-03",
+        "PRD-REV-19",
+        "PRD-REV-20",
+        "UI-06",
+        "UI-07",
+        "SEC-02",
+        "SEC-03"
+      ],
+      "source_sections": "main:9.1,9.2,16;technical:6.6,9.2",
+      "dependencies": [
+        63,
+        67
+      ]
+    },
+    {
+      "issue": 66,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-66.md",
+      "requirements": [
+        "ASM03-REV-04",
+        "ASM03-REV-05",
+        "ASM03-REV-06",
+        "ASM03-REV-07",
+        "ASM03-REV-10",
+        "ASM03-REV-11",
+        "ASM03-REV-12",
+        "PRD-REV-13",
+        "PRD-REV-14",
+        "PRD-REV-15",
+        "PRD-REV-16",
+        "PRD-REV-17",
+        "PRD-REV-18",
+        "PRD-REV-21",
+        "ASM03-REV-08",
+        "PRD-ASG-10"
+      ],
+      "primary_requirements": [
+        "ASM03-REV-04",
+        "ASM03-REV-05",
+        "ASM03-REV-06",
+        "ASM03-REV-07",
+        "ASM03-REV-10",
+        "ASM03-REV-11",
+        "ASM03-REV-12",
+        "PRD-REV-13",
+        "PRD-REV-14",
+        "PRD-REV-15",
+        "PRD-REV-16",
+        "PRD-REV-17",
+        "PRD-REV-18",
+        "PRD-REV-21"
+      ],
+      "source_sections": "main:9.3,9.4,9.5,9.6;technical:6.6",
+      "dependencies": [
+        65,
+        68
+      ]
+    },
+    {
+      "issue": 67,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-67.md",
+      "requirements": [
+        "INS04-CAP-05",
+        "INS04-CAP-06",
+        "ASM03-REV-01",
+        "ASM03-REV-08",
+        "ASM03-REV-09",
+        "PRD-ASG-01",
+        "PRD-ASG-02",
+        "PRD-ASG-03",
+        "PRD-ASG-04",
+        "PRD-ASG-05",
+        "PRD-ASG-06",
+        "PRD-ASG-07",
+        "PRD-ASG-08",
+        "PRD-ASG-09",
+        "PRD-ASG-10",
+        "PRD-ASG-11",
+        "PRD-NTF-01",
+        "PRD-NTF-02",
+        "INS04-CAP-04",
+        "INS04-CAP-07",
+        "INS04-CAP-08",
+        "PRD-CAP-18"
+      ],
+      "primary_requirements": [
+        "INS04-CAP-05",
+        "INS04-CAP-06",
+        "ASM03-REV-01",
+        "ASM03-REV-08",
+        "ASM03-REV-09",
+        "PRD-ASG-01",
+        "PRD-ASG-02",
+        "PRD-ASG-03",
+        "PRD-ASG-04",
+        "PRD-ASG-05",
+        "PRD-ASG-06",
+        "PRD-ASG-07",
+        "PRD-ASG-08",
+        "PRD-ASG-09",
+        "PRD-ASG-10",
+        "PRD-ASG-11",
+        "PRD-NTF-01",
+        "PRD-NTF-02"
+      ],
+      "source_sections": "main:15;technical:6.3,6.15",
+      "dependencies": [
+        42,
+        44,
+        45
+      ]
+    },
+    {
+      "issue": 68,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-68.md",
+      "requirements": [
+        "INS04-CAP-07",
+        "INS04-CAP-08",
+        "SEC-06",
+        "PRD-ASG-03",
+        "PRD-ASG-10",
+        "ARC-01"
+      ],
+      "primary_requirements": [
+        "INS04-CAP-07",
+        "INS04-CAP-08",
+        "SEC-06"
+      ],
+      "source_sections": "main:5,15,17;technical:4.4,6.2,6.3",
+      "dependencies": [
+        42,
+        45
+      ]
+    },
+    {
+      "issue": 69,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-69.md",
+      "requirements": [
+        "PRD-ACC-16",
+        "PRD-ACC-17",
+        "PRD-UI-08a",
+        "PRD-ACC-18",
+        "PRD-ACC-10"
+      ],
+      "primary_requirements": [
+        "PRD-ACC-16",
+        "PRD-ACC-17",
+        "PRD-UI-08a"
+      ],
+      "source_sections": "main:10;technical:6.7",
+      "dependencies": [
+        66
+      ]
+    },
+    {
+      "issue": 70,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-70.md",
+      "requirements": [
+        "ASM04-ACC-01",
+        "ASM04-ACC-02",
+        "ASM04-ACC-03",
+        "ASM04-ACC-04",
+        "ASM04-ACC-05",
+        "ASM04-ACC-06",
+        "ASM04-ACC-07",
+        "ASM04-ACC-08",
+        "ASM04-ACC-09",
+        "PRD-ACC-10",
+        "PRD-ACC-11",
+        "PRD-ACC-12",
+        "PRD-ACC-13",
+        "PRD-ACC-14",
+        "PRD-ACC-15",
+        "PRD-ACC-18",
+        "UI-08",
+        "PRD-ACC-16",
+        "PRD-ACC-17"
+      ],
+      "primary_requirements": [
+        "ASM04-ACC-01",
+        "ASM04-ACC-02",
+        "ASM04-ACC-03",
+        "ASM04-ACC-04",
+        "ASM04-ACC-05",
+        "ASM04-ACC-06",
+        "ASM04-ACC-07",
+        "ASM04-ACC-08",
+        "ASM04-ACC-09",
+        "PRD-ACC-10",
+        "PRD-ACC-11",
+        "PRD-ACC-12",
+        "PRD-ACC-13",
+        "PRD-ACC-14",
+        "PRD-ACC-15",
+        "PRD-ACC-18",
+        "UI-08"
+      ],
+      "source_sections": "main:10;technical:6.7",
+      "dependencies": [
+        69,
+        68
+      ]
+    },
+    {
+      "issue": 71,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-71.md",
+      "requirements": [
+        "ASR01-EVD-05",
+        "ASR01-EVD-06",
+        "ASR01-EVD-10",
+        "PRD-EVD-16",
+        "PRD-EVD-19",
+        "ARC-02",
+        "ASR01-EVD-07"
+      ],
+      "primary_requirements": [
+        "ASR01-EVD-05",
+        "ASR01-EVD-06",
+        "ASR01-EVD-10",
+        "PRD-EVD-16",
+        "PRD-EVD-19"
+      ],
+      "source_sections": "main:19;technical:6.13",
+      "dependencies": [
+        45,
+        46
+      ]
+    },
+    {
+      "issue": 72,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-72.md",
+      "requirements": [
+        "ASR02-OBS-11",
+        "ASR02-OBS-12",
+        "ASR02-OBS-13",
+        "ASR02-OBS-14",
+        "ASR02-OBS-15",
+        "ASR02-OBS-18",
+        "PRD-OBS-26",
+        "PRD-OBS-27",
+        "UI-11"
+      ],
+      "primary_requirements": [
+        "ASR02-OBS-11",
+        "ASR02-OBS-12",
+        "ASR02-OBS-13",
+        "ASR02-OBS-14",
+        "ASR02-OBS-15",
+        "ASR02-OBS-18",
+        "PRD-OBS-26",
+        "PRD-OBS-27",
+        "UI-11"
+      ],
+      "source_sections": "main:18;technical:6.14,9.2",
+      "dependencies": [
+        42,
+        50
+      ]
+    },
+    {
+      "issue": 73,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-73.md",
+      "requirements": [
+        "ASM04-TRN-02",
+        "PRD-TRN-12",
+        "PRD-TRN-17",
+        "UI-09",
+        "PRD-TRN-11",
+        "PRD-TRN-16"
+      ],
+      "primary_requirements": [
+        "ASM04-TRN-02",
+        "PRD-TRN-12",
+        "PRD-TRN-17",
+        "UI-09"
+      ],
+      "source_sections": "main:11;technical:6.8,9.2",
+      "dependencies": [
+        79
+      ]
+    },
+    {
+      "issue": 74,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-74.md",
+      "requirements": [
+        "ASM04-TRN-03",
+        "ASM04-TRN-06",
+        "ASM04-TRN-08",
+        "ASM04-TRN-10",
+        "PRD-TRN-13",
+        "PRD-TRN-14",
+        "PRD-TRN-11"
+      ],
+      "primary_requirements": [
+        "ASM04-TRN-03",
+        "ASM04-TRN-06",
+        "ASM04-TRN-08",
+        "ASM04-TRN-10",
+        "PRD-TRN-13",
+        "PRD-TRN-14"
+      ],
+      "source_sections": "main:11;technical:6.8",
+      "dependencies": [
+        73
+      ]
+    },
+    {
+      "issue": 75,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-75.md",
+      "requirements": [
+        "ASM04-TRN-04",
+        "ASM04-TRN-07",
+        "PRD-TRN-15",
+        "PRD-REV-15",
+        "PRD-ASG-10"
+      ],
+      "primary_requirements": [
+        "ASM04-TRN-04",
+        "ASM04-TRN-07",
+        "PRD-TRN-15"
+      ],
+      "source_sections": "main:11;technical:6.8,6.6",
+      "dependencies": [
+        74,
+        68
+      ]
+    },
+    {
+      "issue": 76,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-76.md",
+      "requirements": [
+        "PRD-ACC-19",
+        "ASM04-TRN-05",
+        "PRD-ACC-16",
+        "PRD-ACC-18"
+      ],
+      "primary_requirements": [
+        "PRD-ACC-19",
+        "ASM04-TRN-05"
+      ],
+      "source_sections": "main:10,11;technical:6.7,6.8",
+      "dependencies": [
+        75,
+        70
+      ]
+    },
+    {
+      "issue": 77,
+      "owner": "Gandharva",
+      "module": "evidence",
+      "file": "tasks/issue-77.md",
+      "requirements": [
+        "ASM05-VLT-01",
+        "ASM05-VLT-02",
+        "ASM05-VLT-03",
+        "ASM05-VLT-04",
+        "ASM05-VLT-05",
+        "ASM05-VLT-06",
+        "ASM05-VLT-07",
+        "PRD-VLT-09",
+        "PRD-VLT-10",
+        "PRD-VLT-11",
+        "PRD-VLT-12",
+        "PRD-VLT-13",
+        "PRD-VLT-14",
+        "PRD-VLT-15",
+        "PRD-VLT-16",
+        "PRD-VLT-17",
+        "DAT-07",
+        "DAT-08",
+        "ARC-05",
+        "ARC-09",
+        "DAT-05",
+        "DAT-06",
+        "ASR01-EVD-05",
+        "ASR01-EVD-07",
+        "PRD-TRN-11"
+      ],
+      "primary_requirements": [
+        "ASM05-VLT-01",
+        "ASM05-VLT-02",
+        "ASM05-VLT-03",
+        "ASM05-VLT-04",
+        "ASM05-VLT-05",
+        "ASM05-VLT-06",
+        "ASM05-VLT-07",
+        "PRD-VLT-09",
+        "PRD-VLT-10",
+        "PRD-VLT-11",
+        "PRD-VLT-12",
+        "PRD-VLT-13",
+        "PRD-VLT-14",
+        "PRD-VLT-15",
+        "PRD-VLT-16",
+        "PRD-VLT-17",
+        "DAT-07",
+        "DAT-08",
+        "ARC-05",
+        "ARC-09"
+      ],
+      "source_sections": "main:12;technical:6.9,8.4,8.6",
+      "dependencies": [
+        70,
+        71,
+        46
+      ]
+    },
+    {
+      "issue": 78,
+      "owner": "Gandharva",
+      "module": "evidence",
+      "file": "tasks/issue-78.md",
+      "requirements": [
+        "ASM05-VLT-08",
+        "SEC-01",
+        "PRD-VLT-11",
+        "SEC-04",
+        "ARC-10"
+      ],
+      "primary_requirements": [
+        "ASM05-VLT-08",
+        "SEC-01"
+      ],
+      "source_sections": "main:12,17;technical:6.9,10.3,10.6",
+      "dependencies": [
+        42,
+        77
+      ]
+    },
+    {
+      "issue": 79,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-79.md",
+      "requirements": [
+        "ASM04-TRN-01",
+        "PRD-TRN-11",
+        "PRD-VLT-14",
+        "PRD-TRN-16"
+      ],
+      "primary_requirements": [
+        "ASM04-TRN-01",
+        "PRD-TRN-11"
+      ],
+      "source_sections": "main:11,13;technical:6.8",
+      "dependencies": [
+        77,
+        67
+      ]
+    },
+    {
+      "issue": 80,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-80.md",
+      "requirements": [
+        "ASM07-RDY-01",
+        "ASM07-RDY-05",
+        "ASM07-RDY-06",
+        "PRD-RDY-07",
+        "PRD-RDY-09",
+        "PRD-RDY-10",
+        "PRD-CFG-11",
+        "PRD-COR-09",
+        "ASM04-TRN-05"
+      ],
+      "primary_requirements": [
+        "ASM07-RDY-01",
+        "ASM07-RDY-05",
+        "ASM07-RDY-06",
+        "PRD-RDY-07",
+        "PRD-RDY-09",
+        "PRD-RDY-10"
+      ],
+      "source_sections": "main:11,13,14;technical:6.10",
+      "dependencies": [
+        76,
+        77
+      ]
+    },
+    {
+      "issue": 81,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-81.md",
+      "requirements": [
+        "ASM07-RDY-02",
+        "ASM07-RDY-03",
+        "ASM07-RDY-04",
+        "PRD-RDY-08",
+        "PRD-INT-13",
+        "INT-06"
+      ],
+      "primary_requirements": [
+        "ASM07-RDY-02",
+        "ASM07-RDY-03",
+        "ASM07-RDY-04",
+        "PRD-RDY-08"
+      ],
+      "source_sections": "main:21;technical:6.10,7.1",
+      "dependencies": [
+        41,
+        80
+      ]
+    },
+    {
+      "issue": 82,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-82.md",
+      "requirements": [
+        "ASM06-LFC-01",
+        "ASM06-LFC-02",
+        "ASM06-LFC-03",
+        "ASM06-LFC-04",
+        "ASM06-LFC-05",
+        "ASM06-LFC-06",
+        "PRD-LFC-07",
+        "PRD-LFC-08",
+        "PRD-LFC-09",
+        "PRD-LFC-10",
+        "PRD-INT-13"
+      ],
+      "primary_requirements": [
+        "ASM06-LFC-01",
+        "ASM06-LFC-02",
+        "ASM06-LFC-03",
+        "ASM06-LFC-04",
+        "ASM06-LFC-05",
+        "ASM06-LFC-06",
+        "PRD-LFC-07",
+        "PRD-LFC-08",
+        "PRD-LFC-09",
+        "PRD-LFC-10"
+      ],
+      "source_sections": "main:13;technical:6.12,7.1",
+      "dependencies": [
+        81
+      ]
+    },
+    {
+      "issue": 83,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-83.md",
+      "requirements": [
+        "ASM04-TRN-09",
+        "PRD-TRN-16",
+        "RES06-COR-01",
+        "RES06-COR-02",
+        "RES06-COR-03",
+        "RES06-COR-04",
+        "RES06-COR-05",
+        "PRD-COR-07",
+        "PRD-COR-08",
+        "PRD-COR-09",
+        "PRD-COR-10",
+        "PRD-COR-12",
+        "PRD-VLT-11",
+        "PRD-RDY-10"
+      ],
+      "primary_requirements": [
+        "ASM04-TRN-09",
+        "PRD-TRN-16",
+        "RES06-COR-01",
+        "RES06-COR-02",
+        "RES06-COR-03",
+        "RES06-COR-04",
+        "RES06-COR-05",
+        "PRD-COR-07",
+        "PRD-COR-08",
+        "PRD-COR-09",
+        "PRD-COR-10",
+        "PRD-COR-12"
+      ],
+      "source_sections": "main:14;technical:6.11",
+      "dependencies": [
+        80,
+        81
+      ]
+    },
+    {
+      "issue": 84,
+      "owner": "Kaustav",
+      "module": "workflow",
+      "file": "tasks/issue-84.md",
+      "requirements": [
+        "RES06-COR-06",
+        "PRD-COR-11",
+        "SEC-08",
+        "PRD-RDY-10"
+      ],
+      "primary_requirements": [
+        "RES06-COR-06",
+        "PRD-COR-11"
+      ],
+      "source_sections": "main:14;technical:6.11",
+      "dependencies": [
+        80,
+        81
+      ]
+    },
+    {
+      "issue": 85,
+      "owner": "KKT",
+      "module": "platform",
+      "file": "tasks/issue-85.md",
+      "requirements": [
+        "INT-02",
+        "ARC-06",
+        "ARC-07",
+        "ARC-08",
+        "ARC-10",
+        "ARC-11",
+        "SEC-12",
+        "PRD-CAP-14",
+        "PRD-CAP-15",
+        "PRD-VLT-11",
+        "PRD-INT-13"
+      ],
+      "primary_requirements": [
+        "INT-02",
+        "ARC-06",
+        "ARC-07",
+        "ARC-08",
+        "ARC-10",
+        "ARC-11",
+        "SEC-12"
+      ],
+      "source_sections": "technical:10.1,10.3,10.7",
+      "dependencies": [
+        41,
+        43,
+        77
+      ]
+    },
+    {
+      "issue": 86,
+      "owner": "Rohit",
+      "module": "testing",
+      "file": "tasks/issue-86.md",
+      "requirements": [
+        "SEC-04",
+        "SEC-11",
+        "SEC-01",
+        "SEC-03",
+        "SEC-05",
+        "SEC-06",
+        "SEC-09",
+        "SEC-13"
+      ],
+      "primary_requirements": [
+        "SEC-04",
+        "SEC-11"
+      ],
+      "source_sections": "technical:10.3,10.6,13.2,13.3",
+      "dependencies": [
+        85,
+        60,
+        65,
+        68,
+        78,
+        81
+      ]
+    },
+    {
+      "issue": 87,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/issue-87.md",
+      "requirements": [
+        "UI-13",
+        "PRD-ACC-13",
+        "PRD-ATH-24"
+      ],
+      "primary_requirements": [
+        "UI-13"
+      ],
+      "source_sections": "technical:6.7,9.2,11,13.3",
+      "dependencies": [
+        58,
+        65,
+        69,
+        70,
+        72,
+        73,
+        75
+      ]
+    },
+    {
+      "issue": 88,
+      "owner": "KKT",
+      "module": "platform",
+      "file": "tasks/issue-88.md",
+      "requirements": [
+        "ASR01-EVD-04",
+        "SEC-13",
+        "PRD-EVD-15",
+        "PRD-OBS-26",
+        "PRD-VLT-17"
+      ],
+      "primary_requirements": [
+        "ASR01-EVD-04",
+        "SEC-13"
+      ],
+      "source_sections": "technical:11,13.5,14.5",
+      "dependencies": [
+        85,
+        77,
+        47
+      ]
+    },
+    {
+      "issue": 89,
+      "owner": "Nikhil",
+      "module": "product",
+      "file": "tasks/issue-89.md",
+      "requirements": [
+        "ASR01-EVD-04",
+        "SEC-13",
+        "UI-13"
+      ],
+      "primary_requirements": [],
+      "source_sections": "technical:13.5,17",
+      "dependencies": [
+        86,
+        87,
+        88
+      ]
+    },
+    {
+      "issue": 94,
+      "owner": "KKT",
+      "module": "platform",
+      "file": "tasks/issue-94.md",
+      "requirements": [
+        "DAT-05",
+        "DAT-06"
+      ],
+      "primary_requirements": [],
+      "source_sections": "technical:13.1,14.1",
+      "dependencies": []
+    },
+    {
+      "issue": 110,
+      "owner": "Irfan",
+      "module": "observability",
+      "file": "tasks/obs-python.md",
+      "requirements": [
+        "DAT-03",
+        "PRD-OBS-28"
+      ],
+      "primary_requirements": [],
+      "source_sections": "technical:6.14,11",
+      "dependencies": [
+        49,
+        52
+      ]
+    },
+    {
+      "issue": 111,
+      "owner": "Irfan",
+      "module": "observability",
+      "file": "tasks/obs-local.md",
+      "requirements": [
+        "DAT-03",
+        "PRD-OBS-28"
+      ],
+      "primary_requirements": [],
+      "source_sections": "technical:11,14.1",
+      "dependencies": []
+    },
+    {
+      "issue": 112,
+      "owner": "Irfan",
+      "module": "observability",
+      "file": "tasks/obs-next.md",
+      "requirements": [
+        "DAT-03",
+        "PRD-OBS-28"
+      ],
+      "primary_requirements": [],
+      "source_sections": "technical:6.14,11",
+      "dependencies": [
+        110,
+        111
+      ]
+    },
+    {
+      "issue": 113,
+      "owner": "Irfan",
+      "module": "observability",
+      "file": "tasks/obs-client.md",
+      "requirements": [
+        "DAT-03",
+        "ASR02-OBS-16",
+        "ASM03-ATH-10"
+      ],
+      "primary_requirements": [],
+      "source_sections": "technical:6.14,9.2",
+      "dependencies": [
+        112,
+        118
+      ]
+    },
+    {
+      "issue": 114,
+      "owner": "Irfan",
+      "module": "observability",
+      "file": "tasks/obs-domain.md",
+      "requirements": [
+        "PRD-OBS-28",
+        "PRD-NTF-03",
+        "PRD-NTF-01",
+        "PRD-NTF-02"
+      ],
+      "primary_requirements": [
+        "PRD-OBS-28",
+        "PRD-NTF-03"
+      ],
+      "source_sections": "technical:6.14,6.15,11",
+      "dependencies": [
+        110,
+        63,
+        77
+      ]
+    },
+    {
+      "issue": 115,
+      "owner": "Rohit",
+      "module": "testing",
+      "file": "tasks/test-harness.md",
+      "requirements": [
+        "ARC-02",
+        "INT-03",
+        "SEC-06",
+        "SEC-03"
+      ],
+      "primary_requirements": [],
+      "source_sections": "technical:13.1,13.2,13.4,13.5",
+      "dependencies": [
+        52
+      ]
+    },
+    {
+      "issue": 116,
+      "owner": "KKT",
+      "module": "platform",
+      "file": "tasks/release-recovery.md",
+      "requirements": [
+        "DAT-06",
+        "SEC-13"
+      ],
+      "primary_requirements": [],
+      "source_sections": "technical:8.4,10.7,11,17.4",
+      "dependencies": [
+        51,
+        77
+      ]
+    },
+    {
+      "issue": 117,
+      "owner": "KKT",
+      "module": "platform",
+      "file": "tasks/task-contract.md",
+      "requirements": [
+        "INT-01",
+        "INT-03",
+        "INT-05",
+        "INT-06",
+        "INT-07",
+        "INT-08",
+        "PRD-INT-11",
+        "PRD-INT-12",
+        "PRD-INT-13",
+        "PRD-INT-14",
+        "ARC-01",
+        "PRD-ATH-15",
+        "PRD-REV-15",
+        "PRD-ASG-02",
+        "PRD-EVD-11"
+      ],
+      "primary_requirements": [
+        "INT-01",
+        "INT-03",
+        "INT-05",
+        "INT-06",
+        "INT-07",
+        "INT-08",
+        "PRD-INT-11",
+        "PRD-INT-12",
+        "PRD-INT-13",
+        "PRD-INT-14"
+      ],
+      "source_sections": "technical:7.1,8.2;main:16",
+      "dependencies": [
+        40
+      ]
+    },
+    {
+      "issue": 118,
+      "owner": "Divyansh",
+      "module": "client",
+      "file": "tasks/client-contract.md",
+      "requirements": [
+        "PRD-ATH-18",
+        "DAT-04",
+        "INS04-CAP-11",
+        "PRD-CAP-12",
+        "ASM03-ATH-10",
+        "PRD-ATH-20",
+        "UI-13",
+        "PRD-INT-14"
+      ],
+      "primary_requirements": [
+        "PRD-ATH-18",
+        "DAT-04"
+      ],
+      "source_sections": "main:17;technical:6.2,9.2,10.7",
+      "dependencies": [
+        117,
+        41,
+        53
+      ]
+    },
+    {
+      "issue": 119,
+      "owner": "Nikhil",
+      "module": "product",
+      "file": "tasks/onboarding.md",
+      "requirements": [
+        "UI-13"
+      ],
+      "primary_requirements": [],
+      "source_sections": "technical:14.1,17.4",
+      "dependencies": [
+        51,
+        52,
+        94
+      ]
+    }
+  ]
+}

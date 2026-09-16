@@ -97,7 +97,7 @@ def build_app(registry: ProviderRegistry) -> FastAPI:
 
     app = FastAPI(
         lifespan=lifespan,
-        title="open-mulyankan core-api",
+        title="Project Rachana core API",
         version="0.1.0",
         description="Layer 1 workflow core of the Content Authoring Engine",
     )
