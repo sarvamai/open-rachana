@@ -78,6 +78,12 @@ closure is evidence, not demonstration.
 | [`docs/provider-contracts.md`](docs/provider-contracts.md) | How providers plug in and certify |
 | [`docs/traceability.md`](docs/traceability.md) | Requirement → component → test index |
 | [`apps/web/README.md`](apps/web/README.md) | Web app: running it, and the vendored design system |
+| [`deploy/dev/README.md`](deploy/dev/README.md) | Local observability stack: Collector and Grafana for development |
+
+## Local observability
+
+Traces and metrics from a local run are viewable in Grafana with the compose
+stack under `deploy/dev/`; see [`deploy/dev/README.md`](deploy/dev/README.md).
 
 ## Contributing
 

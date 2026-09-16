@@ -9,6 +9,14 @@ dependencies = [
     "fastapi>=0.115",
     "uvicorn>=0.30",
     "pyyaml>=6.0",
+    # Observability (ADR-0011). Mandatory: the content-free guard is a
+    # security control. API/SDK track 1.x; contrib instrumentations track
+    # the 0.x line that pairs with it.
+    "opentelemetry-api>=1.44,<2",
+    "opentelemetry-sdk>=1.44,<2",
+    "opentelemetry-exporter-otlp-proto-http>=1.44,<2",
+    "opentelemetry-instrumentation-fastapi>=0.65b0,<1",
+    "opentelemetry-instrumentation-system-metrics>=0.65b0,<1",
 ]
 
 [project.optional-dependencies]

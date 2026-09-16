@@ -76,6 +76,8 @@ apps/web/AGENTS.md                                         modify (4, 5)
 
 ### Task 1: Replace the `build-and-test` placeholder
 
+Landing separately through upstream PR #96 (pip rather than uv; same job, same tests). The observability slices assume it is merged.
+
 **Files:**
 - Modify: `.github/workflows/ci.yml:193-208`
 
@@ -159,7 +161,7 @@ nothing about platform/. Pin setup-python and setup-uv by SHA."
 **Interfaces:**
 - Produces: `mulyankan_platform.observability.configure(app: FastAPI, registry: ProviderRegistry | None = None) -> None`, a no-op when `OTEL_SDK_DISABLED=true`. Fully wired in Task 8.
 
-- [ ] **Step 1: Add the dependencies**
+- [x] **Step 1: Add the dependencies**
 
 In `platform/core/pyproject.toml`, extend `dependencies`:
 
@@ -186,7 +188,7 @@ python -c "import opentelemetry.sdk, opentelemetry.instrumentation.fastapi; prin
 ```
 Expected: `ok`.
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 `platform/core/tests/test_observability_disabled.py`:
 
@@ -223,12 +225,12 @@ def test_asr02obs_app_serves_with_sdk_disabled() -> None:
 
 The test runs in a subprocess because the OTel global providers can be set once per process, and the rest of the suite sets them to in-memory exporters (Task 8).
 
-- [ ] **Step 3: Run it to see it fail**
+- [x] **Step 3: Run it to see it fail**
 
 Run: `python -m pytest platform/core/tests/test_observability_disabled.py -q`
 Expected: FAIL. `create_app_from_mapping` does not call anything OTel yet, so the assertion on `ProxyTracerProvider` passes, but the import of `mulyankan_platform.observability` in the next step does not exist. To make the test meaningful now, add to the script before `TestClient`: `import mulyankan_platform.observability` so it fails with `ModuleNotFoundError`.
 
-- [ ] **Step 4: Create the package with a disabled-aware `configure`**
+- [x] **Step 4: Create the package with a disabled-aware `configure`**
 
 `platform/core/src/mulyankan_platform/observability/__init__.py`:
 
@@ -285,7 +287,7 @@ In `core_api/main.py`, `build_app` calls it after `app.state.registry = registry
 
 with `from mulyankan_platform.observability import configure` added to the imports.
 
-- [ ] **Step 5: Run the test to see it pass**
+- [x] **Step 5: Run the test to see it pass**
 
 Run: `python -m pytest platform/core -q`
 Expected: all pass, including the existing healthz tests.
@@ -306,17 +308,17 @@ git commit -s -m "Add the observability package skeleton and OTel dependencies"
 **Interfaces:**
 - Produces: `ALLOWED_SPAN_ATTRIBUTES: frozenset[str]`, `ALLOWED_LOG_ATTRIBUTES: frozenset[str]`, `ALLOWED_METRIC_ATTRIBUTES: frozenset[str]`, `frames_only(stacktrace: str) -> str`, `metric_views() -> list[View]`, `SpanAttributeGuard(dropped: Counter | None = None)` (a `SpanProcessor`), `LogAttributeGuard(dropped: Counter | None = None)` (a `LogRecordProcessor`). `dropped` is an OTel `Counter`; each removed key is counted with attributes `{"signal": "span" | "log", "attribute": key}`. Keys are filtered by name; `exception.stacktrace` is the one value that is also rewritten, because the SDK renders the exception message into it. Metric attributes are filtered by the SDK `View` from `metric_views()`, which drops silently (no counter).
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 `platform/core/tests/test_observability_guard.py`:
 
 ```python
 """Attribute allowlist guard (ASR02-OBS): unknown keys never reach an exporter."""
 
-import logging
 
-from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-from opentelemetry.sdk._logs.export import InMemoryLogExporter, SimpleLogRecordProcessor
+from opentelemetry._logs import LogRecord, SeverityNumber
+from opentelemetry.sdk._logs import LoggerProvider
+from opentelemetry.sdk._logs.export import InMemoryLogRecordExporter, SimpleLogRecordProcessor
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import InMemoryMetricReader
 from opentelemetry.sdk.trace import TracerProvider
@@ -403,15 +405,20 @@ def test_asr02obs_stacktrace_keeps_frames_and_drops_the_message() -> None:
 
 def test_asr02obs_unknown_log_attributes_are_dropped_and_counted() -> None:
     reader, counter = _counter()
-    exporter = InMemoryLogExporter()
+    exporter = InMemoryLogRecordExporter()
     provider = LoggerProvider()
     provider.add_log_record_processor(LogAttributeGuard(counter))
     provider.add_log_record_processor(SimpleLogRecordProcessor(exporter))
-    logger = logging.getLogger("guard-test")
-    logger.addHandler(LoggingHandler(logger_provider=provider))
-    logger.setLevel(logging.INFO)
 
-    logger.info("draft.submitted", extra={"mulyankan.object_ref": "art-1", "stem": SENTINEL})
+    # Through the logs API: the stdlib handler that maps `extra` to attributes
+    # arrives with the structured-logs task, and the guard sits below it.
+    provider.get_logger("guard-test").emit(
+        LogRecord(
+            body="draft.submitted",
+            severity_number=SeverityNumber.INFO,
+            attributes={"mulyankan.object_ref": "art-1", "stem": SENTINEL},
+        )
+    )
 
     (record,) = exporter.get_finished_logs()
     attributes = dict(record.log_record.attributes)
@@ -440,12 +447,12 @@ def test_allowlist_never_admits_the_known_leaky_keys() -> None:
         assert key not in ALLOWED_METRIC_ATTRIBUTES
 ```
 
-- [ ] **Step 2: Run to see them fail**
+- [x] **Step 2: Run to see them fail**
 
 Run: `python -m pytest platform/core/tests/test_observability_guard.py -q`
 Expected: FAIL with `ModuleNotFoundError: mulyankan_platform.observability.guard`.
 
-- [ ] **Step 3: Implement the guard**
+- [x] **Step 3: Implement the guard**
 
 `platform/core/src/mulyankan_platform/observability/guard.py`:
 
@@ -473,12 +480,16 @@ Keep it identical to `apps/web/src/observability/allowlist.ts`.
 from __future__ import annotations
 
 import re
-from typing import Any, Callable, Mapping
+from collections.abc import Callable, Mapping
+from typing import Any
 
+from opentelemetry.attributes import BoundedAttributes
 from opentelemetry.metrics import Counter
 from opentelemetry.sdk._logs import LogRecordProcessor
 from opentelemetry.sdk.metrics.view import View
 from opentelemetry.sdk.trace import Event, ReadableSpan, SpanProcessor
+from opentelemetry.sdk.util import BoundedList
+from opentelemetry.trace import Status
 
 ALLOWED_SPAN_ATTRIBUTES: frozenset[str] = frozenset(
     {
@@ -518,13 +529,25 @@ ALLOWED_LOG_ATTRIBUTES: frozenset[str] = ALLOWED_SPAN_ATTRIBUTES | frozenset(
     }
 )
 
-# Metric data-point attributes (spec §3.2). The HTTP duration histogram uses
-# the span keys; the rest are the domain instruments' own keys and the fixed
-# enumerations of the process metrics (`_PROCESS_METRICS` in setup.py).
-ALLOWED_METRIC_ATTRIBUTES: frozenset[str] = ALLOWED_SPAN_ATTRIBUTES | frozenset(
+# Metric data-point attributes (spec §3.2). Spelled out rather than derived
+# from the span set: a View filters by key only and never sanitises a value,
+# and every key here must be a bounded set (a metric label is a series).
+# `exception.stacktrace`, `client.address`, `enduser.pseudo.id` and the
+# `mulyankan.*` identifiers are therefore span-only.
+ALLOWED_METRIC_ATTRIBUTES: frozenset[str] = frozenset(
     {
-        "signal",  # mulyankan.observability.attributes_dropped
-        "attribute",  # mulyankan.observability.attributes_dropped: a key name, never a value
+        # http.server.request.duration and the request/response body sizes
+        "http.request.method",
+        "http.route",
+        "http.response.status_code",
+        "url.scheme",
+        "network.protocol.version",
+        "server.address",
+        "server.port",
+        "error.type",  # status class or exception class name
+        # mulyankan.observability.attributes_dropped
+        "signal",
+        "attribute",  # a bounded key label, see `dropped_key_label`
         "action",  # mulyankan.audit.events
         "spi",  # mulyankan.registry.bindings
         "provider.name",  # mulyankan.registry.bindings
@@ -536,24 +559,57 @@ ALLOWED_METRIC_ATTRIBUTES: frozenset[str] = ALLOWED_SPAN_ATTRIBUTES | frozenset(
     }
 )
 
-# A frame is `  File "<path>", line <n>, in <name>` followed by indented
-# source (and, on 3.11+, caret) lines. Everything else in a rendered
-# traceback is a header, a chaining note, the `Type: message` line, message
-# continuation lines or exception notes, and all of those are dropped.
+# The `attribute` label of the dropped counter is a key NAME, but names are
+# not always code-controlled: captured request headers become
+# `http.request.header.<name>` keys, and a client picks the name. Bucket
+# those by prefix, and cap the distinct labels this process will ever emit.
+DROPPED_LABEL_LIMIT = 64
+_BUCKETED_PREFIXES = ("http.request.header.", "http.response.header.")
+_seen_dropped_keys: set[str] = set()
+
+
+def dropped_key_label(key: str) -> str:
+    for prefix in _BUCKETED_PREFIXES:
+        if key.startswith(prefix):
+            return prefix + "*"
+    if key in _seen_dropped_keys:
+        return key
+    if len(_seen_dropped_keys) >= DROPPED_LABEL_LIMIT:
+        return "other"
+    _seen_dropped_keys.add(key)
+    return key
+
+
+# A rendered traceback is one or more sections, each `Traceback (most recent
+# call last):`, then frames (`  File "<path>", line <n>, in <name>` plus
+# indented source and caret lines), then the `Type: message` line and any
+# notes. Frames are only read while a section's header has armed them and
+# the first non-frame line (the message) disarms until the next header, so
+# a message that itself contains a File-shaped line cannot smuggle its
+# following lines through. Header-less input (`traceback.format_tb`) arms
+# from the start.
+_HEADER_LINE = "Traceback (most recent call last):"
 _FRAME_LINE = re.compile(r'^\s+File ".*", line \d+, in .*$')
 
 
 def frames_only(stacktrace: str) -> str:
     """Reduce a `traceback.format_exception` rendering to its frame lines."""
     kept: list[str] = []
+    lines = stacktrace.splitlines()
+    armed = bool(lines) and _FRAME_LINE.match(lines[0]) is not None
     in_frame = False
-    for line in stacktrace.splitlines():
-        if _FRAME_LINE.match(line):
-            in_frame = True
-        elif not (in_frame and line.startswith("    ")):
-            in_frame = False
+    for line in lines:
+        if line == _HEADER_LINE:
+            armed, in_frame = True, False
+        elif not armed:
             continue
-        kept.append(line)
+        elif _FRAME_LINE.match(line):
+            in_frame = True
+            kept.append(line)
+        elif in_frame and line.startswith("    "):
+            kept.append(line)
+        else:
+            armed, in_frame = False, False  # the message line ends the section
     return "\n".join(kept)
 
 
@@ -580,8 +636,23 @@ def filter_attributes(
             sanitise = _SANITISERS.get(key)
             kept[key] = sanitise(value) if sanitise else value
         elif dropped is not None:
-            dropped.add(1, {"signal": signal, "attribute": key})
+            dropped.add(1, {"signal": signal, "attribute": dropped_key_label(key)})
     return kept
+
+
+def _rebound(old: Any, kept: dict[str, Any]) -> Any:
+    """Keep the SDK's limit bookkeeping: a plain dict would report zero
+    dropped attributes and hide that a span or log limit is cutting data."""
+    if not isinstance(old, BoundedAttributes):
+        return kept
+    new = BoundedAttributes(
+        maxlen=old.maxlen,
+        attributes=kept,
+        immutable=True,
+        max_value_len=old.max_value_len,
+    )
+    new.dropped = old.dropped
+    return new
 
 
 class SpanAttributeGuard(SpanProcessor):
@@ -596,23 +667,36 @@ class SpanAttributeGuard(SpanProcessor):
     def __init__(self, dropped: Counter | None = None) -> None:
         self._dropped = dropped
 
-    def on_start(self, span, parent_context=None) -> None:  # noqa: ANN001
+    def on_start(self, span, parent_context=None) -> None:
         return None
 
     def on_end(self, span: ReadableSpan) -> None:
-        span._attributes = filter_attributes(
-            span.attributes, ALLOWED_SPAN_ATTRIBUTES, self._dropped, "span"
+        span._attributes = _rebound(
+            span._attributes,
+            filter_attributes(
+                span.attributes, ALLOWED_SPAN_ATTRIBUTES, self._dropped, "span"
+            ),
         )
-        span._events = [
-            Event(
-                event.name,
-                filter_attributes(
-                    event.attributes, ALLOWED_SPAN_ATTRIBUTES, self._dropped, "span"
-                ),
-                event.timestamp,
+        old_events = span._events
+        events = BoundedList(
+            old_events._dq.maxlen if isinstance(old_events, BoundedList) else None
+        )
+        for event in span.events:
+            events.append(
+                Event(
+                    event.name,
+                    filter_attributes(
+                        event.attributes, ALLOWED_SPAN_ATTRIBUTES, self._dropped, "span"
+                    ),
+                    event.timestamp,
+                )
             )
-            for event in span.events
-        ]
+        events.dropped = getattr(old_events, "dropped", 0)
+        span._events = events
+        # The SDK renders the escaped exception as `Type: message` into the
+        # status description; the OTLP encoder exports it as Status.message.
+        if span.status.description:
+            span._status = Status(span.status.status_code)
 
     def shutdown(self) -> None:
         return None
@@ -627,9 +711,15 @@ class LogAttributeGuard(LogRecordProcessor):
     def __init__(self, dropped: Counter | None = None) -> None:
         self._dropped = dropped
 
-    def on_emit(self, record) -> None:  # noqa: ANN001
-        record.attributes = filter_attributes(
-            record.attributes, ALLOWED_LOG_ATTRIBUTES, self._dropped, "log"
+    def on_emit(self, record) -> None:
+        # SDK >= 1.44 hands the processor a ReadWriteLogRecord wrapping the
+        # API LogRecord; the attributes live on the inner record.
+        inner = record.log_record
+        inner.attributes = _rebound(
+            inner.attributes,
+            filter_attributes(
+                inner.attributes, ALLOWED_LOG_ATTRIBUTES, self._dropped, "log"
+            ),
         )
 
     def shutdown(self) -> None:
@@ -639,7 +729,7 @@ class LogAttributeGuard(LogRecordProcessor):
         return True
 ```
 
-- [ ] **Step 4: Run to see them pass**
+- [x] **Step 4: Run to see them pass**
 
 Run: `python -m pytest platform/core/tests/test_observability_guard.py -q`
 Expected: 5 passed.
@@ -833,6 +923,12 @@ git commit -s -m "Record audit metrics and link spans to audit event ids"
 ```
 
 ### Task 5: Structured logs
+
+This task adds `opentelemetry-instrumentation-logging` to `platform/core`'s
+dependencies (its `LoggingHandler` maps `extra` to attributes) and owns the
+log **body** question the attribute guard does not: the sentinel test gains a
+log call whose message interpolates the sentinel, and the handler or the
+formatter must keep the exported body a static event name.
 
 **Files:**
 - Create: `platform/core/src/mulyankan_platform/observability/logs.py`
@@ -1408,10 +1504,13 @@ def sdk_disabled() -> bool:
 def register_providers(*, span_exporter=None, metric_reader=None, log_exporter=None) -> Providers:  # noqa: ANN001
     global _providers
     if _providers is not None:
+        if span_exporter or metric_reader or log_exporter:
+            raise RuntimeError("providers are already installed; exporters cannot change")
         return _providers
 
-    # Stable HTTP conventions and the http.server.request.duration metric.
-    os.environ.setdefault("OTEL_SEMCONV_STABILITY_OPT_IN", "http")
+    # OTEL_SEMCONV_STABILITY_OPT_IN=http is set at module import (top of this
+    # file): the instrumentation latches it once per process, the first time
+    # anything instruments, so it must precede every instrumentor.
     # Resource.create() runs the env detector: OTEL_SERVICE_NAME and
     # OTEL_RESOURCE_ATTRIBUTES are the descriptor (ADR-0011).
     resource = Resource.create()
@@ -1460,6 +1559,11 @@ def configure(app: FastAPI, registry: ProviderRegistry | None = None) -> None:
         app,
         tracer_provider=providers.tracer_provider,
         meter_provider=providers.meter_provider,
+        # Resolved at configure time, "" when unset, because the instrumentation
+        # snapshots the environment at import and treats None as that snapshot.
+        excluded_urls=os.environ.get(
+            "OTEL_PYTHON_FASTAPI_EXCLUDED_URLS", os.environ.get("OTEL_PYTHON_EXCLUDED_URLS", "")
+        ),
         exclude_spans=["receive", "send"],  # the ASGI message spans are noise
     )
     if registry is not None:
@@ -1554,7 +1658,7 @@ def telemetry() -> Telemetry:
 
 Because `register_providers` is idempotent, the first test that asks for the fixture installs the in-memory providers for the whole session; every `create_app_*` call afterwards instruments against them.
 
-- [ ] **Step 4: Write the pipeline tests**
+- [x] **Step 4: Write the pipeline tests**
 
 `platform/core/tests/test_observability_pipeline.py`:
 
@@ -1641,16 +1745,16 @@ def test_asr02obs_app_serves_with_collector_unreachable() -> None:
     assert "served" in result.stdout
 ```
 
-- [ ] **Step 5: Run the whole suite**
+- [x] **Step 5: Run the whole suite**
 
 Run: `python -m pytest platform/spi platform/core -q`
 Expected: every test passes, including the Task 4, 5, 6 and 7 tests that needed the fixture. If `test_asr02obs_no_content_reaches_any_exporter` fails, print `exported` and find which key carried the sentinel; the fix is always the allowlist, never the test.
 
-- [ ] **Step 6: Run the API by hand once**
+- [x] **Step 6: Run the API by hand once**
 
 ```bash
 OTEL_SERVICE_NAME=core-api OTEL_SDK_DISABLED=true \
-  uvicorn mulyankan_platform.core_api.main:app --no-access-log --port 8000 &
+  uvicorn --factory mulyankan_platform.core_api.main:app --no-access-log --port 8000 &
 curl -si localhost:8000/healthz | head -5
 ```
 Expected: `200`, a JSON warning line about the missing config on stdout, no access log line. Stop the server.
@@ -1749,9 +1853,9 @@ git commit -s -m "Document the observability package and its tests"
 - Modify: `AGENTS.md`, `docs/AGENTS.md`
 
 **Interfaces:**
-- Produces: `docker compose -f deploy/dev/compose.yaml up -d` gives OTLP on `localhost:4317`/`4318` and Grafana on `localhost:3000`.
+- Produces: `docker compose -f deploy/dev/compose.yaml up -d` gives OTLP on `localhost:4317`/`4318` and Grafana on `localhost:3001` (3000 is the Next.js dev server).
 
-- [ ] **Step 1: The compose file**
+- [x] **Step 1: The compose file**
 
 `deploy/dev/compose.yaml`:
 
@@ -1759,7 +1863,8 @@ git commit -s -m "Document the observability package and its tests"
 # Local observability backend. Grafana's all-in-one image is a development
 # convenience (D1): a separate, unmodified AGPL service per ADR-0002, never a
 # dependency of the system. The applications run on the host and export to
-# the Collector; only the Collector's OTLP ports and Grafana are published.
+# the Collector; only the Collector's OTLP ports and Grafana are published,
+# and only on loopback: the receiver and Grafana (admin / admin) are unauthenticated.
 services:
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.160.0@sha256:799dc6cf12c96192af37b5bdba804da8c10b3bc563b43cb90c3f3c58d9572ad6
@@ -1767,24 +1872,28 @@ services:
     volumes:
       - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
     ports:
-      - "4317:4317"   # OTLP gRPC
-      - "4318:4318"   # OTLP HTTP
-      - "13133:13133" # health_check extension
+      - "127.0.0.1:4317:4317"   # OTLP gRPC
+      - "127.0.0.1:4318:4318"   # OTLP HTTP
+      - "127.0.0.1:13133:13133" # health_check extension
     depends_on:
       - lgtm
 
   lgtm:
     image: grafana/otel-lgtm:0.32.1@sha256:7fd8eaad6bb64897ad5f644c8e15ee67c3204c97168f4bdba122adbf8f60e3c4
     ports:
-      - "3000:3000"   # Grafana (admin / admin)
+      - "127.0.0.1:3001:3000"   # Grafana (admin / admin); 3000 is the Next.js dev server
     volumes:
       - lgtm-data:/data
+      # Development dashboards (spec §6.2). Grafana reads the provider file
+      # from its provisioning directory and the JSON from the mounted path.
+      - ./grafana/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/mulyankan.yaml:ro
+      - ./grafana/dashboards:/otel-lgtm/dashboards:ro
 
 volumes:
   lgtm-data:
 ```
 
-- [ ] **Step 2: The Collector configuration**
+- [x] **Step 2: The Collector configuration**
 
 `deploy/dev/otel-collector.yaml`:
 
@@ -1807,18 +1916,38 @@ processors:
   batch: {}
   redaction:
     allow_all_keys: false
+    # Despite the name, `ignored_keys` are NOT dropped: the processor skips
+    # them before the allowlist check, so they pass through untouched
+    # ("ignored" by the redaction, not by the pipeline). The processor also
+    # runs the allowlist over resource attributes, and without this list it
+    # strips service.name and the rest of the descriptor, which breaks every
+    # service-based query. Resource attributes are the operator's descriptor
+    # (ADR-0011; spec §4.2 says they are not filtered). Add a key when the
+    # descriptor grows (e.g. resourcedetection's host.*).
+    ignored_keys:
+      - service.name
+      - service.namespace
+      - service.version
+      - service.instance.id
+      - deployment.environment.name
+      - telemetry.sdk.name
+      - telemetry.sdk.language
+      - telemetry.sdk.version
+      - telemetry.distro.name
+      - telemetry.distro.version
     # One processor for all three pipelines: the union of the span, log and
-    # metric allowlists in platform/core/.../guard.py and
-    # apps/web/.../allowlist.ts. Keep it identical to them.
+    # metric allowlists in platform/core/.../guard.py, which a test pins.
     allowed_keys:
+      # The union of the three Python allowlists (guard.py), nothing more.
+      # The web tier's keys (url.path, a query-stripped url.full, next.*,
+      # the RUM keys) are added in the PR that lands apps/web's allowlist,
+      # so this list never admits a key nothing in the tree emits.
       - http.request.method
       - http.route
       - http.response.status_code
       - http.request.body.size
       - http.response.body.size
       - url.scheme
-      - url.path
-      - url.full
       - server.address
       - server.port
       - network.protocol.version
@@ -1827,7 +1956,6 @@ processors:
       - exception.type
       - exception.stacktrace
       - enduser.pseudo.id
-      - session.id
       - mulyankan.spi
       - mulyankan.provider.name
       - mulyankan.provider.version
@@ -1839,27 +1967,11 @@ processors:
       - db.system.name
       - db.operation.name
       - db.collection.name
+      # log records
       - code.function.name
       - code.file.path
       - code.line.number
-      - http.method
-      - http.status_code
-      - http.url
-      - next.span_name
-      - next.span_type
-      - next.route
-      - next.page
-      - next.rsc
-      - next.segment
-      - net.peer.name
-      - net.peer.port
-      - browser.mobile
-      - navigation.type
-      - event_type
-      - target_element
-      - target_xpath
-      - mulyankan.web.vital.rating
-      # Metric data-point keys (ALLOWED_METRIC_ATTRIBUTES on each tier)
+      # metric data points (ALLOWED_METRIC_ATTRIBUTES)
       - signal
       - attribute
       - action
@@ -1870,14 +1982,10 @@ processors:
       - to_state
       - type
       - generation
-      - nodejs.eventloop.state
-      - v8js.gc.type
-      - v8js.heap.space.name
-      - v8js.resource.type
     summary: debug
 
 exporters:
-  otlphttp:
+  otlp_http:
     endpoint: http://lgtm:4318
     tls:
       insecure: true
@@ -1895,18 +2003,18 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, redaction, batch]
-      exporters: [otlphttp]
+      exporters: [otlp_http]
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, redaction, batch]
-      exporters: [otlphttp]
+      exporters: [otlp_http]
     logs:
       receivers: [otlp]
       processors: [memory_limiter, redaction, batch]
-      exporters: [otlphttp]
+      exporters: [otlp_http]
 ```
 
-- [ ] **Step 3: The environment example**
+- [x] **Step 3: The environment example**
 
 `deploy/dev/.env.example`:
 
@@ -1922,11 +2030,14 @@ export OTEL_RESOURCE_ATTRIBUTES=service.namespace=open-mulyankan,service.version
 export OTEL_LOG_LEVEL=info
 
 # core-api
-export OTEL_PYTHON_FASTAPI_EXCLUDED_URLS=healthz
+# Anchored: the instrumentation applies it as an unanchored search over
+# scheme://host/path, so a bare `healthz` would also blind any host or path
+# containing the word.
+export OTEL_PYTHON_FASTAPI_EXCLUDED_URLS='^https?://[^/]+/healthz$'
 # OTEL_SERVICE_NAME is set per process: core-api, web.
 ```
 
-- [ ] **Step 4: README**
+- [x] **Step 4: README**
 
 `deploy/dev/README.md`:
 
@@ -1948,12 +2059,12 @@ block in `otel-collector.yaml` and nothing else.
     source deploy/dev/.env.example
 
     # core-api, from the repo root
-    OTEL_SERVICE_NAME=core-api uvicorn mulyankan_platform.core_api.main:app --no-access-log --port 8000
+    OTEL_SERVICE_NAME=core-api uvicorn --factory mulyankan_platform.core_api.main:app --no-access-log --port 8000
 
     # web, from apps/web
     OTEL_SERVICE_NAME=web NEXT_PUBLIC_CORE_API_ORIGIN=http://localhost:8000 pnpm dev
 
-Open http://localhost:3000 (admin / admin), Explore, Tempo, search
+Open http://localhost:3001 (admin / admin), Explore, Tempo, search
 `service.name = core-api`. Logs are in Loki with `trace_id` for correlation.
 
 ## Stop and reset
@@ -1961,19 +2072,19 @@ Open http://localhost:3000 (admin / admin), Explore, Tempo, search
     docker compose -f deploy/dev/compose.yaml down -v
 ```
 
-- [ ] **Step 5: Verify**
+- [x] **Step 5: Verify**
 
 ```bash
 docker compose -f deploy/dev/compose.yaml up -d
 sleep 10 && curl -sf localhost:13133 && echo collector-ok
 source deploy/dev/.env.example
-OTEL_SERVICE_NAME=core-api uvicorn mulyankan_platform.core_api.main:app --no-access-log --port 8000 &
+OTEL_SERVICE_NAME=core-api uvicorn --factory mulyankan_platform.core_api.main:app --no-access-log --port 8000 &
 sleep 2; for i in 1 2 3; do curl -s localhost:8000/healthz >/dev/null; done
 curl -s "localhost:8000/nope" >/dev/null   # a 404 is traced; /healthz is excluded
 ```
 Expected: `collector-ok`; in Grafana Explore, Tempo shows a `GET /nope`-less trace named by route (`HTTP GET` with `http.route` absent for unmatched routes) under `service.name=core-api`, and Loki shows the `http.request` JSON lines with `trace_id`. Kill uvicorn.
 
-- [ ] **Step 6: Docs**
+- [x] **Step 6: Docs**
 
 Root `AGENTS.md`: in the `ls providers db contracts ...` paragraph, add `deploy/dev` to what now exists: "`deploy/dev/` exists (the local observability stack, `docs/observability.md` §6); the others are still absent." `docs/AGENTS.md`'s "Keeping this file true" needs no change; `docs/observability.md` §6.2 already describes the directory.
 
@@ -3043,4 +3154,4 @@ git commit -s -m "Prove one trace from the browser to core-api and no content in
 
 - ADR-0011 status: flip from Proposed to Accepted with deciders and date once the team has reviewed slice 2 (the first PR that depends on it).
 - `docs/observability.md` §8 lists the same touch points; tick them as the slices land.
-- Open items the plan does not cover, by design: alert rules and dashboards (deferred until the deployment target is known), the M1 database instrumentations (`opentelemetry-instrumentation-sqlalchemy` and the driver's, added with the driver), D11 on SQL text, and the ADR-0008 thin client.
+- Open items the plan does not cover, by design: alert rules and production dashboards (deferred until the deployment target is known; the development dashboards under `deploy/dev/grafana` are a local convenience), the M1 database instrumentations (`opentelemetry-instrumentation-sqlalchemy` and the driver's, added with the driver), D11 on SQL text, and the ADR-0008 thin client.

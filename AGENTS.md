@@ -16,7 +16,8 @@ ls providers db contracts tests/conformance platform.yaml docs/canonicalization.
 ```
 
 Every one of those is absent today. If a task needs one, create it explicitly
-and say so — don't code as if it were already there.
+and say so — don't code as if it were already there. `deploy/dev/` does exist
+(the local observability stack, `docs/observability.md` §6).
 `docs/provider-contracts.md` claims M0 ships a `kms` reference provider; only
 the interface and conformance suite exist.
 

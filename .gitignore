@@ -30,3 +30,6 @@ apps/web/dist/
 runs/
 *.log
 .DS_Store
+
+# Per-machine compose overrides
+deploy/dev/compose.local.yaml

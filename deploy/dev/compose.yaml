@@ -1,0 +1,31 @@
+# Local observability backend. Grafana's all-in-one image is a development
+# convenience (D1): a separate, unmodified AGPL service per ADR-0002, never a
+# dependency of the system. The applications run on the host and export to
+# the Collector; only the Collector's OTLP ports and Grafana are published,
+# and only on loopback: the receiver and Grafana (admin / admin) are unauthenticated.
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.160.0@sha256:799dc6cf12c96192af37b5bdba804da8c10b3bc563b43cb90c3f3c58d9572ad6
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "127.0.0.1:4317:4317"   # OTLP gRPC
+      - "127.0.0.1:4318:4318"   # OTLP HTTP
+      - "127.0.0.1:13133:13133" # health_check extension
+    depends_on:
+      - lgtm
+
+  lgtm:
+    image: grafana/otel-lgtm:0.32.1@sha256:7fd8eaad6bb64897ad5f644c8e15ee67c3204c97168f4bdba122adbf8f60e3c4
+    ports:
+      - "127.0.0.1:3001:3000"   # Grafana (admin / admin); 3000 is the Next.js dev server
+    volumes:
+      - lgtm-data:/data
+      # Development dashboards (spec §6.2). Grafana reads the provider file
+      # from its provisioning directory and the JSON from the mounted path.
+      - ./grafana/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/mulyankan.yaml:ro
+      - ./grafana/dashboards:/otel-lgtm/dashboards:ro
+
+volumes:
+  lgtm-data:

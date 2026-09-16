@@ -31,6 +31,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from starlette.concurrency import run_in_threadpool
 
 from mulyankan_platform.audit import AuditLog
+from mulyankan_platform.observability import configure
 from mulyankan_platform.registry import ProviderRegistry
 from mulyankan_platform.sessions import (
     DEFAULT_PAGE_SIZE,
@@ -101,6 +102,7 @@ def build_app(registry: ProviderRegistry) -> FastAPI:
         description="Layer 1 workflow core of the Content Authoring Engine",
     )
     app.state.registry = registry
+    configure(app, registry)
     app.state.audit_log = audit_log
     app.state.sessions = monitor
 
@@ -167,7 +169,14 @@ def create_app(config_path: str = DEFAULT_CONFIG_PATH) -> FastAPI:
     return create_app_from_mapping(config)
 
 
-def _default_app() -> FastAPI:
+def app() -> FastAPI:
+    """The uvicorn factory: `uvicorn --factory mulyankan_platform.core_api.main:app`.
+
+    A function rather than a module-level instance because `build_app`
+    instruments the app and installs the telemetry providers (ADR-0011);
+    importing this module must stay free of that side effect for tests,
+    scripts and tooling.
+    """
     if not os.path.exists(DEFAULT_CONFIG_PATH):
         logger.warning(
             "platform config %s not found; starting with no provider bindings",
@@ -175,6 +184,3 @@ def _default_app() -> FastAPI:
         )
         return create_app_from_mapping({})
     return create_app(DEFAULT_CONFIG_PATH)
-
-
-app = _default_app()
